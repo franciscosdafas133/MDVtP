@@ -16,7 +16,7 @@ Ningún archivo de `.reference-sources/` se ha ejecutado, instalado ni habilitad
 
 | ID | Fuente | Papel | Licencia raíz | Commit | Estado |
 |---|---|---|---|---|---|
-| F01 | cc-sdd | Principal | MIT (© 2025 gotalab) | `e2a0c67` | Obtenida |
+| F01 | cc-sdd | Principal | MIT (© 2025 gotalab) | `e2a0c67` | Obtenida · [auditada](auditoria/F01-cc-sdd.md) |
 | F02 | spec-kit | Comparación principal | MIT (© GitHub, Inc.) | `0443760` | Obtenida |
 | F03 | gsd-core | Comparación principal | MIT (© 2026 Open GSD) | `b747aca` | Obtenida |
 | F04 | humanlayer | Complemento | Apache-2.0 | `99abe67` | Pendiente (B05) |
@@ -34,7 +34,7 @@ Las licencias raíz de F01–F03 se comprobaron en la copia local, y su huella S
 
 | ID | Rutas | Archivos | Tamaño |
 |---|---|---|---|
-| F01 | `docs/guides`, `tools/cc-sdd/templates` + archivos raíz | 560 | 4,4 MB |
+| F01 | `docs/guides`, `tools/cc-sdd/templates`, `tools/cc-sdd/src`, `tools/cc-sdd/test` + archivos raíz (src y test añadidos en B03 para seguir el instalador) | — | — |
 | F02 | `workflows`, `templates`, `src/specify_cli/workflows` + archivos raíz | 919 | 1,9 MB |
 | F03 | `commands/gsd`, `gsd-core/workflows`, `gsd-core/templates`, `gsd-core/references`, `docs` + archivos raíz | 3938 | 16 MB |
 

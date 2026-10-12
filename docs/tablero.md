@@ -18,12 +18,12 @@ Vista mantenible del progreso de construcción **del método** (no de una aplica
 | Estado | Tareas |
 |---|---|
 | en_curso | — |
-| preparada | B03, B04, B05 |
+| preparada | B04, B05 |
 | pendiente | B06–B22 |
 | bloqueada | — |
-| verificada | B01, B02 |
+| verificada | B01, B02, B03 |
 
-**Siguiente actividad preparada:** B03 (auditar cc-sdd). B04 y B05 también están preparadas y son independientes entre sí.
+**Siguiente actividad preparada:** B04 (comparar Spec Kit y GSD Core). B05 también está preparada. B06 espera a ambas.
 
 ## Tareas
 
@@ -33,7 +33,7 @@ Responsable por defecto: agente constructor. Las decisiones de producto correspo
 |---|---|---|---|---|---|---|
 | B01 | Inspeccionar carpeta, herramientas y archivos existentes; conservar encargo y crear tablero. | — | verificada | — | A | Se conoce el entorno y existe un registro del estado inicial sin sobrescribir trabajo previo. |
 | B02 | Obtener referencias principales y guardar versiones, rutas y licencias. | B01 | verificada | R20 | A | El inventario reproduce los commits consultados y distingue fuentes originales de archivos propios. |
-| B03 | Auditar cc-sdd, incluyendo sus dos hosts y dependencias de recursos. | B02 | preparada | R01–R20 | A | Hay una ficha del recorrido real, sus paradas, estado, documentos, validaciones y huecos frente a R01–R20. |
+| B03 | Auditar cc-sdd, incluyendo sus dos hosts y dependencias de recursos. | B02 | verificada | R01–R20 | A | Hay una ficha del recorrido real, sus paradas, estado, documentos, validaciones y huecos frente a R01–R20. |
 | B04 | Comparar coordinación y recuperación de Spec Kit y GSD Core. | B02 | preparada | R08, R12, R13, R19 | A | Matriz con mecanismos, dependencias, costes y límites; sin mezclar sus estados. |
 | B05 | Auditar complementos de producto, investigación, pruebas y diagnóstico. | B02 | preparada | R03, R05, R11, R14, R15, R18 | A | Cada pieza propuesta tiene ficha y requisito; redundancias y ausencias quedan visibles. |
 | B06 | Elegir base y extracciones mínimas; producir mapa de cobertura. | B03, B04, B05 | pendiente | R01–R20 | A | Cada requisito tiene una solución prevista o un desarrollo propio explícito. Decisiones fundadas, no selección por popularidad. |
@@ -63,6 +63,17 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 - **Entrega C — resto del tablero:** ejecución completa, integración, operación, evaluación y versión candidata.
 
 ## Detalle de la tarea activa
+
+### B03 — verificada
+
+- **Responsable:** agente constructor.
+- **Evidencia (2026-10-12):** [auditoria/F01-cc-sdd.md](auditoria/F01-cc-sdd.md) con recorrido real y paradas, estado y documentos, controles, instalación, diferencias entre hosts, 11 hallazgos, fichas por pieza y huecos frente a R01–R20. La sección 1 declara qué se leyó entero, qué por búsqueda dirigida y qué no se leyó.
+- **Ampliación de fuente:** sparse checkout de F01 ampliado con `tools/cc-sdd/src` y `tools/cc-sdd/test` para seguir el instalador (procedimiento §7, paso 2); lock actualizado.
+- **Hallazgos principales:** las fases se detienen y exigen conocer la skill siguiente (H1); el estado no tiene validación (H2); hay aprobaciones implícitas al generar la fase siguiente (H3); las variantes por host están duplicadas y con deriva (H4); no hay retirada del instalador; no hay checkpoints, invalidación ni operación.
+- **Límites:** no se ejecutó nada; las afirmaciones sobre Cursor (`openai.yaml`, `disable-model-invocation`, `$1`) quedan sin comprobar hasta B15.
+- **Checkpoint:** `CP-03` = commit «B03: auditoría de cc-sdd».
+- **Siguiente actividad:** B04.
+
 
 ### B02 — verificada
 
@@ -108,5 +119,6 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 |---|---|---|
 | 2026-10-12 | Creación del tablero con B01–B22 del encargo; asignación propuesta de requisitos por tarea. | B01. |
 | 2026-10-12 | B01 verificada; git inicializado (P-01 resuelta); B02 pasa a en_curso. | Aprobación del usuario. |
+| 2026-10-12 | B03 verificada. Corrección: cc-sdd instala 17 skills por host (no 20, como se dijo en conversación). | Auditoría F01. |
 | 2026-10-12 | B02 verificada; B03, B04 y B05 pasan a preparada. Complementos F04–F07 se obtienen dentro de B05. | Evidencia de B02. |
 | 2026-10-12 | Encargo conservado en la raíz como `PLAN_PAQUETE_FLUJO_IA.md` en lugar de copiarlo a `docs/encargo.md`. | Evitar dos copias con autoridad sobre el mismo contenido. Revisable. |
