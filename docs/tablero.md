@@ -1,6 +1,6 @@
 # Tablero de construcción del paquete
 
-Vista mantenible del progreso de construcción **del método** (no de una aplicación de usuario). Encargo: [PLAN_PAQUETE_FLUJO_IA.md](../PLAN_PAQUETE_FLUJO_IA.md) (se conserva en la raíz, sin copiarlo, para no crear dos autoridades). Objetivos: [objetivos.md](objetivos.md). Reglas: [reglas-hacer.md](reglas-hacer.md) y [reglas-no-hacer.md](reglas-no-hacer.md). Especificaciones: [especificaciones/](especificaciones/README.md).
+Vista mantenible del progreso de construcción **del método** (no de una aplicación de usuario). Encargo: [PLAN_PAQUETE_FLUJO_IA.md](../PLAN_PAQUETE_FLUJO_IA.md) (se conserva en la raíz, sin copiarlo, para no crear dos autoridades). Objetivos: [objetivos.md](objetivos.md). Reglas: [reglas-hacer.md](reglas-hacer.md) y [reglas-no-hacer.md](reglas-no-hacer.md). Especificaciones: [especificaciones/](especificaciones/README.md). Decisiones: [decisiones.md](decisiones.md). Selección: [seleccion.md](seleccion.md).
 
 Última actualización: 2026-10-12.
 
@@ -18,12 +18,13 @@ Vista mantenible del progreso de construcción **del método** (no de una aplica
 | Estado | Tareas |
 |---|---|
 | en_curso | — |
-| preparada | B06 |
+| en_revision | B06 |
+| preparada | — |
 | pendiente | B07–B22 |
 | bloqueada | — |
 | verificada | B01–B05 |
 
-**Siguiente actividad preparada:** B06 (elegir base y extracciones mínimas; mapa de cobertura).
+**Siguiente actividad preparada:** ninguna. B06 espera la revisión del usuario de DEC-01 a DEC-08 ([decisiones.md](decisiones.md)); después, B07.
 
 ## Tareas
 
@@ -36,7 +37,7 @@ Responsable por defecto: agente constructor. Las decisiones de producto correspo
 | B03 | Auditar cc-sdd, incluyendo sus dos hosts y dependencias de recursos. | B02 | verificada | R01–R20 | A | Hay una ficha del recorrido real, sus paradas, estado, documentos, validaciones y huecos frente a R01–R20. |
 | B04 | Comparar coordinación y recuperación de Spec Kit y GSD Core. | B02 | verificada | R08, R12, R13, R19 | A | Matriz con mecanismos, dependencias, costes y límites; sin mezclar sus estados. |
 | B05 | Auditar complementos de producto, investigación, pruebas y diagnóstico. | B02 | verificada | R03, R05, R11, R14, R15, R18 | A | Cada pieza propuesta tiene ficha y requisito; redundancias y ausencias quedan visibles. |
-| B06 | Elegir base y extracciones mínimas; producir mapa de cobertura. | B03, B04, B05 | preparada | R01–R20 | A | Cada requisito tiene una solución prevista o un desarrollo propio explícito. Decisiones fundadas, no selección por popularidad. |
+| B06 | Elegir base y extracciones mínimas; producir mapa de cobertura. | B03, B04, B05 | en_revision | R01–R20 | A | Cada requisito tiene una solución prevista o un desarrollo propio explícito. Decisiones fundadas, no selección por popularidad. |
 | B07 | Elaborar especificaciones del paquete y análisis de alternativas. | B06 | pendiente | R01–R20 | A | Se describen flujo, estado, decisiones, trazabilidad, recuperación, dos adaptadores, instalación y verificaciones. |
 | B08 | Diseñar contratos y comprobaciones de integridad. | B07 | pendiente | R04, R05, R07, R11, R19 | A | Referencias y estados válidos definidos; cambios incompatibles o evidencia inválida producen un resultado verificable. |
 | B09 | Construir prototipo de documentación guiada con una única entrada. | B08 | pendiente | R02, R03, R04, R05, R06, R17 | B | Una idea vaga llega a un incremento preparado con decisiones y preguntas registradas; no exige que el usuario elija skills. |
@@ -63,6 +64,15 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 - **Entrega C — resto del tablero:** ejecución completa, integración, operación, evaluación y versión candidata.
 
 ## Detalle de la tarea activa
+
+### B06 — en_revision
+
+- **Responsable:** agente constructor. Revisión: usuario.
+- **Evidencia (2026-10-12):** [seleccion.md](seleccion.md) con la base propuesta, 21 extracciones (X01–X21) con origen, tipo, licencia, destino y tarea de implementación, y mapa de cobertura R01–R20 sin requisitos huérfanos. Ocho decisiones en estado `propuesta` en [decisiones.md](decisiones.md), cada una con alternativas, consecuencias y referencias a los hallazgos de las auditorías.
+- **Pendiente para verificar B06:** que el usuario acepte, rechace o modifique DEC-01 a DEC-08 (puerta humana, DEC-07).
+- **Checkpoint:** `CP-06` = commit «B06: selección, extracciones, mapa de cobertura y decisiones propuestas».
+- **Siguiente actividad:** B07, cuando B06 esté verificada.
+
 
 ### B05 — verificada
 
@@ -141,6 +151,7 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 |---|---|---|
 | 2026-10-12 | Creación del tablero con B01–B22 del encargo; asignación propuesta de requisitos por tarea. | B01. |
 | 2026-10-12 | B01 verificada; git inicializado (P-01 resuelta); B02 pasa a en_curso. | Aprobación del usuario. |
+| 2026-10-12 | B06 pasa a en_revision; se crea [decisiones.md](decisiones.md) con DEC-01 a DEC-08 propuestas. | Selección de base. |
 | 2026-10-12 | B05 verificada; B06 pasa a preparada. El commit `706bb0d` salió sin el tablero por un fallo del script de actualización; se corrige en el commit siguiente. | Auditoría F04–F07. |
 | 2026-10-12 | B04 verificada. Vocabulario: «checkpoint» = punto de recuperación; las paradas humanas se llamarán «puertas» (C8). | Comparación F02/F03. |
 | 2026-10-12 | B03 verificada. Corrección: cc-sdd instala 17 skills por host (no 20, como se dijo en conversación). | Auditoría F01. |
