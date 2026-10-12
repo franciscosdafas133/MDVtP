@@ -1,10 +1,10 @@
 # Selección de base, extracciones y mapa de cobertura
 
-Tarea: B06 · Fecha: 2026-10-12 · Estado: en_revision (depende de que se acepten [DEC-01 a DEC-08](decisiones.md))
+Tarea: B06 · Fecha: 2026-10-12 · Estado: en_revision (DEC-01 aceptada; [DEC-02 a DEC-08](decisiones.md) pendientes de revisión)
 
 ## 1. Base
 
-**Propuesta (DEC-01):** núcleo propio, en español, con una skill coordinadora y procedimientos internos. Las fuentes no se instalan; se extraen piezas concretas con aviso de procedencia. Los motivos están en [decisiones.md](decisiones.md).
+**Aceptada (DEC-01):** reutilizar y conectar las piezas buenas de las fuentes (X01–X21) y construir solo lo que las une: el coordinador, el registro común y los adaptadores por host. Las fuentes no se instalan tal cual; cada pieza se adapta para escribir en el registro común.
 
 ## 2. Extracciones mínimas
 

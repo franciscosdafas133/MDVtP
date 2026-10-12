@@ -6,7 +6,7 @@ Fuentes de los argumentos: [F01](auditoria/F01-cc-sdd.md) (hallazgos H*), [F02�
 
 | ID | Decisión | Estado | Fecha |
 |---|---|---|---|
-| DEC-01 | Núcleo propio con extracciones; ninguna fuente como base instalada | propuesta | 2026-10-12 |
+| DEC-01 | Reutilizar y conectar las piezas buenas; construir solo lo que las une | **aceptada** | 2026-10-12 |
 | DEC-02 | Coordinación conversacional dentro del host, sin motor externo | propuesta | 2026-10-12 |
 | DEC-03 | Validador determinista propio, solo con biblioteca estándar | propuesta | 2026-10-12 |
 | DEC-04 | Un protocolo de verificación (síntesis de cc-sdd y superpowers) | propuesta | 2026-10-12 |
@@ -17,21 +17,31 @@ Fuentes de los argumentos: [F01](auditoria/F01-cc-sdd.md) (hallazgos H*), [F02�
 
 ---
 
-## DEC-01 — Núcleo propio con extracciones
+## DEC-01 — Reutilizar y conectar las piezas buenas; construir solo lo que las une
 
-- **Contexto:** el encargo propone cc-sdd como candidato de base (§7, F01). B06 debe elegir la base sin dejarse llevar por la popularidad.
-- **Alternativas:**
-  - **A.** Bifurcar cc-sdd y adaptarlo.
+- **Contexto:** el encargo propone cc-sdd como candidato de base (§7, F01). Las auditorías B03–B05 encontraron piezas valiosas repartidas entre varias fuentes, pero cada fuente usa su propio sistema de estado y sus propias convenciones (`spec.json` en cc-sdd, `.planning/STATE.md` en GSD, runtime `_bmad/` en BMAD), que se contradirían si se instalaran juntas (§12 del encargo).
+- **Alternativas consideradas:**
+  - **A.** Bifurcar cc-sdd y parchearlo.
   - **B.** Adoptar el motor de Spec Kit.
   - **C.** Adoptar el runtime de GSD Core.
-  - **D.** Escribir un núcleo propio pequeño que incorpore piezas concretas de cada fuente.
+  - **D.** Reutilizar las piezas buenas de cada fuente y conectarlas.
+- **Decisión:** **D**. No se reinventa lo que ya existe:
+  - Se reutilizan las piezas seleccionadas (X01–X21 en [seleccion.md](seleccion.md)): copia adaptada cuando la licencia lo permite, idea cuando no.
+  - Solo se construye lo que las une:
+    1. **El coordinador**, la única entrada con la que habla el usuario, que elige qué pieza usar en cada momento.
+    2. **Un registro común**, un solo lugar donde todas las piezas anotan decisiones, tareas y evidencia.
+    3. **Los adaptadores**, que ajustan cada pieza a ese registro común y a cada host (Claude Code, Cursor).
 - **Consecuencias:**
-  - **A:** heredaríamos aprobaciones implícitas (H3), estado sin validación (H2), 17 skills duplicadas por host con deriva (H4), paradas entre fases (H1) y la ausencia de retirada. Habría que reescribir casi todo lo que más importa (R02, R05, R11–R13, R16, R19).
-  - **B:** ver DEC-02.
-  - **C:** Node ≥ 24 + npm + `claude-agent-sdk`, instalador de ~10 700 líneas, instalación global y ~300 archivos de instrucciones (C10, C11).
-  - **D:** más trabajo propio en estado, decisiones y recuperación, que de todos modos no tiene ninguna fuente; a cambio, un único modelo de estado y contratos coherentes (§12 del encargo).
-- **Propuesta:** **D**. cc-sdd pasa de «base» a fuente principal de piezas (revisión, verificación, división de tareas).
-- **Estado:** propuesta.
+  - Un único modelo de estado y una única interfaz.
+  - Cada pieza reutilizada se modifica para escribir en el registro común en lugar de en el suyo.
+  - Los requisitos que ninguna fuente cubre (R18 y partes de R01, R06, R07, R20) siguen siendo desarrollo propio.
+- **Rechazadas:**
+  - **A**, por las aprobaciones implícitas, el estado sin validación y la deriva entre hosts (H1–H4).
+  - **B**, ver DEC-02.
+  - **C**, por el tamaño, las dependencias y la instalación global (C10, C11).
+- **Apunte del usuario (2026-10-12):** «No es necesario construir la rueda si ya está hecha; lo ideal es sacar las partes buenas y conectarlas, crear esas conexiones de tal manera que este producto sea capaz de crear cualquier producto.»
+- **Límite:** que sirva para «cualquier producto» es la meta, pero solo podrá afirmarse para los escenarios realmente probados (§14 del encargo).
+- **Estado:** **aceptada** por el usuario el 2026-10-12, con esta redacción.
 
 ## DEC-02 — Coordinación conversacional dentro del host
 

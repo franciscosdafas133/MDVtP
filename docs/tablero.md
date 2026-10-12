@@ -24,7 +24,7 @@ Vista mantenible del progreso de construcción **del método** (no de una aplica
 | bloqueada | — |
 | verificada | B01–B05 |
 
-**Siguiente actividad preparada:** ninguna. B06 espera la revisión del usuario de DEC-01 a DEC-08 ([decisiones.md](decisiones.md)); después, B07.
+**Siguiente actividad preparada:** ninguna. B06 espera la revisión del usuario de DEC-02 a DEC-08 (DEC-01 aceptada) ([decisiones.md](decisiones.md)); después, B07.
 
 ## Tareas
 
@@ -69,7 +69,7 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 
 - **Responsable:** agente constructor. Revisión: usuario.
 - **Evidencia (2026-10-12):** [seleccion.md](seleccion.md) con la base propuesta, 21 extracciones (X01–X21) con origen, tipo, licencia, destino y tarea de implementación, y mapa de cobertura R01–R20 sin requisitos huérfanos. Ocho decisiones en estado `propuesta` en [decisiones.md](decisiones.md), cada una con alternativas, consecuencias y referencias a los hallazgos de las auditorías.
-- **Pendiente para verificar B06:** que el usuario acepte, rechace o modifique DEC-01 a DEC-08 (puerta humana, DEC-07).
+- **Pendiente para verificar B06:** DEC-01 aceptada (2026-10-12, redactada con las palabras del usuario); falta que el usuario revise DEC-02 a DEC-08.
 - **Checkpoint:** `CP-06` = commit «B06: selección, extracciones, mapa de cobertura y decisiones propuestas».
 - **Siguiente actividad:** B07, cuando B06 esté verificada.
 
@@ -151,6 +151,7 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 |---|---|---|
 | 2026-10-12 | Creación del tablero con B01–B22 del encargo; asignación propuesta de requisitos por tarea. | B01. |
 | 2026-10-12 | B01 verificada; git inicializado (P-01 resuelta); B02 pasa a en_curso. | Aprobación del usuario. |
+| 2026-10-12 | DEC-01 reescrita y aceptada por el usuario: «reutilizar y conectar las piezas buenas; construir solo lo que las une». | Apunte del usuario. |
 | 2026-10-12 | B06 pasa a en_revision; se crea [decisiones.md](decisiones.md) con DEC-01 a DEC-08 propuestas. | Selección de base. |
 | 2026-10-12 | B05 verificada; B06 pasa a preparada. El commit `706bb0d` salió sin el tablero por un fallo del script de actualización; se corrige en el commit siguiente. | Auditoría F04–F07. |
 | 2026-10-12 | B04 verificada. Vocabulario: «checkpoint» = punto de recuperación; las paradas humanas se llamarán «puertas» (C8). | Comparación F02/F03. |
