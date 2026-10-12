@@ -18,12 +18,12 @@ Vista mantenible del progreso de construcción **del método** (no de una aplica
 | Estado | Tareas |
 |---|---|
 | en_curso | — |
-| preparada | B05 |
-| pendiente | B06–B22 |
+| preparada | B06 |
+| pendiente | B07–B22 |
 | bloqueada | — |
-| verificada | B01, B02, B03, B04 |
+| verificada | B01–B05 |
 
-**Siguiente actividad preparada:** B05 (auditar complementos). B06 espera a B05.
+**Siguiente actividad preparada:** B06 (elegir base y extracciones mínimas; mapa de cobertura).
 
 ## Tareas
 
@@ -35,8 +35,8 @@ Responsable por defecto: agente constructor. Las decisiones de producto correspo
 | B02 | Obtener referencias principales y guardar versiones, rutas y licencias. | B01 | verificada | R20 | A | El inventario reproduce los commits consultados y distingue fuentes originales de archivos propios. |
 | B03 | Auditar cc-sdd, incluyendo sus dos hosts y dependencias de recursos. | B02 | verificada | R01–R20 | A | Hay una ficha del recorrido real, sus paradas, estado, documentos, validaciones y huecos frente a R01–R20. |
 | B04 | Comparar coordinación y recuperación de Spec Kit y GSD Core. | B02 | verificada | R08, R12, R13, R19 | A | Matriz con mecanismos, dependencias, costes y límites; sin mezclar sus estados. |
-| B05 | Auditar complementos de producto, investigación, pruebas y diagnóstico. | B02 | preparada | R03, R05, R11, R14, R15, R18 | A | Cada pieza propuesta tiene ficha y requisito; redundancias y ausencias quedan visibles. |
-| B06 | Elegir base y extracciones mínimas; producir mapa de cobertura. | B03, B04, B05 | pendiente | R01–R20 | A | Cada requisito tiene una solución prevista o un desarrollo propio explícito. Decisiones fundadas, no selección por popularidad. |
+| B05 | Auditar complementos de producto, investigación, pruebas y diagnóstico. | B02 | verificada | R03, R05, R11, R14, R15, R18 | A | Cada pieza propuesta tiene ficha y requisito; redundancias y ausencias quedan visibles. |
+| B06 | Elegir base y extracciones mínimas; producir mapa de cobertura. | B03, B04, B05 | preparada | R01–R20 | A | Cada requisito tiene una solución prevista o un desarrollo propio explícito. Decisiones fundadas, no selección por popularidad. |
 | B07 | Elaborar especificaciones del paquete y análisis de alternativas. | B06 | pendiente | R01–R20 | A | Se describen flujo, estado, decisiones, trazabilidad, recuperación, dos adaptadores, instalación y verificaciones. |
 | B08 | Diseñar contratos y comprobaciones de integridad. | B07 | pendiente | R04, R05, R07, R11, R19 | A | Referencias y estados válidos definidos; cambios incompatibles o evidencia inválida producen un resultado verificable. |
 | B09 | Construir prototipo de documentación guiada con una única entrada. | B08 | pendiente | R02, R03, R04, R05, R06, R17 | B | Una idea vaga llega a un incremento preparado con decisiones y preguntas registradas; no exige que el usuario elija skills. |
@@ -63,6 +63,18 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 - **Entrega C — resto del tablero:** ejecución completa, integración, operación, evaluación y versión candidata.
 
 ## Detalle de la tarea activa
+
+### B05 — verificada
+
+- **Responsable:** agente constructor.
+- **Evidencia (2026-10-12):** F04–F07 obtenidas por sparse checkout, con los commits verificados y las licencias registradas. Informe en [auditoria/F04-F07-complementos.md](auditoria/F04-F07-complementos.md): fichas por pieza, comparación de protocolos de verificación y depuración (uno por función), dependencias de entorno, 8 hallazgos y cobertura R01–R20 tras B03–B05, con las ausencias visibles.
+- **Ausencia principal:** R18 (entrega, operación y mantenimiento) no la cubre ninguna fuente; desarrollo propio en B14.
+- **Restricciones de redistribución:** la marca BMad no está cubierta por MIT (renombrar las piezas de F05 y F06); F04 es Apache-2.0 (conservar el aviso y declarar los cambios).
+- **Condicionales F08–F10:** no obtenidas; motivos registrados en la ficha (§6).
+- **Límites:** no se ejecutó nada; los resultados de TEA prueban la procedencia de sus ejecuciones, no su eficacia.
+- **Checkpoint:** `CP-05` = commits `706bb0d` (fuentes y ficha) + este (tablero).
+- **Siguiente actividad:** B06.
+
 
 ### B04 — verificada
 
@@ -129,6 +141,7 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 |---|---|---|
 | 2026-10-12 | Creación del tablero con B01–B22 del encargo; asignación propuesta de requisitos por tarea. | B01. |
 | 2026-10-12 | B01 verificada; git inicializado (P-01 resuelta); B02 pasa a en_curso. | Aprobación del usuario. |
+| 2026-10-12 | B05 verificada; B06 pasa a preparada. El commit `706bb0d` salió sin el tablero por un fallo del script de actualización; se corrige en el commit siguiente. | Auditoría F04–F07. |
 | 2026-10-12 | B04 verificada. Vocabulario: «checkpoint» = punto de recuperación; las paradas humanas se llamarán «puertas» (C8). | Comparación F02/F03. |
 | 2026-10-12 | B03 verificada. Corrección: cc-sdd instala 17 skills por host (no 20, como se dijo en conversación). | Auditoría F01. |
 | 2026-10-12 | B02 verificada; B03, B04 y B05 pasan a preparada. Complementos F04–F07 se obtienen dentro de B05. | Evidencia de B02. |
