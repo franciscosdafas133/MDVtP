@@ -71,7 +71,16 @@
       "role": "complemento",
       "commit": "99abe673498cf8bdcd5f989aebe9406a27185b3b",
       "license": "Apache-2.0",
-      "status": "pendiente-B05"
+      "status": "obtenida",
+      "license_file": "LICENSE",
+      "license_sha256": "a22be4045580cf9fd55278e4a42f015aaaa828a859cef7ea19733d25da11755e",
+      "dest": ".reference-sources/humanlayer",
+      "sparse": [
+        ".claude/commands",
+        ".claude/agents"
+      ],
+      "obtained": "2026-10-12",
+      "audit": "docs/auditoria/F04-F07-complementos.md"
     },
     {
       "id": "F05",
@@ -80,7 +89,20 @@
       "role": "complemento",
       "commit": "bda3c5929f672019b90f39a3ea27259d35d00974",
       "license": "MIT",
-      "status": "pendiente-B05"
+      "status": "obtenida",
+      "license_file": "LICENSE",
+      "license_sha256": "0aa79baf6328b4a1e694ce10a12ffc36d7666554da128dff0e8fcda0fc536a66",
+      "dest": ".reference-sources/BMAD-METHOD",
+      "sparse": [
+        "skills/bmad-product-brief",
+        "skills/bmad-prd",
+        "skills/bmad-advanced-elicitation",
+        "skills/bmad-architecture",
+        "skills/bmad-correct-course"
+      ],
+      "obtained": "2026-10-12",
+      "audit": "docs/auditoria/F04-F07-complementos.md",
+      "note": "Marca BMad no cubierta por MIT (TRADEMARK.md de F05): renombrar cualquier pieza adaptada."
     },
     {
       "id": "F06",
@@ -89,7 +111,20 @@
       "role": "complemento",
       "commit": "a5675c354ecb781e99b5f83145bb1850f8f27e09",
       "license": "MIT",
-      "status": "pendiente-B05"
+      "status": "obtenida",
+      "license_file": "LICENSE",
+      "license_sha256": "d63b6198ba078d9494407eb94e2d86adf6350195301bb5ded4ba24e36bce8b55",
+      "dest": ".reference-sources/tea",
+      "sparse": [
+        "skills/bmad-testarch-test-design",
+        "skills/bmad-testarch-trace",
+        "skills/bmad-testarch-evaluate",
+        "docs/explanation",
+        "test"
+      ],
+      "obtained": "2026-10-12",
+      "audit": "docs/auditoria/F04-F07-complementos.md",
+      "note": "Marca BMad no cubierta por MIT (TRADEMARK.md de F05): renombrar cualquier pieza adaptada."
     },
     {
       "id": "F07",
@@ -98,7 +133,17 @@
       "role": "comparacion",
       "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
       "license": "MIT",
-      "status": "pendiente-B05"
+      "status": "obtenida",
+      "license_file": "LICENSE",
+      "license_sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
+      "dest": ".reference-sources/superpowers",
+      "sparse": [
+        "skills/systematic-debugging",
+        "skills/verification-before-completion",
+        "skills/using-git-worktrees"
+      ],
+      "obtained": "2026-10-12",
+      "audit": "docs/auditoria/F04-F07-complementos.md"
     },
     {
       "id": "F08",

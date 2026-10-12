@@ -19,13 +19,13 @@ Ningún archivo de `.reference-sources/` se ha ejecutado, instalado ni habilitad
 | F01 | cc-sdd | Principal | MIT (© 2025 gotalab) | `e2a0c67` | Obtenida · [auditada](auditoria/F01-cc-sdd.md) |
 | F02 | spec-kit | Comparación principal | MIT (© GitHub, Inc.) | `0443760` | Obtenida · [auditada](auditoria/F02-F03-coordinacion-recuperacion.md) |
 | F03 | gsd-core | Comparación principal | MIT (© 2026 Open GSD) | `b747aca` | Obtenida · [auditada](auditoria/F02-F03-coordinacion-recuperacion.md) |
-| F04 | humanlayer | Complemento | Apache-2.0 | `99abe67` | Pendiente (B05) |
-| F05 | BMAD-METHOD | Complemento | MIT | `bda3c59` | Pendiente (B05) |
-| F06 | bmad-method-test-architecture-enterprise | Complemento | MIT | `a5675c3` | Pendiente (B05) |
-| F07 | superpowers | Comparación | MIT | `bb92a77` | Pendiente (B05) |
-| F08 | agent-os | Condicional | MIT | `e892e61` | Solo si aparece un hueco |
-| F09 | OpenSpec | Condicional | MIT | `9111a76` | Solo si aparece un hueco |
-| F10 | gh-aw | Condicional, posterior | MIT | `2db4dd7` | Solo si aparece un hueco |
+| F04 | humanlayer | Complemento | Apache-2.0 | `99abe67` | Obtenida · [auditada](auditoria/F04-F07-complementos.md) |
+| F05 | BMAD-METHOD | Complemento | MIT + marca BMad (no MIT) | `bda3c59` | Obtenida · [auditada](auditoria/F04-F07-complementos.md) |
+| F06 | bmad-method-test-architecture-enterprise | Complemento | MIT + marca BMad (no MIT) | `a5675c3` | Obtenida · [auditada](auditoria/F04-F07-complementos.md) |
+| F07 | superpowers | Comparación | MIT | `bb92a77` | Obtenida · [auditada](auditoria/F04-F07-complementos.md) |
+| F08 | agent-os | Condicional | MIT | `e892e61` | Solo si aparece un hueco (B05: no necesaria) |
+| F09 | OpenSpec | Condicional | MIT | `9111a76` | Solo si aparece un hueco (B05: valorar en B08) |
+| F10 | gh-aw | Condicional, posterior | MIT | `2db4dd7` | Solo si aparece un hueco (B05: valorar en B14, hueco R18) |
 | F11 | get-shit-done | Descartado como base | MIT | `bdcaab2` | No se obtiene |
 
 Las licencias raíz de F01–F03 se comprobaron en la copia local, y su huella SHA-256 está en el lock. Antes de reutilizar una pieza, hay que revisar además sus avisos y licencias específicas (regla N-18).
