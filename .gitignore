@@ -1,0 +1,7 @@
+# Copias de referencia de terceros: se estudian, no se versionan ni se distribuyen (plan §5, §7)
+.reference-sources/
+
+# Editor y sistema
+.vscode/
+.DS_Store
+*.swp
