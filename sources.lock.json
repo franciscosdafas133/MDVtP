@@ -39,7 +39,9 @@
         "src/specify_cli/workflows"
       ],
       "obtained": "2026-10-12",
-      "status": "obtenida"
+      "status": "obtenida",
+      "audit": "docs/auditoria/F02-F03-coordinacion-recuperacion.md",
+      "note": "Además se leyeron con git show, fuera de la selección: src/specify_cli/integrations/{_file_changes,manifest,command_uninstall}.py, cursor_agent/__init__.py, claude/__init__.py"
     },
     {
       "id": "F03",
@@ -59,7 +61,8 @@
         "docs"
       ],
       "obtained": "2026-10-12",
-      "status": "obtenida"
+      "status": "obtenida",
+      "audit": "docs/auditoria/F02-F03-coordinacion-recuperacion.md"
     },
     {
       "id": "F04",

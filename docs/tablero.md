@@ -18,12 +18,12 @@ Vista mantenible del progreso de construcción **del método** (no de una aplica
 | Estado | Tareas |
 |---|---|
 | en_curso | — |
-| preparada | B04, B05 |
+| preparada | B05 |
 | pendiente | B06–B22 |
 | bloqueada | — |
-| verificada | B01, B02, B03 |
+| verificada | B01, B02, B03, B04 |
 
-**Siguiente actividad preparada:** B04 (comparar Spec Kit y GSD Core). B05 también está preparada. B06 espera a ambas.
+**Siguiente actividad preparada:** B05 (auditar complementos). B06 espera a B05.
 
 ## Tareas
 
@@ -34,7 +34,7 @@ Responsable por defecto: agente constructor. Las decisiones de producto correspo
 | B01 | Inspeccionar carpeta, herramientas y archivos existentes; conservar encargo y crear tablero. | — | verificada | — | A | Se conoce el entorno y existe un registro del estado inicial sin sobrescribir trabajo previo. |
 | B02 | Obtener referencias principales y guardar versiones, rutas y licencias. | B01 | verificada | R20 | A | El inventario reproduce los commits consultados y distingue fuentes originales de archivos propios. |
 | B03 | Auditar cc-sdd, incluyendo sus dos hosts y dependencias de recursos. | B02 | verificada | R01–R20 | A | Hay una ficha del recorrido real, sus paradas, estado, documentos, validaciones y huecos frente a R01–R20. |
-| B04 | Comparar coordinación y recuperación de Spec Kit y GSD Core. | B02 | preparada | R08, R12, R13, R19 | A | Matriz con mecanismos, dependencias, costes y límites; sin mezclar sus estados. |
+| B04 | Comparar coordinación y recuperación de Spec Kit y GSD Core. | B02 | verificada | R08, R12, R13, R19 | A | Matriz con mecanismos, dependencias, costes y límites; sin mezclar sus estados. |
 | B05 | Auditar complementos de producto, investigación, pruebas y diagnóstico. | B02 | preparada | R03, R05, R11, R14, R15, R18 | A | Cada pieza propuesta tiene ficha y requisito; redundancias y ausencias quedan visibles. |
 | B06 | Elegir base y extracciones mínimas; producir mapa de cobertura. | B03, B04, B05 | pendiente | R01–R20 | A | Cada requisito tiene una solución prevista o un desarrollo propio explícito. Decisiones fundadas, no selección por popularidad. |
 | B07 | Elaborar especificaciones del paquete y análisis de alternativas. | B06 | pendiente | R01–R20 | A | Se describen flujo, estado, decisiones, trazabilidad, recuperación, dos adaptadores, instalación y verificaciones. |
@@ -63,6 +63,16 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 - **Entrega C — resto del tablero:** ejecución completa, integración, operación, evaluación y versión candidata.
 
 ## Detalle de la tarea activa
+
+### B04 — verificada
+
+- **Responsable:** agente constructor.
+- **Evidencia (2026-10-12):** [auditoria/F02-F03-coordinacion-recuperacion.md](auditoria/F02-F03-coordinacion-recuperacion.md), con una matriz de 15 mecanismos (coordinación, estado, transiciones, atomicidad, eventos, reanudación, siguiente paso, evidencia obsoleta, puertas, avance automático, deshacer, instalación, hosts, dependencias, tamaño) y 11 hallazgos. Los estados de ambas fuentes se describen por separado.
+- **Conclusiones propuestas para B06:** no adoptar el motor de Spec Kit, porque exige lanzar al agente en modo no interactivo con permisos amplios y rompe R02; no adoptar el runtime de GSD (tamaño y dependencias). En su lugar, un validador propio que copia el contrato de estado de Spec Kit, la tabla de rutas y la evidencia `stale` de GSD, y el manifiesto con SHA-256 de Spec Kit para R16. R12 (recuperación aislada) requiere desarrollo propio.
+- **Límites:** no se ejecutó nada; no se leyó el código de `gsd-tools.cjs` ni la mayor parte de `engine.py`.
+- **Checkpoint:** `CP-04` = commit «B04: comparación de Spec Kit y GSD Core».
+- **Siguiente actividad:** B05.
+
 
 ### B03 — verificada
 
@@ -119,6 +129,7 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 |---|---|---|
 | 2026-10-12 | Creación del tablero con B01–B22 del encargo; asignación propuesta de requisitos por tarea. | B01. |
 | 2026-10-12 | B01 verificada; git inicializado (P-01 resuelta); B02 pasa a en_curso. | Aprobación del usuario. |
+| 2026-10-12 | B04 verificada. Vocabulario: «checkpoint» = punto de recuperación; las paradas humanas se llamarán «puertas» (C8). | Comparación F02/F03. |
 | 2026-10-12 | B03 verificada. Corrección: cc-sdd instala 17 skills por host (no 20, como se dijo en conversación). | Auditoría F01. |
 | 2026-10-12 | B02 verificada; B03, B04 y B05 pasan a preparada. Complementos F04–F07 se obtienen dentro de B05. | Evidencia de B02. |
 | 2026-10-12 | Encargo conservado en la raíz como `PLAN_PAQUETE_FLUJO_IA.md` en lugar de copiarlo a `docs/encargo.md`. | Evitar dos copias con autoridad sobre el mismo contenido. Revisable. |

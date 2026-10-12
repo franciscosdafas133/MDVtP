@@ -17,8 +17,8 @@ Ningún archivo de `.reference-sources/` se ha ejecutado, instalado ni habilitad
 | ID | Fuente | Papel | Licencia raíz | Commit | Estado |
 |---|---|---|---|---|---|
 | F01 | cc-sdd | Principal | MIT (© 2025 gotalab) | `e2a0c67` | Obtenida · [auditada](auditoria/F01-cc-sdd.md) |
-| F02 | spec-kit | Comparación principal | MIT (© GitHub, Inc.) | `0443760` | Obtenida |
-| F03 | gsd-core | Comparación principal | MIT (© 2026 Open GSD) | `b747aca` | Obtenida |
+| F02 | spec-kit | Comparación principal | MIT (© GitHub, Inc.) | `0443760` | Obtenida · [auditada](auditoria/F02-F03-coordinacion-recuperacion.md) |
+| F03 | gsd-core | Comparación principal | MIT (© 2026 Open GSD) | `b747aca` | Obtenida · [auditada](auditoria/F02-F03-coordinacion-recuperacion.md) |
 | F04 | humanlayer | Complemento | Apache-2.0 | `99abe67` | Pendiente (B05) |
 | F05 | BMAD-METHOD | Complemento | MIT | `bda3c59` | Pendiente (B05) |
 | F06 | bmad-method-test-architecture-enterprise | Complemento | MIT | `a5675c3` | Pendiente (B05) |
