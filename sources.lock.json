@@ -1,0 +1,57 @@
+{
+  "schema": "sources.lock/0.1",
+  "updated": "2026-10-12",
+  "note": "Fuentes de referencia para estudiar. No se instalan ni se ejecutan. Las copias viven en .reference-sources/ (excluido de git y del paquete distribuido).",
+  "sources": [
+    {
+      "id": "F01",
+      "name": "cc-sdd",
+      "url": "https://github.com/gotalab/cc-sdd.git",
+      "role": "principal",
+      "commit": "e2a0c671aef37a482404905b409ab5c27092b25b",
+      "license": "MIT",
+      "license_file": "LICENSE",
+      "license_sha256": "b63b38d2dd9673c2321c1d7cab50d2b970b264e7a3aa23ecf2dc26baad21ab07",
+      "dest": ".reference-sources/cc-sdd",
+      "sparse": ["docs/guides", "tools/cc-sdd/templates"],
+      "obtained": "2026-10-12",
+      "status": "obtenida"
+    },
+    {
+      "id": "F02",
+      "name": "spec-kit",
+      "url": "https://github.com/github/spec-kit.git",
+      "role": "comparacion-principal",
+      "commit": "0443760542e7e5269724744a2ac55c4bd386d095",
+      "license": "MIT",
+      "license_file": "LICENSE",
+      "license_sha256": "2510b446bc1f0cf9702453075d20cd88631e20e5642658edb7325d9c1eb534f7",
+      "dest": ".reference-sources/spec-kit",
+      "sparse": ["workflows", "templates", "src/specify_cli/workflows"],
+      "obtained": "2026-10-12",
+      "status": "obtenida"
+    },
+    {
+      "id": "F03",
+      "name": "gsd-core",
+      "url": "https://github.com/open-gsd/gsd-core.git",
+      "role": "comparacion-principal",
+      "commit": "b747aca5b1dcff699c36d90c5b9fca0ec6354c1c",
+      "license": "MIT",
+      "license_file": "LICENSE",
+      "license_sha256": "3a160aec61eeb28e75e8017346ee190db07986a09c4bd72555cc706f1d99e27e",
+      "dest": ".reference-sources/gsd-core",
+      "sparse": ["commands/gsd", "gsd-core/workflows", "gsd-core/templates", "gsd-core/references", "docs"],
+      "obtained": "2026-10-12",
+      "status": "obtenida"
+    },
+    { "id": "F04", "name": "humanlayer", "url": "https://github.com/humanlayer/humanlayer.git", "role": "complemento", "commit": "99abe673498cf8bdcd5f989aebe9406a27185b3b", "license": "Apache-2.0", "status": "pendiente-B05" },
+    { "id": "F05", "name": "BMAD-METHOD", "url": "https://github.com/bmad-code-org/BMAD-METHOD.git", "role": "complemento", "commit": "bda3c5929f672019b90f39a3ea27259d35d00974", "license": "MIT", "status": "pendiente-B05" },
+    { "id": "F06", "name": "bmad-method-test-architecture-enterprise", "url": "https://github.com/bmad-code-org/bmad-method-test-architecture-enterprise.git", "role": "complemento", "commit": "a5675c354ecb781e99b5f83145bb1850f8f27e09", "license": "MIT", "status": "pendiente-B05" },
+    { "id": "F07", "name": "superpowers", "url": "https://github.com/obra/superpowers.git", "role": "comparacion", "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3", "license": "MIT", "status": "pendiente-B05" },
+    { "id": "F08", "name": "agent-os", "url": "https://github.com/buildermethods/agent-os.git", "role": "condicional", "commit": "e892e61d322759165e7d9173e92c1010406c9f4d", "license": "MIT", "status": "solo-si-hay-hueco" },
+    { "id": "F09", "name": "OpenSpec", "url": "https://github.com/Fission-AI/OpenSpec.git", "role": "condicional", "commit": "9111a7654d7800391459431fff4eaf66e33a3d2e", "license": "MIT", "status": "solo-si-hay-hueco" },
+    { "id": "F10", "name": "gh-aw", "url": "https://github.com/github/gh-aw.git", "role": "condicional-posterior", "commit": "2db4dd75564e9b65e6b1d056448b429fab2efb1d", "license": "MIT", "status": "solo-si-hay-hueco" },
+    { "id": "F11", "name": "get-shit-done", "url": "https://github.com/gsd-build/get-shit-done.git", "role": "descartado-como-base", "commit": "bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815", "license": "MIT", "status": "no-se-obtiene" }
+  ]
+}

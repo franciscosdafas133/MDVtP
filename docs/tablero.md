@@ -17,13 +17,13 @@ Vista mantenible del progreso de construcción **del método** (no de una aplica
 
 | Estado | Tareas |
 |---|---|
-| en_curso | B02 |
-| preparada | — |
-| pendiente | B03–B22 |
+| en_curso | — |
+| preparada | B03, B04, B05 |
+| pendiente | B06–B22 |
 | bloqueada | — |
-| verificada | B01 |
+| verificada | B01, B02 |
 
-**Siguiente actividad preparada:** B02 (en curso).
+**Siguiente actividad preparada:** B03 (auditar cc-sdd). B04 y B05 también están preparadas y son independientes entre sí.
 
 ## Tareas
 
@@ -32,10 +32,10 @@ Responsable por defecto: agente constructor. Las decisiones de producto correspo
 | ID | Trabajo | Depende de | Estado | Req. | Entrega | Condición observable de terminación |
 |---|---|---|---|---|---|---|
 | B01 | Inspeccionar carpeta, herramientas y archivos existentes; conservar encargo y crear tablero. | — | verificada | — | A | Se conoce el entorno y existe un registro del estado inicial sin sobrescribir trabajo previo. |
-| B02 | Obtener referencias principales y guardar versiones, rutas y licencias. | B01 | en_curso | R20 | A | El inventario reproduce los commits consultados y distingue fuentes originales de archivos propios. |
-| B03 | Auditar cc-sdd, incluyendo sus dos hosts y dependencias de recursos. | B02 | pendiente | R01–R20 | A | Hay una ficha del recorrido real, sus paradas, estado, documentos, validaciones y huecos frente a R01–R20. |
-| B04 | Comparar coordinación y recuperación de Spec Kit y GSD Core. | B02 | pendiente | R08, R12, R13, R19 | A | Matriz con mecanismos, dependencias, costes y límites; sin mezclar sus estados. |
-| B05 | Auditar complementos de producto, investigación, pruebas y diagnóstico. | B02 | pendiente | R03, R05, R11, R14, R15, R18 | A | Cada pieza propuesta tiene ficha y requisito; redundancias y ausencias quedan visibles. |
+| B02 | Obtener referencias principales y guardar versiones, rutas y licencias. | B01 | verificada | R20 | A | El inventario reproduce los commits consultados y distingue fuentes originales de archivos propios. |
+| B03 | Auditar cc-sdd, incluyendo sus dos hosts y dependencias de recursos. | B02 | preparada | R01–R20 | A | Hay una ficha del recorrido real, sus paradas, estado, documentos, validaciones y huecos frente a R01–R20. |
+| B04 | Comparar coordinación y recuperación de Spec Kit y GSD Core. | B02 | preparada | R08, R12, R13, R19 | A | Matriz con mecanismos, dependencias, costes y límites; sin mezclar sus estados. |
+| B05 | Auditar complementos de producto, investigación, pruebas y diagnóstico. | B02 | preparada | R03, R05, R11, R14, R15, R18 | A | Cada pieza propuesta tiene ficha y requisito; redundancias y ausencias quedan visibles. |
 | B06 | Elegir base y extracciones mínimas; producir mapa de cobertura. | B03, B04, B05 | pendiente | R01–R20 | A | Cada requisito tiene una solución prevista o un desarrollo propio explícito. Decisiones fundadas, no selección por popularidad. |
 | B07 | Elaborar especificaciones del paquete y análisis de alternativas. | B06 | pendiente | R01–R20 | A | Se describen flujo, estado, decisiones, trazabilidad, recuperación, dos adaptadores, instalación y verificaciones. |
 | B08 | Diseñar contratos y comprobaciones de integridad. | B07 | pendiente | R04, R05, R07, R11, R19 | A | Referencias y estados válidos definidos; cambios incompatibles o evidencia inválida producen un resultado verificable. |
@@ -64,6 +64,21 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 
 ## Detalle de la tarea activa
 
+### B02 — verificada
+
+- **Responsable:** agente constructor.
+- **Alcance:** fuentes principales F01–F03. Los complementos F04–F07 se obtienen en B05, cuando se audite cada pieza; las condicionales F08–F10 solo si aparece un hueco; F11 no se obtiene.
+- **Evidencia (2026-10-12):**
+  - Sparse checkout en `.reference-sources/{cc-sdd,spec-kit,gsd-core}`; `git rev-parse HEAD` coincide con los commits del encargo en las tres copias.
+  - Licencias raíz MIT leídas; huellas SHA-256 en [sources.lock.json](../sources.lock.json), comprobadas con `sha256sum -c`.
+  - Existen todas las rutas que cita el encargo, incluidas las diez skills `kiro-*` en ambas variantes de host.
+  - Inventario y separación entre fuentes y archivos propios en [fuentes.md](fuentes.md). `.reference-sources/` está excluido de git.
+  - No se ejecutó ningún instalador, script ni suite de las fuentes.
+- **Hallazgo:** las copias contienen `CLAUDE.md`/`AGENTS.md` que un host podría cargar como instrucciones (riesgo R-01 en [fuentes.md](fuentes.md)).
+- **Checkpoint:** `CP-02` = commit «B02: inventario y lock de fuentes principales».
+- **Siguiente actividad:** B03.
+
+
 ### B01 — verificada
 
 - **Responsable:** agente constructor. Revisión: usuario.
@@ -84,6 +99,7 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 |---|---|---|---|---|
 | ~~P-01~~ | ~~¿Inicializar un repositorio git en `creación_método/`?~~ **Resuelta 2026-10-12: sí.** | Sin git no hay commits ni checkpoints para la propia construcción (R12) y B02 colocará clones dentro de la carpeta; conviene excluir `.reference-sources/` con `.gitignore`. | B01, B02, B11 | Usuario |
 | P-02 | ¿Qué versión de Claude Code (extensión) se usará para las pruebas reales? | R01 exige registrar versiones de host. | B15, B19 | Usuario / se puede consultar más adelante |
+| R-01 | Instrucciones de terceros (`CLAUDE.md`, `AGENTS.md`) dentro de `.reference-sources/` podrían cargarse como contexto activo. | Podrían desviar al agente constructor (N-06, N-07). | B03–B05, B15 | Agente: tratarlos como datos; comprobar en B15 |
 | P-03 | `npm` no aparece en el PATH aunque Node está instalado. | Solo relevante si un instalador o validador elige Node; el runtime mínimo se decide en B07 (regla del §12). | B07, B16 | Agente (investigar cuando aplique) |
 
 ## Cambios del tablero
@@ -92,4 +108,5 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 |---|---|---|
 | 2026-10-12 | Creación del tablero con B01–B22 del encargo; asignación propuesta de requisitos por tarea. | B01. |
 | 2026-10-12 | B01 verificada; git inicializado (P-01 resuelta); B02 pasa a en_curso. | Aprobación del usuario. |
+| 2026-10-12 | B02 verificada; B03, B04 y B05 pasan a preparada. Complementos F04–F07 se obtienen dentro de B05. | Evidencia de B02. |
 | 2026-10-12 | Encargo conservado en la raíz como `PLAN_PAQUETE_FLUJO_IA.md` en lugar de copiarlo a `docs/encargo.md`. | Evitar dos copias con autoridad sobre el mismo contenido. Revisable. |
