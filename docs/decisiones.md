@@ -53,7 +53,18 @@ Fuentes de los argumentos: [F01](auditoria/F01-cc-sdd.md) (hallazgos H*), [F02�
   - **A:** el motor ejecuta al agente en modo no interactivo con permisos amplios (`cursor-agent -p --trust --approve-mcps --force`, C2) y las puertas se responden en un terminal. Se pierde la conversación con el coordinador (R02) y se amplía la superficie de riesgo.
   - **B:** el coordinador depende de que el modelo siga instrucciones. Por eso los controles obligatorios pasan al validador (DEC-03), como exige §6 del encargo.
 - **Propuesta:** **B**. Del motor se toma el **contrato** (transiciones con lista permitida, escritura atómica, eventos después del estado, reanudación validada; C1), no el código.
-- **Estado:** propuesta.
+- **Apunte del usuario (2026-10-12):** el chat se queda corto para documentar; quiere «algo interactivo como una ventana» para armar desde un producto hasta el propio flujo, con gráficos e interacción, y pide buscar MCP para graficar e interactuar.
+- **Requisitos del usuario para la ventana (2026-10-12):** «interactivo, poder editarlo y que use algún modelo de mi mismo IDE con el que está Claude o de Cursor para que me corrija en ese momento y proponga en tiempo real toda la documentación; que sea visible, manejable y controlable». Es decir:
+  1. La documentación se ve y se edita en una ventana, no solo en el chat.
+  2. La IA es la del propio host (la suscripción de Claude Code o la de Cursor); no hay una clave ni un modelo aparte.
+  3. Mientras se edita, la IA corrige y propone en el momento.
+  4. El usuario controla qué se acepta.
+- **Caminos técnicos identificados (sin probar):**
+  - Cursor: MCP App dentro del chat. La ventana puede enviar mensajes y contexto al modelo del host (documentación de MCP Apps).
+  - Claude Code: ventana local más un *channel* de Claude Code (MCP que empuja eventos a la sesión abierta; vista previa de investigación, v2.1.80+, opción `--channels`). Sin confirmar que funcione en la extensión de VS Code ni que la extensión muestre MCP Apps.
+- **Revisión en curso:** se estudia añadir a **B** esa ventana sobre el registro común. El agente sigue en la conversación y la ventana no lo lanza; los cambios hechos desde la ventana pasan por el validador (DEC-03).
+- **Depende de:** la prueba [I-01](investigaciones/I-01-ventana-interactiva.md), que se hará primero en Cursor.
+- **Estado:** propuesta (en revisión con el usuario).
 
 ## DEC-03 — Validador determinista propio
 

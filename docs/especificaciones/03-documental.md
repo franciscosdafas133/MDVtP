@@ -1,6 +1,6 @@
 # ESP-03 — Contrato documental
 
-Estado: borrador 0.1 · Fuente: encargo §5 · Requisitos: R04, R06, R07, R11
+Estado: borrador 0.2 (lista de documentos revisada con el usuario) · Fuente: encargo §5 · Requisitos: R04, R06, R07, R11
 
 ## Qué la inicia
 
@@ -18,8 +18,8 @@ Documentos con identificador, procedencia, versión, autoridad y enlaces, de mod
 |---|---|
 | `producto.md` | Problema, usuarios, resultados, restricciones y alcance vigente. |
 | `descubrimiento.md` | Hechos, hipótesis, preguntas y experimentos. |
-| `requisitos.md` | Escenarios y condiciones de aceptación identificables. |
-| `sistema.md` | Componentes, contratos, datos y recorridos vigentes. |
+| `requisitos.md` | Escenarios y condiciones de aceptación identificables. Incluye **recorridos del usuario**: los pasos que da una persona en el producto (p. ej. «abre la app → elige peluquero → elige hora → confirma»), enlazados a los escenarios que los cubren. |
+| `sistema.md` | Componentes, contratos, datos y recorridos vigentes. Incluye un apartado de **flujos de conexión entre sistemas** (qué pieza llama a cuál, servicios externos, credenciales) y de **flujos de datos** (qué dato nace dónde, por dónde pasa, dónde se guarda y cómo se recupera), con diagrama. |
 | `decisiones/` | Una decisión significativa por registro (ESP-05). |
 | `entregas/<id>/plan.md` y `tareas.md` | Incremento actual, límites, dependencias y terminación. |
 | `verificacion.md` | Estrategia y referencias a evidencia versionada. |
@@ -28,6 +28,8 @@ Documentos con identificador, procedencia, versión, autoridad y enlaces, de mod
 | `tablero.md` | Vista legible **regenerable**; no es autoridad. |
 | `eventos.jsonl` | Historial de transiciones y decisiones (ESP-04). |
 | `checkpoints/` | Metadatos de puntos de recuperación (ESP-06). |
+
+**Lista revisada con el usuario (2026-10-12):** el usuario acepta estos documentos como los necesarios para un buen producto, con dos añadidos suyos: flujos de conexión y de datos en `sistema.md`, y recorridos del usuario en `requisitos.md`. Quedan fuera, salvo que se pidan: bocetos de pantallas, negocio y marca.
 
 **Metadatos mínimos de cada artefacto:** identificador, versión, estado, entradas relevantes, decisiones que lo condicionan y comprobación requerida.
 
@@ -40,6 +42,14 @@ Documentos con identificador, procedencia, versión, autoridad y enlaces, de mod
 **Proyectos pequeños:** se pueden fusionar documentos de contenido, pero se mantienen los identificadores y relaciones y nunca hay dos autoridades sobre el mismo dato.
 
 **Cambio de requisitos (R11):** al cambiar un artefacto, se consultan sus relaciones y se marca lo dependiente como pendiente de revisión. Los resultados históricos se conservan, pero no valen como comprobación del nuevo estado.
+
+**Mapa de lectura (apunte del usuario, 2026-10-12):** cada documento declara al principio de qué documentos depende y cuáles dependen de él, para que se lea en orden y se sepa qué revisar cuando cambia. Orden de lectura propuesto:
+
+```
+producto → descubrimiento → requisitos → sistema (+ decisiones) → plan y tareas → verificación → operación
+```
+
+Las flechas también se recorren hacia atrás: un cambio en un documento marca como pendiente de revisión lo que depende de él (R11). El mapa completo se deriva de esas declaraciones; no es una segunda autoridad.
 
 ## Cómo se revisa
 

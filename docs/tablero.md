@@ -19,12 +19,12 @@ Vista mantenible del progreso de construcción **del método** (no de una aplica
 |---|---|
 | en_curso | — |
 | en_revision | B06 |
-| preparada | — |
+| preparada | I-01 |
 | pendiente | B07–B22 |
 | bloqueada | — |
 | verificada | B01–B05 |
 
-**Siguiente actividad preparada:** ninguna. B06 espera la revisión del usuario de DEC-02 a DEC-08 (DEC-01 aceptada) ([decisiones.md](decisiones.md)); después, B07.
+**Siguiente actividad preparada:** I-01, prueba de la ventana interactiva en Cursor ([ficha](investigaciones/I-01-ventana-interactiva.md)). Su resultado decide DEC-02. B06 sigue esperando la revisión del usuario de DEC-02 a DEC-08 (DEC-01 aceptada; [decisiones.md](decisiones.md)); después, B07.
 
 ## Tareas
 
@@ -38,6 +38,7 @@ Responsable por defecto: agente constructor. Las decisiones de producto correspo
 | B04 | Comparar coordinación y recuperación de Spec Kit y GSD Core. | B02 | verificada | R08, R12, R13, R19 | A | Matriz con mecanismos, dependencias, costes y límites; sin mezclar sus estados. |
 | B05 | Auditar complementos de producto, investigación, pruebas y diagnóstico. | B02 | verificada | R03, R05, R11, R14, R15, R18 | A | Cada pieza propuesta tiene ficha y requisito; redundancias y ausencias quedan visibles. |
 | B06 | Elegir base y extracciones mínimas; producir mapa de cobertura. | B03, B04, B05 | en_revision | R01–R20 | A | Cada requisito tiene una solución prevista o un desarrollo propio explícito. Decisiones fundadas, no selección por popularidad. |
+| I-01 | Investigación: ¿puede una ventana editable usar la IA del host (Cursor / Claude Code) para corregir y proponer documentación en el momento? | B06 (DEC-01) | preparada | R01, R02, R05, R06 | A | Resultado registrado por host (funciona / en parte / no) con versión y evidencia, según la [ficha](investigaciones/I-01-ventana-interactiva.md). |
 | B07 | Elaborar especificaciones del paquete y análisis de alternativas. | B06 | pendiente | R01–R20 | A | Se describen flujo, estado, decisiones, trazabilidad, recuperación, dos adaptadores, instalación y verificaciones. |
 | B08 | Diseñar contratos y comprobaciones de integridad. | B07 | pendiente | R04, R05, R07, R11, R19 | A | Referencias y estados válidos definidos; cambios incompatibles o evidencia inválida producen un resultado verificable. |
 | B09 | Construir prototipo de documentación guiada con una única entrada. | B08 | pendiente | R02, R03, R04, R05, R06, R17 | B | Una idea vaga llega a un incremento preparado con decisiones y preguntas registradas; no exige que el usuario elija skills. |
@@ -69,7 +70,8 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 
 - **Responsable:** agente constructor. Revisión: usuario.
 - **Evidencia (2026-10-12):** [seleccion.md](seleccion.md) con la base propuesta, 21 extracciones (X01–X21) con origen, tipo, licencia, destino y tarea de implementación, y mapa de cobertura R01–R20 sin requisitos huérfanos. Ocho decisiones en estado `propuesta` en [decisiones.md](decisiones.md), cada una con alternativas, consecuencias y referencias a los hallazgos de las auditorías.
-- **Pendiente para verificar B06:** DEC-01 aceptada (2026-10-12, redactada con las palabras del usuario); falta que el usuario revise DEC-02 a DEC-08.
+- **Pendiente para verificar B06:** DEC-01 aceptada (2026-10-12, redactada con las palabras del usuario); falta que el usuario revise DEC-02 a DEC-08. DEC-02 depende del resultado de I-01.
+- **Revisión con el usuario (2026-10-12):** pidió una ventana interactiva y editable en la que la IA del host corrija y proponga documentación en el momento (requisitos en DEC-02). Aceptó la lista de documentos de ESP-03 con dos añadidos: flujos de conexión y de datos en sistema, y recorridos del usuario en requisitos; también el mapa de lectura entre documentos. La prueba técnica se hará en Cursor (I-01).
 - **Checkpoint:** `CP-06` = commit «B06: selección, extracciones, mapa de cobertura y decisiones propuestas».
 - **Siguiente actividad:** B07, cuando B06 esté verificada.
 
@@ -149,6 +151,7 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 
 | Fecha | Cambio | Motivo |
 |---|---|---|
+| 2026-10-12 | Nueva investigación I-01 (ventana interactiva), preparada; ESP-03 pasa a 0.2; se crea `AGENTS.md` para continuar en Cursor. | El usuario pidió una ventana interactiva; hay incertidumbre técnica sobre si la IA del host puede usarse desde ella. |
 | 2026-10-12 | Creación del tablero con B01–B22 del encargo; asignación propuesta de requisitos por tarea. | B01. |
 | 2026-10-12 | B01 verificada; git inicializado (P-01 resuelta); B02 pasa a en_curso. | Aprobación del usuario. |
 | 2026-10-12 | DEC-01 reescrita y aceptada por el usuario: «reutilizar y conectar las piezas buenas; construir solo lo que las une». | Apunte del usuario. |
