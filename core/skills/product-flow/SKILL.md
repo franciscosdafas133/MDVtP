@@ -47,7 +47,10 @@ Si falla, repara o pregunta; no ignores el validador.
 
 ```bash
 python3 <ruta-del-método>/scripts/product_flow.py iniciar --proyecto <proyecto> --idea "…"
+python3 <ruta-del-método>/scripts/product_flow.py iniciar --proyecto <proyecto> --idea "…" --modo rapido
 ```
+
+Preguntas en lenguaje llano; `--modo rapido` deja 3 ASK. Añade pistas según el tipo de negocio (citas, consultorio, restaurante, tienda). Cuando las ASK activas ya tienen apunte, `continuar` pide pasar a `requisito`, no repetir preguntas.
 
 4. Estado / continuar (continuar contrasta validador + apuntes + git):
 

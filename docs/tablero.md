@@ -233,6 +233,8 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 
 | Fecha | Cambio | Motivo |
 |---|---|---|
+| 2026-10-14 | Oleada C (e2e-v2-1 @ 95f38ae): construir 4/5; formular 2/5. Local: modo rápido, anti-true/manual, huellas cubre, decidir. Falta publicar. | Usuario pegó INFORME-METODO + e2e-v2. |
+| 2026-10-14 | Oleada e2e dueños: anti-simulación, modo rápido, pistas de negocio, impactar DEC, regresión OK. | Usuario: analizar pruebas para mejorar, no reinventar. |
 | 2026-10-14 | B22 verificada; publicación a GitHub MDVtP. | Usuario: paso 22 ok + URL del repo. |
 | 2026-10-14 | B21 verificada; B22 en_revision (mantenimiento + regresión + checklist GitHub). | Usuario: okey, sigamos al 22; luego GitHub. |
 | 2026-10-14 | B20 verificada; B21 en_revision (0.1.0-rc1 + guía). | Usuario: paso 20 ok. |

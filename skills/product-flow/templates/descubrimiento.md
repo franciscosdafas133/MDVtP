@@ -9,15 +9,15 @@ Para cada área: ¿aplica? · qué se sabe · qué falta · cómo averiguarlo.
 
 | Área | Aplica | Se sabe | Falta | Cómo averiguarlo | Pregunta |
 |---|---|---|---|---|---|
-| Usuarios y permisos | ? | | | | ASK-01 |
-| Datos y recuperación | ? | | | | ASK-02 |
-| Integraciones y credenciales | ? | | | | ASK-03 |
-| Procesos asíncronos | ? | | | | ASK-04 |
-| Concurrencia | ? | | | | ASK-05 |
-| Experiencia de uso | ? | | | | ASK-06 |
-| Calidad / pruebas | ? | | | | ASK-07 |
-| Entornos | ? | | | | ASK-08 |
-| Costes y operación | ? | | | | ASK-09 |
+| Quién lo usa | ? | | | | ASK-01 |
+| Datos | ? | | | | ASK-02 |
+| Otras apps y claves | ? | | | | ASK-03 |
+| Cosas que tardan | ? | | | | ASK-04 |
+| Choques | ? | | | | ASK-05 |
+| Camino feliz | ? | | | | ASK-06 |
+| Cómo sabemos que está bien | ? | | | | ASK-07 |
+| Dónde se usa | ? | | | | ASK-08 |
+| Después de publicar | ? | | | | ASK-09 |
 
 ## Preguntas abiertas
 

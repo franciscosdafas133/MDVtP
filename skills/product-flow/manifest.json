@@ -6,7 +6,7 @@
     "cursor",
     "claude"
   ],
-  "instalado": "2026-10-14T21:38:07Z",
+  "instalado": "2026-10-14T23:10:27Z",
   "archivos": {
     "SKILL.md": {
       "sha256": "541d184af3a9cf2f7bd9a6421f09f69c703f867ce3be706e4b8ce655961f5ffb"
@@ -57,7 +57,7 @@
       "sha256": "059349aca245df65521780e5c5dbc84c1d58144358bdbcf9d2c5ec2d7648d9af"
     },
     "procedures/bloquear.md": {
-      "sha256": "0504e3c162e309db53316a1a63bf132958401cdf2deb77d274ef3c50719f27e9"
+      "sha256": "98cf7229720cea31b72116b1420b358ca82ac9d3b6a68ff0bac9e3f64f719c2b"
     },
     "procedures/checkpoint.md": {
       "sha256": "350761102b6d3615df5aa1ebf901c927d56add0fcc1e0b08c84216cf15618a15"
@@ -99,13 +99,13 @@
       "sha256": "160b0ebf417a1666245632d9b781925d7baa48716179fd4e340491bc718086ea"
     },
     "scripts/product_flow.py": {
-      "sha256": "0c67ffa5cea408deed801bf0b0589e4b58d4822d1fb178296784a3e367370c1a"
+      "sha256": "0bdb5d0e371ad962a0f0e99c5166f321a3eb75c02f772a9e39d042c455aeb3ab"
     },
     "scripts/validate_workflow.py": {
-      "sha256": "6616c5b49deb1b05400b95a309dfa3d716027c3ade148fe021dbef59208b9fca"
+      "sha256": "4eee6df7e649ec421d48c6f8fd742f24a7fd62442b0725bd7c69f6df17c06df3"
     },
     "templates/descubrimiento.md": {
-      "sha256": "4c1719ee8824ecd16307bd2caf66eca585be8f30124c3089b4b82eaf5e130e08"
+      "sha256": "38e6a07e17ccaba08ddbb4152b173c1ba01d88ea2aeaf81cb15712ed0283a1d8"
     },
     "templates/operacion.md": {
       "sha256": "2b34c275205ca1f7ab257f9886d893ce6f74c191cd69d6f0c9c39a19be0beed9"

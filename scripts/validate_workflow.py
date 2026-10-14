@@ -10,6 +10,7 @@ Solo biblioteca estándar. Códigos de salida:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -158,6 +159,24 @@ def validate_workflow(
                 f"{eid}: vigente con exit {ev.get('exit_code')}",
                 str(evid_path),
             )
+        # Huellas guardadas al evidenciar --ejecutar (--cubre): el código cambió → stale
+        if (
+            ev.get("origen") == "comando"
+            and ev.get("estado") == "vigente"
+            and isinstance(ev.get("huellas"), dict)
+        ):
+            root = workflow.parent
+            for ruta, digest in (ev.get("huellas") or {}).items():
+                fp = root / ruta
+                if not fp.is_file():
+                    continue
+                actual = hashlib.sha256(fp.read_bytes()).hexdigest()
+                if digest and actual != digest:
+                    err(
+                        "evidencia_stale",
+                        f"{eid}: {ruta} cambió desde la evidencia (debería ser stale)",
+                        str(evid_path),
+                    )
         if huellas and ev.get("origen") == "hash_archivo" and ev.get("estado") == "vigente":
             for ruta in ev.get("cubre") or []:
                 if ruta in huellas and ev.get("valor") and huellas[ruta] != ev["valor"]:

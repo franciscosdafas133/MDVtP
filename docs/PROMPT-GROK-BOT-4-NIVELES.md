@@ -1,109 +1,118 @@
-# Cuatro pruebas: formular + construir (una por nivel)
+# Cuatro pruebas: formular + construir hasta app que corre
 
-Usa el mismo Bot **Formulador del método** (identidad y reglas de [PROMPT-GROK-BOT-FORMULAR.md](PROMPT-GROK-BOT-FORMULAR.md)).
+1. En el Bot, deja Identidad y Reglas de [PROMPT-GROK-BOT-FORMULAR.md](PROMPT-GROK-BOT-FORMULAR.md).
+2. En cada corrida pega **solo un bloque** de abajo (nivel 1 → 4, uno por uno).
+3. Carpetas nuevas: `e2e-v2-nivel-1` … `e2e-v2-nivel-4` (no reuses la oleada anterior).
+4. Termina el INFORME de ese nivel antes de pegar el siguiente.
 
-En cada prueba pega **solo un bloque de Tarea**. Termina y guarda el informe antes de pasar al siguiente nivel. Carpetas distintas: `e2e-nivel-1` … `e2e-nivel-4`.
+Comportamiento común:
+- El método es **formular y construir**. Sin app que corre + prueba en verde = fallaste.
+- Eres el dueño. No me preguntes qué elegir.
+- Solo MDVtP. Comando que falle → lo anotas; no inventas que pasó.
+- `evidenciar --ejecutar`. Rojo = no verificado.
+- Tarjeta/pasarela: bloqueada; simulación no desbloquea ni verifica.
+- Al final: nota formular + nota construir (1–5) + fallos + mejoras.
 
-Comportamiento común (siempre):
-- El método no es solo formular: es **formular y construir** (docs → decisiones → código → prueba real → operar). Si te quedas en papeles sin producto que corra, fallaste la prueba.
-- Eres el dueño del producto. No me preguntes qué elegir.
-- Usas solo el método (repo MDVtP). Si el comando falla, anotas fallo; no inventas que pasó.
-- `evidenciar --ejecutar`. Prueba en rojo = no verificado.
-- Al final: **dos notas 1–5** (formular / construir) + fallos y mejoras del método.
+**Importante:** el clone debe traer la versión con `--modo rapido`, `requisito`/`tarea`/`decidir` y anti-simulación. Si GitHub está desactualizado respecto a tu repo local, actualiza el remoto **antes** de lanzar al Bot, o indícale una ruta local del método.
 
 ---
 
-## Nivel 1 — Dueño de tienda de barrio (simple, poco paciente)
-
-**Comportamiento que asumes:** Dueño de una tienda pequeña. Quieres algo ya. No lees manuales largos. Si el método te pide 9 preguntas, contestas corto o “no aplica”, y te molestas si no te deja avanzar. No inventas un ERP.
+## Nivel 1 — Dueño de tienda (impaciente)
 
 ```
 Resultado
-Una sola prueba de nivel 1. El método es formular Y construir: sales con producto que corre y prueba en verde, no solo docs. Al final dos notas 1–5 (formular / construir) + fallos del método.
+Una sola prueba de nivel 1. Formular Y construir: inventario que CORRE + prueba en verde. Dos notas 1–5 (formular / construir) + fallos del método.
 
 NIVEL: 1
 NECESIDAD: quiero saber qué productos me quedan en la tienda sin apuntarlo en un cuaderno
-CARPETA: ~/mdvtp-pruebas/e2e-nivel-1/
+CARPETA: ~/mdvtp-pruebas/e2e-v2-nivel-1/
 
 Comportamiento
-Eres el dueño de una tienda de barrio. Quieres algo usable ya. Respuestas cortas a las ASK. Si el método se pone pesado, lo anotas como fallo. Alcance: una pantalla o flujo mínimo de inventario (stock, venta baja stock) QUE FUNCIONE. Sin usuarios, sin pagos, sin nube.
+Eres dueño de tienda de barrio. Quieres algo usable ya. Usa iniciar --modo rapido si existe. Respuestas cortas. Si te abruma con jerga (staging, colas) o 9 preguntas, anótalo como fallo. Alcance: stock + venta que baja stock, QUE FUNCIONE. Sin usuarios, sin pagos, sin nube.
 
-Fuentes: https://github.com/franciscosdafas133/MDVtP — si el repo está vacío, PARA.
-Lee GUIA-USUARIO y SKILL. Construye, evidenciar --ejecutar, presentar, verificar, operar.
+Fuentes
+- https://github.com/franciscosdafas133/MDVtP — si el repo está vacío, PARA.
+- Lee GUIA-USUARIO, LIMITES-CANDIDATA, core/skills/product-flow/SKILL.md
+- Comandos: iniciar, anotar, requisito, tarea, decidir, evidenciar --ejecutar, presentar, verificar, operar, validate_workflow. No edites JSON a mano si el comando existe.
 
-Entrega: ~/mdvtp-pruebas/e2e-nivel-1/INFORME.md
-(producto formulado, qué construiste, prueba/validador, nota formular, nota construir, fallos, mejoras)
+Cierre obligatorio
+App que corre + evidenciar --ejecutar en verde + validador OK + operar.
+Entrega: ~/mdvtp-pruebas/e2e-v2-nivel-1/INFORME.md
+(producto formulado, qué construiste, cómo se prueba, validador, nota formular, nota construir, fallos, mejoras, qué no comprobaste)
 No push. No me pidas decidir.
 ```
 
 ---
 
-## Nivel 2 — Dueña de consulta (cuidadosa con privacidad)
-
-**Comportamiento que asumes:** Dueña de un consultorio. Te importa quién ve qué. No aceptas que recepción lea la nota clínica. Prefieres preguntar bien antes de construir de más.
+## Nivel 2 — Dueña de consultorio (privacidad)
 
 ```
 Resultado
-Una sola prueba de nivel 2. El método es formular Y construir: producto que corre + prueba en verde. Dos notas 1–5 (formular / construir) + fallos del método.
+Una sola prueba de nivel 2. Formular Y construir: citas + nota clínica QUE CORREN + prueba en verde. Dos notas 1–5 + fallos del método.
 
 NIVEL: 2
 NECESIDAD: quiero que recepción agende citas y el médico vea al paciente, pero la nota clínica solo la ve el médico
-CARPETA: ~/mdvtp-pruebas/e2e-nivel-2/
+CARPETA: ~/mdvtp-pruebas/e2e-v2-nivel-2/
 
 Comportamiento
-Eres la dueña del consultorio. Priorizas privacidad. Si el método no te fuerza a decidir roles y datos sensibles, anótalo como hueco. Alcance: dos roles, citas y nota clínica QUE FUNCIONEN. Sin historial enorme. Sin pagos.
+Eres la dueña. Priorizas privacidad. Si el método no pregunta por datos sensibles / quién NO debe ver la nota, anótalo como hueco grave. No aceptes “no aplica” en roles: tú decides recepción ≠ nota clínica. Alcance: dos roles, citas y nota, QUE FUNCIONEN. Sin historial enorme. Sin pagos.
 
-Fuentes: https://github.com/franciscosdafas133/MDVtP — si el repo está vacío, PARA.
-Lee GUIA-USUARIO y SKILL. Construye, evidenciar --ejecutar, presentar, verificar, operar.
+Fuentes
+- https://github.com/franciscosdafas133/MDVtP — si vacío, PARA.
+- GUIA-USUARIO + SKILL. requisito/tarea/decidir por comando. evidenciar --ejecutar.
 
-Entrega: ~/mdvtp-pruebas/e2e-nivel-2/INFORME.md
+Cierre obligatorio
+Prueba que demuestre que recepción NO lee la nota. Validador OK. operar.
+Entrega: ~/mdvtp-pruebas/e2e-v2-nivel-2/INFORME.md
 No push. No me pidas decidir.
 ```
 
 ---
 
-## Nivel 3 — Dueño de peluquería (la idea vaga clásica)
-
-**Comportamiento que asumes:** Dueño de peluquería. Empezaste con una frase vaga. No eres técnico. Aceptas un piloto local. Si te piden tarjeta o SMS, dices “luego” y el método debe dejarlo pendiente, no fingirlo.
+## Nivel 3 — Dueño de peluquería (idea vaga + cambio de regla)
 
 ```
 Resultado
-Una sola prueba de nivel 3. El método es formular Y construir: reservas que corren + prueba en verde. Dos notas 1–5 (formular / construir) + fallos del método.
+Una sola prueba de nivel 3. Formular Y construir: reservas QUE CORREN + prueba en verde. Luego cambias una regla de confirmación, impactar, y vuelves a verificar. Dos notas 1–5 + fallos.
 
 NIVEL: 3
 NECESIDAD: que mis clientes reserven en la peluquería sin llamarme
-CARPETA: ~/mdvtp-pruebas/e2e-nivel-3/
+CARPETA: ~/mdvtp-pruebas/e2e-v2-nivel-3/
 
 Comportamiento
-Eres el dueño de la peluquería. Partes de esa frase vaga. Respondes las ASK como dueño. Quieres servicios, hora, confirmar, sin pisar huecos — y que eso FUNCIONE. Pago y SMS: “luego” → pendientes en operar. Si cambias una regla de confirmación, impactar y volver a verificar.
+Eres el dueño. Partes de esa frase vaga. Si las preguntas son jerga que no entiendes, anótalo. Quieres duración de servicios, horario, reservar sin pisar huecos — y que FUNCIONE. Pago y SMS: “luego” → pendientes en operar, no fingidos. Después de v1 en verde: cambia la regla de confirmación (decidir/reabrir + impactar) y comprueba que la evidencia vieja no siga como verificada a ciegas.
 
-Fuentes: https://github.com/franciscosdafas133/MDVtP — si el repo está vacío, PARA.
-Lee GUIA-USUARIO y SKILL. Construye, evidenciar --ejecutar, presentar, verificar, operar.
+Fuentes
+- https://github.com/franciscosdafas133/MDVtP — si vacío, PARA.
+- GUIA-USUARIO + SKILL. evidenciar --ejecutar. impactar al cambiar la decisión.
 
-Entrega: ~/mdvtp-pruebas/e2e-nivel-3/INFORME.md
+Cierre obligatorio
+v1 corre + verde; cambio de regla; impacto visible; v2 re-verificada o en_revision honesta.
+Entrega: ~/mdvtp-pruebas/e2e-v2-nivel-3/INFORME.md
 No push. No me pidas decidir.
 ```
 
 ---
 
-## Nivel 4 — Dueño de restaurante (operación con hueco real)
-
-**Comportamiento que asumes:** Dueño de restaurante. Quieres salón → cocina → cuenta. Sabes que la tarjeta no está lista: no dejas que el método diga “cobrado con tarjeta”. Exiges bloqueo parcial: el resto sigue.
+## Nivel 4 — Dueño de restaurante (tarjeta bloqueada)
 
 ```
 Resultado
-Una sola prueba de nivel 4. El método es formular Y construir: salón/cocina/caja que corren + prueba en verde. Dos notas 1–5 (formular / construir) + fallos del método.
+Una sola prueba de nivel 4. Formular Y construir: salón → cocina → caja QUE CORREN + prueba en verde. Tarjeta bloqueada y NO verificada con simulación. Dos notas 1–5 + fallos.
 
 NIVEL: 4
 NECESIDAD: que el salón mande la comanda a cocina y la caja cobre, aunque la tarjeta aún no esté lista
-CARPETA: ~/mdvtp-pruebas/e2e-nivel-4/
+CARPETA: ~/mdvtp-pruebas/e2e-v2-nivel-4/
 
 Comportamiento
-Eres el dueño del restaurante. Quieres mesas, comanda, cocina y cuenta QUE FUNCIONEN. Divide con criterio. Bloquea solo tarjeta. Efectivo simulado sí se prueba. Si el método no distingue simulación vs real, fallo grave. No inventes Stripe.
+Eres el dueño. Mesas, comanda, cocina, cuenta QUE FUNCIONEN. Divide con criterio. Bloquea solo tarjeta (marca MANUAL_VERIFY_REQUIRED o equivalente). Efectivo simulado sí se prueba. Si el método desbloquea o verifica tarjeta con una nota de “simulación”, FALLO GRAVE. No inventes Stripe ni claves.
 
-Fuentes: https://github.com/franciscosdafas133/MDVtP — si el repo está vacío, PARA.
-Lee GUIA-USUARIO y SKILL. Construye, evidenciar --ejecutar, presentar, verificar, operar (tarjeta pendiente).
+Fuentes
+- https://github.com/franciscosdafas133/MDVtP — si vacío, PARA.
+- GUIA-USUARIO + SKILL. evidenciar --ejecutar. bloquear/desbloquear honestos.
 
-Entrega: ~/mdvtp-pruebas/e2e-nivel-4/INFORME.md
+Cierre obligatorio
+Flujo salón-cocina-caja en verde; tarjeta pendiente en operar; validador OK.
+Entrega: ~/mdvtp-pruebas/e2e-v2-nivel-4/INFORME.md
 No push. No me pidas decidir.
 ```

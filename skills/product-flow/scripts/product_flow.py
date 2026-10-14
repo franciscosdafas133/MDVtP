@@ -9,6 +9,7 @@ las puertas de producto las responde el usuario.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -18,6 +19,12 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+# Comandos que "pasan" sin probar el producto (sonda e2e-v2-nivel-1).
+_CMD_TRIVIAL = re.compile(
+    r"^(true|:|exit\s+0|echo(\s+\S+){0,3})$",
+    re.I,
+)
 
 def _resolve_roots() -> tuple[Path, Path, Path]:
     """Repo del método, skill empaquetada o .metodo/."""
@@ -38,17 +45,77 @@ def _resolve_roots() -> tuple[Path, Path, Path]:
 ROOT, TEMPLATES, VALIDATE = _resolve_roots()
 ID_RE = re.compile(r"^(OBJ|REQ|DEC|TASK|CHECK|EVID|ASK|NOTE)-[0-9]{2,}$")
 
+# Preguntas en lenguaje llano (hallazgo e2e: jerga tipo staging/colas asusta al dueño).
 AREAS = [
-    ("ASK-01", "Usuarios y permisos", "¿Quién usa el producto y con qué permisos?"),
-    ("ASK-02", "Datos y recuperación", "¿Qué datos guarda y cómo se recuperan si fallan?"),
-    ("ASK-03", "Integraciones y credenciales", "¿Con qué sistemas externos habla y qué secretos necesita?"),
-    ("ASK-04", "Procesos asíncronos", "¿Hay trabajos en segundo plano, colas o esperas largas?"),
-    ("ASK-05", "Concurrencia", "¿Pueden dos personas pisarse el mismo dato a la vez?"),
-    ("ASK-06", "Experiencia de uso", "¿Cuál es el recorrido feliz mínimo del usuario?"),
-    ("ASK-07", "Calidad / pruebas", "¿Cómo sabremos que una versión está bien?"),
-    ("ASK-08", "Entornos", "¿Dónde corre (local, staging, prod) y qué cambia entre ellos?"),
-    ("ASK-09", "Costes y operación", "¿Qué hay que vigilar en producción (coste, alertas, backups)?"),
+    ("ASK-01", "Quién lo usa", "¿Quién va a usar esto (dueño, cliente, empleado) y qué puede hacer cada uno?"),
+    ("ASK-02", "Datos", "¿Qué información guarda y qué pasa si se pierde o se borra?"),
+    ("ASK-03", "Otras apps y claves", "¿Habla con WhatsApp, pagos u otras apps, o necesita contraseñas?"),
+    ("ASK-04", "Cosas que tardan", "¿Hay algo que tarde o corra solo (mensajes, reportes)?"),
+    ("ASK-05", "Choques", "¿Pueden dos personas pelearse por el mismo turno o el mismo dato?"),
+    ("ASK-06", "Camino feliz", "¿Cuál es el camino más corto para que el usuario termine lo que quiere?"),
+    ("ASK-07", "Cómo sabemos que está bien", "¿Cómo sabremos que una versión funciona bien?"),
+    ("ASK-08", "Dónde se usa", "¿Lo usarán solo en el local o también por internet?"),
+    ("ASK-09", "Después de publicar", "¿Qué hay que cuidar después (copias de seguridad, avisos, costos)?"),
 ]
+
+# Modo rápido: 3 preguntas (hallazgo e2e: 9 de golpe abruman).
+AREAS_RAPIDO_IDS = ("ASK-01", "ASK-06", "ASK-02")
+
+# Pistas según la idea (no sustituyen a AREAS; se añaden al descubrimiento).
+PISTAS_NEGOCIO = [
+    (
+        re.compile(r"peluquer|barber|sal[oó]n|cita|reserv", re.I),
+        [
+            "¿Cuánto dura cada servicio y en qué horario atienden?",
+            "¿Qué pasa si el cliente cancela o no llega?",
+            "¿Quién ve la agenda: solo el local o también el cliente?",
+        ],
+    ),
+    (
+        re.compile(r"m[eé]dic|consultor|cl[ií]nic|paciente|nota cl[ií]nic", re.I),
+        [
+            "¿Qué datos son sensibles y quién NO debe verlos (p. ej. recepción vs médico)?",
+            "¿La nota clínica puede salir del consultorio?",
+            "¿Hace falta historial largo o solo la cita de hoy?",
+        ],
+    ),
+    (
+        re.compile(r"restaurant|comanda|cocina|mesero|plato", re.I),
+        [
+            "¿Hay carta y precios fijos, o cambian seguido?",
+            "¿La cocina ve la comanda en tiempo real?",
+            "¿El cobro con tarjeta es obligatorio ahora o puede quedar pendiente?",
+        ],
+    ),
+    (
+        re.compile(r"tienda|inventario|stock|almac[eé]n|producto", re.I),
+        [
+            "¿Vendes por unidades y el stock debe bajar al vender?",
+            "¿Hay precios o solo cantidades?",
+            "¿Quién puede registrar una venta?",
+        ],
+    ),
+]
+
+
+def areas_para_iniciar(modo: str) -> list[tuple[str, str, str]]:
+    if modo == "rapido":
+        return [a for a in AREAS if a[0] in AREAS_RAPIDO_IDS]
+    return list(AREAS)
+
+
+def pistas_para_idea(idea: str) -> list[str]:
+    out: list[str] = []
+    for pat, preguntas in PISTAS_NEGOCIO:
+        if pat.search(idea or ""):
+            out.extend(preguntas)
+    # Privacidad genérica si hay roles o datos personales
+    if re.search(r"cliente|paciente|empleado|recepci|m[eé]dic", idea or "", re.I):
+        if not any("sensib" in p for p in out):
+            out.append(
+                "¿Hay datos que una persona no deba ver aunque use el mismo sistema?"
+            )
+    return out
 
 
 def now_iso() -> str:
@@ -205,7 +272,7 @@ def dependents(relaciones: dict, changed: str) -> list[str]:
     return sorted(out)
 
 
-def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool) -> int:
+def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool, modo: str = "completo") -> int:
     wf = proyecto / "workflow"
     if wf.exists() and any(wf.iterdir()) and not fuerza:
         print(f"Ya existe {wf}. Usa --fuerza para recrear (borra workflow/).", file=sys.stderr)
@@ -214,11 +281,21 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool) -> int:
     if wf.exists() and fuerza:
         shutil.rmtree(wf)
 
+    if modo not in ("completo", "rapido"):
+        print("--modo debe ser completo|rapido", file=sys.stderr)
+        return 2
+
     entrega = "E01"
     idea_corta = idea.strip().split("\n")[0][:120]
+    areas = areas_para_iniciar(modo)
+    pistas = pistas_para_idea(idea)
     preguntas_md = "\n".join(
-        f"- **{aid}** ({area}): {preg}" for aid, area, preg in AREAS
+        f"- **{aid}** ({area}): {preg}" for aid, area, preg in areas
     )
+    if pistas:
+        preguntas_md += "\n\n### Preguntas de este tipo de negocio\n\n" + "\n".join(
+            f"- {p}" for p in pistas
+        )
 
     (wf / "decisiones").mkdir(parents=True)
     (wf / "entregas" / entrega).mkdir(parents=True)
@@ -294,11 +371,11 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool) -> int:
             "archivo": f"entregas/{entrega}/tareas.md",
         },
     }
-    for aid, area, _ in AREAS:
+    for aid, area, _ in areas:
         nodos[aid] = {"tipo": "ASK", "archivo": "descubrimiento.md", "area": area}
 
     aristas = [{"de": "TASK-01", "tipo": "implementa", "a": "OBJ-01"}]
-    for aid, _, _ in AREAS:
+    for aid, _, _ in areas:
         aristas.append({"de": aid, "tipo": "comenta", "a": "OBJ-01"})
 
     atomic_write_json(
@@ -343,6 +420,8 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool) -> int:
         "siguiente_preparada": None,
         "idea_inicial": idea_corta,
         "entrega_actual": entrega,
+        "modo_descubrimiento": modo,
+        "asks_activas": [a[0] for a in areas],
     }
     atomic_write_json(wf / "estado.json", estado)
     (wf / "eventos.jsonl").write_text("", encoding="utf-8")
@@ -394,32 +473,34 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool) -> int:
         print("ADVERTENCIA: el workflow recién creado no pasó el validador:", file=sys.stderr)
         print(raw, file=sys.stderr)
 
-    # Propuestas de profundidad: 3 preguntas prioritarias tipicas
-    prioritarias = ["ASK-01", "ASK-06", "ASK-02"]
-    propuesto = [
-        f"{aid}: {next(p for a, _, p in AREAS if a == aid)}" for aid in prioritarias
-    ]
+    prioritarias = [a[0] for a in areas[:3]]
+    propuesto = [f"{aid}: {preg}" for aid, _, preg in areas if aid in prioritarias]
+    if pistas:
+        propuesto.append("Preguntas de este tipo de negocio (ver descubrimiento.md)")
 
     print(
         informe(
             objetivo=idea_corta,
             actividad="Descubrir — convertir la idea en preguntas y hechos",
-            confirmado=["Idea inicial registrada como OBJ-01 (hipótesis)"],
+            confirmado=[
+                "Idea inicial registrada como OBJ-01 (hipótesis)",
+                f"Modo descubrimiento: {modo}",
+            ],
             propuesto=[
-                "Recorrer áreas de descubrimiento; priorizar usuarios, recorrido y datos",
+                "Responder en lenguaje llano; luego pasar respuestas a requisitos",
                 *propuesto,
             ],
             rechazado=[],
-            dudas=[f"{a}: {p}" for a, _, p in AREAS],
+            dudas=[f"{aid}: {preg}" for aid, _, preg in areas],
             archivos=files_written,
             comprobaciones=[
                 "Validador: " + ("OK" if ok else "FALLA — ver JSON"),
-                "Puerta humana: el usuario responde o marca 'no aplica' en preguntas prioritarias",
+                "Puerta: responde o marca 'no aplica' en las ASK activas",
             ],
             checkpoint="(aún no — se crea al cerrar actividad comprobada; paso 11)",
             siguiente=(
-                "Responder ASK-01, ASK-06 y ASK-02 (o decir 'no aplica'). "
-                "No hace falta elegir skills: sigue con product-flow continuar."
+                f"Responder {', '.join(prioritarias)} (o 'no aplica'). "
+                "Luego: product_flow.py requisito … y continuar."
             ),
         )
     )
@@ -432,7 +513,23 @@ def load_estado(wf: Path) -> dict:
     return json.loads((wf / "estado.json").read_text(encoding="utf-8"))
 
 
-def ruta_siguiente(estado: dict, val_ok: bool, hallazgos: list) -> str:
+def asks_respondidas(wf: Path, estado: dict) -> tuple[list[str], list[str]]:
+    """ASK activas con al menos un apunte vs las que aún no tienen respuesta."""
+    activas = estado.get("asks_activas") or [a[0] for a in AREAS]
+    items = (load_json(wf / "apuntes.json", {"items": {}}) or {}).get("items") or {}
+    cubiertas: set[str] = set()
+    for note in items.values():
+        enlaza = note.get("enlaza") or ""
+        if enlaza.startswith("ASK-"):
+            cubiertas.add(enlaza)
+    hechas = [a for a in activas if a in cubiertas]
+    faltan = [a for a in activas if a not in cubiertas]
+    return hechas, faltan
+
+
+def ruta_siguiente(
+    estado: dict, val_ok: bool, hallazgos: list, wf: Path | None = None
+) -> str:
     """Tabla de rutas mínima sobre hechos (inspiración X11)."""
     if not val_ok:
         codigos = ", ".join(sorted({h.get("codigo", "?") for h in hallazgos})) or "error"
@@ -451,10 +548,22 @@ def ruta_siguiente(estado: dict, val_ok: bool, hallazgos: list) -> str:
     if en_rev:
         return f"Puerta humana: revisar {en_rev[0]} y aceptar/rechazar."
     if en_curso:
+        if act == "descubrir" and wf is not None:
+            hechas, faltan = asks_respondidas(wf, estado)
+            if faltan:
+                return (
+                    f"Seguir descubrimiento: faltan respuestas a {', '.join(faltan)} "
+                    "(anotar --enlaza ASK-…)."
+                )
+            return (
+                "ASK activas ya tienen respuesta. Siguiente: "
+                "product_flow.py requisito … y pasar de descubrir a construir "
+                "(no hace falta seguir preguntando lo mismo)."
+            )
         if act == "descubrir":
             return (
                 f"Seguir descubrimiento en {en_curso[0]}: "
-                "contestar preguntas ASK o anotar; luego product-flow decidir si hay alternativas."
+                "contestar ASK o anotar; luego requisito / construir."
             )
         return f"Continuar trabajo técnico de {en_curso[0]} dentro del alcance autorizado."
     if prep:
@@ -488,6 +597,11 @@ def cmd_estado(proyecto: Path) -> int:
     resumen_t = [f"{k}: {v.get('estado')}" for k, v in tareas.items()]
     dudas = [f"{b.get('id')}: {b.get('motivo')}" for b in estado.get("bloqueos") or []]
     dudas.extend(pendientes_apuntes(wf))
+    hechas, faltan = asks_respondidas(wf, estado)
+    if faltan and (estado.get("actividad") or {}).get("id") == "descubrir":
+        dudas.append("ASK sin respuesta: " + ", ".join(faltan))
+    elif hechas and (estado.get("actividad") or {}).get("id") == "descubrir":
+        resumen_t.append("ASK respondidas: " + ", ".join(hechas))
     print(
         informe(
             objetivo=estado.get("idea_inicial") or "(sin idea)",
@@ -499,7 +613,7 @@ def cmd_estado(proyecto: Path) -> int:
             archivos=["workflow/estado.json"],
             comprobaciones=["Validador: " + ("OK" if ok else "FALLA")],
             checkpoint="(ver workflow/checkpoints/)",
-            siguiente=ruta_siguiente(estado, ok, hallazgos),
+            siguiente=ruta_siguiente(estado, ok, hallazgos, wf),
         )
     )
     if not ok and raw:
@@ -647,6 +761,32 @@ def cmd_impactar(proyecto: Path, cambiado: str, motivo: str) -> int:
     estado = load_estado(wf)
     if cambiado.startswith("TASK-") and cambiado not in deps:
         deps.append(cambiado)
+
+    # Expandir: TASK que enlaza el cambiado
+    for tid, tarea in (estado.get("tareas") or {}).items():
+        if cambiado in (tarea.get("enlaces") or []):
+            if tid not in deps:
+                deps.append(tid)
+
+    # Hallazgo peluquería: impactar DEC debe invalidar TASK enlazadas (y vía REQ)
+    if cambiado.startswith("DEC-"):
+        dec_path = wf / "decisiones" / f"{cambiado}.json"
+        dec = load_json(dec_path, {}) if dec_path.is_file() else {}
+        for link in dec.get("enlaces") or []:
+            if link not in deps:
+                deps.append(link)
+            for tid, tarea in (estado.get("tareas") or {}).items():
+                enl = tarea.get("enlaces") or []
+                if cambiado in enl or link in enl:
+                    if tid not in deps:
+                        deps.append(tid)
+        # También aristas en relaciones desde/hacia la DEC
+        for edge in rel.get("aristas") or []:
+            if edge.get("de") == cambiado and edge.get("a") not in deps:
+                deps.append(edge["a"])
+            if edge.get("a") == cambiado and edge.get("de") not in deps:
+                deps.append(edge["de"])
+
     # Transitivo: quien depende (depende_de) de una tarea ya afectada
     crecio = True
     while crecio:
@@ -657,15 +797,10 @@ def cmd_impactar(proyecto: Path, cambiado: str, motivo: str) -> int:
             if any(d in deps for d in (tarea.get("depende_de") or [])):
                 deps.append(tid)
                 crecio = True
+
     evidencias = load_json(wf / "evidencias.json", {"items": {}})
     items_ev = evidencias.setdefault("items", {})
     afectados: list[str] = []
-
-    # Expandir: si un TASK depende del cambiado vía enlaces en estado
-    for tid, tarea in (estado.get("tareas") or {}).items():
-        if cambiado in (tarea.get("enlaces") or []):
-            if tid not in deps:
-                deps.append(tid)
 
     for dep in deps:
         if dep.startswith("TASK-"):
@@ -1047,6 +1182,24 @@ def cmd_recuperar(
     return 0
 
 
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    h.update(path.read_bytes())
+    return h.hexdigest()
+
+
+def _comando_trivial(cmd: str) -> bool:
+    c = (cmd or "").strip()
+    if not c:
+        return True
+    if _CMD_TRIVIAL.match(c):
+        return True
+    # "true && true", "echo ok | true", etc.
+    if re.fullmatch(r"(true|:|exit\s+0)(\s*(&&|\|\|)\s*(true|:|exit\s+0))*", c, re.I):
+        return True
+    return False
+
+
 def cmd_evidenciar(
     proyecto: Path,
     tarea: str,
@@ -1073,9 +1226,23 @@ def cmd_evidenciar(
         print("origen debe ser commit|hash_archivo|comando|manual", file=sys.stderr)
         return 2
 
+    cubre_list = [c.strip() for c in cubre.split(",") if c.strip()]
+    comprobacion = (tareas[tarea].get("comprobacion") or "").strip()
+
+    # Tarea con comprobación de código: no basta un "lo probé" manual
+    if origen == "manual" and comprobacion:
+        print(
+            "Esta tarea tiene --comprobacion (trabajo de código). "
+            "Usa evidenciar --origen comando --ejecutar con la prueba real "
+            f"(p. ej. el script de la comprobación), no origen manual.",
+            file=sys.stderr,
+        )
+        return 2
+
     exit_code = None
     salida = None
     estado_ev = "vigente"
+    huellas: dict[str, str] = {}
     if origen == "comando":
         if not ejecutar:
             print(
@@ -1084,6 +1251,22 @@ def cmd_evidenciar(
                 file=sys.stderr,
             )
             return 2
+        cmd = (valor or "").strip()
+        if not cmd and comprobacion:
+            # Si la comprobación parece un comando (empieza por ./ o palabra)
+            m = re.match(r"^(\./\S+|\S+\.(?:sh|py)|python3?\s+\S+|bash\s+\S+)", comprobacion)
+            if m:
+                cmd = m.group(1)
+                print(f"(Usando comando de la comprobación: {cmd})")
+        if _comando_trivial(cmd):
+            print(
+                "Ese comando no prueba el producto (p. ej. true / echo). "
+                "Pasa el script de prueba real en --valor "
+                "(el de la --comprobacion de la tarea).",
+                file=sys.stderr,
+            )
+            return 2
+        valor = cmd
         r = subprocess.run(
             valor,
             cwd=proyecto,
@@ -1099,6 +1282,11 @@ def cmd_evidenciar(
             print(f"Prueba FALLÓ (exit {exit_code}). No queda evidencia vigente.", file=sys.stderr)
             if salida.strip():
                 print(salida[-400:], file=sys.stderr)
+        elif cubre_list:
+            for rel in cubre_list:
+                fp = proyecto / rel
+                if fp.is_file():
+                    huellas[rel] = _sha256_file(fp)
 
     evidencias = load_json(wf / "evidencias.json", {"contrato_version": "0.1.0", "items": {}})
     rel = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
@@ -1110,12 +1298,13 @@ def cmd_evidenciar(
         "estado": estado_ev,
         "origen": origen,
         "valor": valor,
-        "cubre": [c.strip() for c in cubre.split(",") if c.strip()],
+        "cubre": cubre_list,
         "registrado": now_iso(),
         "motivo_stale": None,
         "tarea": tarea,
         "exit_code": exit_code,
         "salida": salida,
+        "huellas": huellas or None,
     }
     tareas[tarea].setdefault("evidencia", []).append(eid)
     rel.setdefault("nodos", {})[eid] = {"tipo": "EVID"}
@@ -1195,6 +1384,28 @@ def cmd_presentar(proyecto: Path, tarea: str) -> int:
     return 0 if ok else 1
 
 
+def _texto_simula(*parts: str | None) -> bool:
+    return bool(re.search(r"simula", " ".join(p or "" for p in parts), re.I))
+
+
+def _marca_integracion_real(tarea: dict, estado: dict) -> str:
+    marca = (tarea.get("marca") or "").strip()
+    bid = tarea.get("bloqueo")
+    for b in estado.get("bloqueos") or []:
+        if b.get("id") == bid and b.get("marca"):
+            marca = b.get("marca") or marca
+    return marca
+
+
+def _evidencia_comando_real(ev: dict) -> bool:
+    return (
+        ev.get("estado") == "vigente"
+        and ev.get("origen") == "comando"
+        and ev.get("exit_code") == 0
+        and not _texto_simula(ev.get("valor"), ev.get("salida"))
+    )
+
+
 def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
     """Cierra en_revision→verificada solo con evidencia vigente; o registra fallo."""
     wf = proyecto / "workflow"
@@ -1231,6 +1442,7 @@ def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
     evidencias = load_json(wf / "evidencias.json", {"items": {}})
     items = evidencias.get("items") or {}
     eids = tareas[tarea].get("evidencia") or []
+    marca = _marca_integracion_real(tareas[tarea], estado)
     vigentes = []
     for e in eids:
         ev = items.get(e) or {}
@@ -1239,6 +1451,15 @@ def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
         if ev.get("origen") == "comando" and ev.get("exit_code") != 0:
             print(
                 f"{e} es comando sin exit 0 (exit={ev.get('exit_code')}). No cuenta.",
+                file=sys.stderr,
+            )
+            continue
+        if _texto_simula(ev.get("valor"), ev.get("salida")) and marca in (
+            "MANUAL_VERIFY_REQUIRED",
+            "integracion_real",
+        ):
+            print(
+                f"{e} habla de simulación; no verifica una marca de integración real.",
                 file=sys.stderr,
             )
             continue
@@ -1255,6 +1476,36 @@ def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
             file=sys.stderr,
         )
         return 1
+
+    # Tarea con comprobación: hace falta al menos una evidencia de comando en verde
+    if (tareas[tarea].get("comprobacion") or "").strip():
+        con_cmd = [
+            e
+            for e in vigentes
+            if (items.get(e) or {}).get("origen") == "comando"
+            and (items.get(e) or {}).get("exit_code") == 0
+        ]
+        if not con_cmd:
+            print(
+                "Esta tarea tiene comprobación de código: "
+                "verifica solo con evidenciar --origen comando --ejecutar en verde. "
+                "Origen manual no basta.",
+                file=sys.stderr,
+            )
+            return 1
+
+    # Hallazgo restaurante: integración real exige comando en verde, no nota simulada
+    if marca in ("MANUAL_VERIFY_REQUIRED", "integracion_real"):
+        reales = [e for e in vigentes if _evidencia_comando_real(items.get(e) or {})]
+        if not reales:
+            print(
+                f"Esta tarea exige integración real ({marca}). "
+                "Verifica solo con evidenciar --origen comando --ejecutar en verde. "
+                "Una simulación o nota libre no basta.",
+                file=sys.stderr,
+            )
+            return 1
+        vigentes = reales
 
     tareas[tarea]["estado"] = "verificada"
     tareas[tarea]["depurar_intentos"] = 0
@@ -1666,8 +1917,16 @@ def cmd_bloquear(proyecto: Path, tarea: str, motivo: str, marca: str) -> int:
     if prev == "verificada":
         print("No se bloquea una tarea ya verificada; usa impactar si cambió el requisito.")
         return 2
+    # Si el dueño bloquea tarjeta/pasarela sin marca, exigir verificación real
+    if not marca and re.search(
+        r"tarjeta|pasarela|stripe|pago real|cobro con",
+        motivo + " " + (tareas[tarea].get("titulo") or ""),
+        re.I,
+    ):
+        marca = "MANUAL_VERIFY_REQUIRED"
     tareas[tarea]["estado"] = "bloqueada"
     tareas[tarea]["bloqueo"] = bid
+    tareas[tarea]["motivo_bloqueo"] = motivo
     if marca in ("simulacion", "integracion_real", "MANUAL_VERIFY_REQUIRED"):
         tareas[tarea]["marca"] = marca
     estado.setdefault("bloqueos", []).append(
@@ -1693,6 +1952,7 @@ def cmd_bloquear(proyecto: Path, tarea: str, motivo: str, marca: str) -> int:
             ):
                 # R10: no bloquear automáticamente a todos — solo informar
                 pass
+    sincronizar_preparadas(wf, estado)
     estado["actualizado"] = now_iso()
     atomic_write_json(wf / "estado.json", estado)
     append_event(
@@ -1715,7 +1975,7 @@ def cmd_bloquear(proyecto: Path, tarea: str, motivo: str, marca: str) -> int:
         and tarea not in (t.get("depende_de") or [])
         and t.get("estado") not in ("bloqueada", "verificada")
     ]
-    ok, _ = run_validator(wf)
+    ok, raw = run_validator(wf)
     print(f"Bloqueada {tarea}: {motivo}")
     if marca:
         print(f"  Marca: {marca}")
@@ -1736,7 +1996,42 @@ def cmd_desbloquear(proyecto: Path, tarea: str, evidencia: str) -> int:
     if str(tareas[tarea].get("bloqueo") or "").startswith("dividida"):
         print("Esta tarea fue dividida; trabaja las hijas, no la desbloquees.")
         return 2
+
+    marca = _marca_integracion_real(tareas[tarea], estado)
     bid = tareas[tarea].get("bloqueo")
+
+    # Hallazgo restaurante: no desbloquear cobro/integración real con texto "simulación"
+    if marca in ("MANUAL_VERIFY_REQUIRED", "integracion_real"):
+        if not evidencia.startswith("EVID-"):
+            print(
+                f"Esta tarea exige integración real ({marca}). "
+                "Desbloquea solo con un id EVID-… vigente creado con "
+                "evidenciar --origen comando --ejecutar (prueba real en verde). "
+                "Una nota de simulación no vale.",
+                file=sys.stderr,
+            )
+            return 2
+        items = (load_json(wf / "evidencias.json", {"items": {}}) or {}).get("items") or {}
+        ev = items.get(evidencia) or {}
+        if not _evidencia_comando_real(ev):
+            print(
+                f"{evidencia} no es una prueba de comando en verde sin simulación. "
+                "No se desbloquea una marca de integración real así.",
+                file=sys.stderr,
+            )
+            return 2
+    elif _texto_simula(evidencia) and re.search(
+        r"tarjeta|pasarela|stripe|pago real|cobro",
+        (tareas[tarea].get("titulo") or "") + " " + (tareas[tarea].get("motivo_bloqueo") or ""),
+        re.I,
+    ):
+        print(
+            "No desbloquees cobro/tarjeta con una nota de simulación. "
+            "Usa marca MANUAL_VERIFY_REQUIRED y evidencia de comando real.",
+            file=sys.stderr,
+        )
+        return 2
+
     deps = tareas[tarea].get("depende_de") or []
     deps_ok = all((tareas.get(d) or {}).get("estado") == "verificada" for d in deps)
     nuevo = "preparada" if deps_ok or not deps else "pendiente"
@@ -1745,8 +2040,7 @@ def cmd_desbloquear(proyecto: Path, tarea: str, evidencia: str) -> int:
     estado["bloqueos"] = [
         b for b in (estado.get("bloqueos") or []) if b.get("id") != bid
     ]
-    if nuevo == "preparada":
-        estado["siguiente_preparada"] = tarea
+    sincronizar_preparadas(wf, estado)
     estado["actualizado"] = now_iso()
     atomic_write_json(wf / "estado.json", estado)
     append_event(
@@ -2010,15 +2304,27 @@ def cmd_decidir(
             return 2
     did = next_id("DEC", set(rel.get("nodos") or {}))
     estado_dec = "aceptada" if aceptar else "propuesta"
+    # --elegida "A"|"B" = id corto; si es texto largo, es la opción elegida (id=A)
+    eleg_raw = (elegida or "A").strip()
+    if re.fullmatch(r"[A-Za-z]", eleg_raw):
+        alt_id = eleg_raw.upper()
+        alt_texto = titulo.strip()
+    else:
+        alt_id = "A"
+        alt_texto = eleg_raw or titulo.strip()
     dec = {
         "id": did,
         "titulo": titulo.strip(),
-        "contexto": motivo.strip(),
+        "contexto": titulo.strip(),
         "alternativas": [
-            {"id": elegida.strip() or "A", "texto": titulo.strip(), "consecuencias": motivo.strip()}
+            {
+                "id": alt_id,
+                "texto": alt_texto,
+                "consecuencias": motivo.strip(),
+            }
         ],
         "estado": estado_dec,
-        "elegida": (elegida.strip() or "A") if aceptar else None,
+        "elegida": alt_id if aceptar else None,
         "motivo": motivo.strip(),
         "aprobado_por": aprobado_por.strip() or None,
         "apuntes": [],
@@ -2843,6 +3149,12 @@ def main(argv: list[str] | None = None) -> int:
     p_ini.add_argument("--proyecto", type=Path, required=True)
     p_ini.add_argument("--idea", required=True)
     p_ini.add_argument("--fuerza", action="store_true")
+    p_ini.add_argument(
+        "--modo",
+        choices=("completo", "rapido"),
+        default="completo",
+        help="completo=9 ASK; rapido=3 ASK + pistas de negocio",
+    )
 
     p_st = sub.add_parser("estado", help="Informe de estado + ruta")
     p_st.add_argument("--proyecto", type=Path, required=True)
@@ -3008,7 +3320,7 @@ def main(argv: list[str] | None = None) -> int:
 
     args = p.parse_args(argv)
     if args.cmd == "iniciar":
-        return cmd_iniciar(args.proyecto, args.idea, args.fuerza)
+        return cmd_iniciar(args.proyecto, args.idea, args.fuerza, modo=args.modo)
     if args.cmd == "estado":
         return cmd_estado(args.proyecto)
     if args.cmd == "continuar":
