@@ -9,6 +9,12 @@ Fallo grave: desbloquear/verificar tarjeta con simulación.
 
 Veredicto del probador: útil con huecos. Documental bien; promesa de pruebas honestas rota (evidencia texto libre; `siguiente_preparada`; `recuperar` worktree; `impactar` TASK/DEC).
 
+## Oleada E — e2e-v3-nivel-2 academia (192ec37 → e0c33d7)
+
+Formular/construir **4/5**. Pistas de privacidad sí, pero sin id; S1c (mismo script, otros args); stale sin reabrir tareas; sin `--sensible`.
+
+**Hecho y publicado:** ASK-10+ anotables; comando+subargs; stale→en_revision; `requisito --sensible`; cierre del padre dividido. Regresión 7/7 (`e0c33d7`).
+
 ## Oleada D — e2e-v3-nivel-1 lavandería (a8885a3)
 
 Formular **4/5**, construir **4/5**. Modo rápido, continuar→requisito, `--ejecutar`, huellas, impactar DEC: OK.  
