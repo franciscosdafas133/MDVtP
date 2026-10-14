@@ -1,9 +1,9 @@
 {
   "bateria": "regresion-B22",
   "version": "0.1.0-rc1",
-  "ts": "2026-10-14T20:35:51Z",
-  "passed": 6,
-  "total": 6,
+  "ts": "2026-10-14T21:38:08Z",
+  "passed": 7,
+  "total": 7,
   "veredicto": "ok",
   "casos": [
     {
@@ -41,6 +41,12 @@
       "ok": true,
       "exit": 0,
       "tail": "Archivos actualizados:\n  - workflow/operacion.md\n  - workflow/estado.json\nComprobaciones y pendientes:\n  - pendientes reales listados — no inventar que ya pasaron\nPunto de recuperación disponible:\n  (crear checkpoint si el alcance ya está comprobado)\nSiguiente paso y por qué:\n  Publicar solo con checklist y pendientes a la vista\n\n\n=== RECORRIDO: veredicto=ok TASK-10=verificada validador=OK ===\nResultado: /home/doomf/Documents/creación_método/tests/scenarios/producto-simple/ultimo-resultado.json\n"
+    },
+    {
+      "label": "hallazgos_bot",
+      "ok": true,
+      "exit": 0,
+      "tail": "OK no ejecuta texto suelto\nOK prueba en rojo no es vigente\nOK no verifica en rojo\nOK verifica solo con exit 0\nHALLAZGOS OK\n"
     }
   ]
 }

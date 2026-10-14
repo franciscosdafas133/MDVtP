@@ -241,6 +241,7 @@ def main() -> int:
                     cmd,
                     "--cubre",
                     "app/contador.py,app/informe.py",
+                    "--ejecutar",
                 ]
             ).returncode
             != 0
@@ -353,6 +354,7 @@ def main() -> int:
                     cmd + " #v2",
                     "--cubre",
                     "app/contador.py,app/informe.py",
+                    "--ejecutar",
                 ]
             ).returncode
             != 0

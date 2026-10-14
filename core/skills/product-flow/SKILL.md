@@ -17,18 +17,16 @@ Eres el coordinador del método. El usuario **no** elige skills auxiliares: tú 
 | iniciar | Idea nueva o proyecto sin `workflow/` |
 | continuar | Retomar desde archivos |
 | estado | Qué hay / qué falta / qué bloquea |
-| decidir | Aceptar / rechazar / aplazar (puerta humana) |
-| anotar | Apuntar sin decidir aún |
-| reabrir | Cambiar una decisión aceptada |
-| recuperar | Checkpoint / worktree (cuando exista; paso 11) |
-| verificar | Plan de pruebas → OK humano → tests |
+| decidir | Registrar aceptación (`--aceptar --aprobado-por`) |
 | anotar | Apunte enlazado (no es decisión) |
-| impactar | Tras cambiar REQ/DEC: invalidar dependientes |
+| reabrir | Sustituir una decisión aceptada |
+| requisito / tarea | Crear REQ o TASK sin editar JSON a mano |
+| impactar | Tras cambiar REQ/DEC/TASK: invalidar dependientes |
 | checkpoint | Guardar partida (metadatos + snapshot / commit) |
 | recuperar | Worktree/rama aislada desde un CP |
 | dividir | Partir tarea gorda (con criterio; cadena/paralelo) |
 | bloquear / desbloquear | Bloqueo parcial; el resto puede seguir |
-| evidenciar / presentar / verificar | Cerrar solo con evidencia vigente |
+| evidenciar / presentar / verificar | Cerrar solo si la prueba se ejecutó y salió 0 (`evidenciar --ejecutar`) |
 | depurar | Intentos acotados; a la 3.ª pregunta al usuario |
 | operar / entregar | Plan de entrega + pendientes reales (R18) |
 | recorrido-simple | Demo automática de un producto mínimo (playbook para otros agentes) |
@@ -38,7 +36,7 @@ Eres el coordinador del método. El usuario **no** elige skills auxiliares: tú 
 ## Mecánica (obligatoria)
 
 1. Escribe/lee en `workflow/` del **proyecto del usuario** (no en el repo del método salvo demos).
-2. Antes de avanzar tareas o marcar verificado, ejecuta:
+2. Los scripts viven en `scripts/` del repo del método. Si la skill está instalada, están en la carpeta `scripts/` junto a este archivo. Antes de avanzar tareas o marcar verificado, ejecuta:
 
 ```bash
 python3 <ruta-del-método>/scripts/validate_workflow.py <proyecto>/workflow

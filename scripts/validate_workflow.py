@@ -148,6 +148,16 @@ def validate_workflow(
             err("estado_evidencia", f"{eid}: estado inválido", str(evid_path))
         if ev.get("origen") not in vocab["versionado_evidencia"]["origen_permitido"]:
             err("origen_evidencia", f"{eid}: origen inválido", str(evid_path))
+        if (
+            ev.get("origen") == "comando"
+            and ev.get("estado") == "vigente"
+            and ev.get("exit_code") not in (None, 0)
+        ):
+            err(
+                "evidencia_invalida",
+                f"{eid}: vigente con exit {ev.get('exit_code')}",
+                str(evid_path),
+            )
         if huellas and ev.get("origen") == "hash_archivo" and ev.get("estado") == "vigente":
             for ruta in ev.get("cubre") or []:
                 if ruta in huellas and ev.get("valor") and huellas[ruta] != ev["valor"]:

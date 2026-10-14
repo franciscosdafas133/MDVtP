@@ -1,0 +1,6 @@
+{
+  "ts": "2026-10-12T21:05:48.832414+00:00",
+  "reason": "La frase «la app es para todo el mundo» es ambigua: no dice si son clientes, peluqueros o ambos. Propongo separar roles y dejar claro el valor de la idea.",
+  "proposal": "# Producto — Reservas de peluquería\n\n## Idea\n\nUna app para que las personas reserven cita en una peluquería del barrio, sin depender solo del WhatsApp o la llamada.\n\n## Quién la usa\n\nDos tipos de usuario:\n\n1. **Clientes** — ven horarios libres, reservan un corte y reciben un recordatorio.\n2. **Peluqueros / dueño del local** — publican disponibilidad y confirman o reorganizan citas.\n\n(Antes decía «para todo el mundo»; eso era demasiado amplio y no separaba roles.)\n\n## Qué hace (borrador)\n\n- Ver horarios libres.\n- Reservar un corte.\n- Recibir un recordatorio.\n- (Pendiente) Que el peluquero gestione su agenda.\n",
+  "source": "cursor-agent-host"
+}

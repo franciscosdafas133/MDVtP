@@ -1,0 +1,68 @@
+{"ts": "2026-10-12T17:32:18.357507+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T17:32:18.357964+00:00", "kind": "initialize", "client": {"name": "smoke", "version": "0"}, "capabilities": {"extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T17:32:18.358553+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T17:32:18.360395+00:00", "kind": "tools/call", "name": "abrir_documento"}
+{"ts": "2026-10-12T17:32:18.360752+00:00", "kind": "abrir_documento", "chars": 259}
+{"ts": "2026-10-12T17:32:18.361240+00:00", "kind": "tools/call", "name": "aceptar_propuesta"}
+{"ts": "2026-10-12T17:32:18.361758+00:00", "kind": "aceptar", "reason": "smoke", "chars": 7}
+{"ts": "2026-10-12T17:55:25.876377+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T17:55:25.877076+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T17:55:25.893172+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T17:55:59.353940+00:00", "kind": "tools/call", "name": "abrir_documento"}
+{"ts": "2026-10-12T17:55:59.354312+00:00", "kind": "abrir_documento", "chars": 259}
+{"ts": "2026-10-12T18:00:03.484736+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:00:03.485245+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:00:03.486609+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:03:09.420431+00:00", "kind": "tools/call", "name": "abrir_documento"}
+{"ts": "2026-10-12T18:03:09.420837+00:00", "kind": "abrir_documento", "chars": 259}
+{"ts": "2026-10-12T18:05:19.028118+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:05:19.028327+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:05:19.034166+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:05:19.122686+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:05:19.122971+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:05:19.127414+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:05:19.774064+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:05:19.774274+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:05:19.774941+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:05:34.643758+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:05:34.644033+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:05:34.644803+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:06:43.706836+00:00", "kind": "tools/call", "name": "abrir_documento"}
+{"ts": "2026-10-12T18:06:43.707322+00:00", "kind": "abrir_documento", "chars": 259}
+{"ts": "2026-10-12T18:10:23.732557+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:10:23.733065+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:10:23.734389+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:10:24.042845+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:10:24.043271+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:10:24.044583+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:11:23.041949+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:11:23.042477+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:11:23.043991+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:14:28.610674+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:14:28.611023+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:14:28.612527+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:14:29.630645+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:14:29.631076+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:14:29.632532+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:14:29.863907+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:14:29.864292+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:14:29.865564+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:14:30.175337+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:14:30.175744+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:14:30.176967+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:15:23.682342+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:15:23.682912+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:15:23.684458+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:15:23.973041+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:15:23.973401+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:15:23.974414+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:15:27.287902+00:00", "kind": "tools/call", "name": "abrir_documento"}
+{"ts": "2026-10-12T18:15:27.288287+00:00", "kind": "abrir_documento", "chars": 259}
+{"ts": "2026-10-12T18:15:59.537745+00:00", "kind": "tools/call", "name": "abrir_documento"}
+{"ts": "2026-10-12T18:15:59.538213+00:00", "kind": "abrir_documento", "chars": 259}
+{"ts": "2026-10-12T18:20:23.745201+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:20:23.745614+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:20:23.746731+00:00", "kind": "client_initialized"}
+{"ts": "2026-10-12T18:20:23.922207+00:00", "kind": "server_start", "root": "/home/doomf/Documents/creación_método/experimentos/I-01"}
+{"ts": "2026-10-12T18:20:23.922647+00:00", "kind": "initialize", "client": {"name": "cursor-vscode", "version": "1.0.0"}, "capabilities": {"elicitation": {"form": {}}, "roots": {"listChanged": false}, "extensions": {"io.modelcontextprotocol/ui": {"mimeTypes": ["text/html;profile=mcp-app"]}}}}
+{"ts": "2026-10-12T18:20:23.923856+00:00", "kind": "client_initialized"}

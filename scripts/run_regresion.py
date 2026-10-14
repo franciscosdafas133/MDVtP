@@ -37,6 +37,7 @@ def main() -> int:
         ("integracion_b20", [sys.executable, "scripts/run_integracion_b20.py"]),
         ("build_dist", [sys.executable, "scripts/install_metodo.py", "build-dist"]),
         ("recorrido_simple", [sys.executable, "scripts/product_flow.py", "recorrido-simple"]),
+        ("hallazgos_bot", [sys.executable, "scripts/run_hallazgos_bot.py"]),
     ]
     results = [run(label, cmd) for label, cmd in checks]
     passed = sum(1 for r in results if r["ok"])

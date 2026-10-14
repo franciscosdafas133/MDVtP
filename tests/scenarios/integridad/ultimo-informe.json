@@ -1,6 +1,6 @@
 {
   "bateria": "B17-integridad",
-  "ts": "2026-10-14T20:35:49Z",
+  "ts": "2026-10-14T21:38:04Z",
   "passed": 8,
   "total": 8,
   "veredicto": "ok",
@@ -15,13 +15,13 @@
       "caso": "estado_invalido",
       "ok": true,
       "esperado": "validador exit=1 y código esquema",
-      "detalle": "FALLA — 4 hallazgo(s) en /tmp/b17-estado-bt5212cl/workflow\n  [esquema] estado.json sin campo paquete_version (/tmp/b17-estado-bt5212cl/workflow/estado.json)\n  [esquema] estado.json sin campo actualizado (/tmp/b17-estado-bt5212cl/workflow/estado.json)\n  [esquema] estado.json sin campo actividad (/tmp/b17-estado-bt5212cl/workflow/estado.json)\n  [esquema] estado.json sin campo tareas (/tmp/b17-estado-bt5212cl/workflow/estado.json)"
+      "detalle": "FALLA — 4 hallazgo(s) en /tmp/b17-estado-k1mf1fu1/workflow\n  [esquema] estado.json sin campo paquete_version (/tmp/b17-estado-k1mf1fu1/workflow/estado.json)\n  [esquema] estado.json sin campo actualizado (/tmp/b17-estado-k1mf1fu1/workflow/estado.json)\n  [esquema] estado.json sin campo actividad (/tmp/b17-estado-k1mf1fu1/workflow/estado.json)\n  [esquema] estado.json sin campo tareas (/tmp/b17-estado-k1mf1fu1/workflow/estado.json)"
     },
     {
       "caso": "escritura_interrumpida",
       "ok": true,
       "esperado": "JSON truncado → validador falla (detecta incoherencia)",
-      "detalle": "FALLA — 1 hallazgo(s) en /tmp/b17-tmp-2t4sf99b/workflow\n  [json_invalido] Unterminated string starting at: line 1 column 31 (char 30) (workflow)"
+      "detalle": "FALLA — 1 hallazgo(s) en /tmp/b17-tmp-p1ge9618/workflow\n  [json_invalido] Unterminated string starting at: line 1 column 31 (char 30) (workflow)"
     },
     {
       "caso": "dirty_checkpoint",
@@ -33,7 +33,7 @@
       "caso": "recuperacion_aislada",
       "ok": true,
       "esperado": "demo-b11: worktree/rama desde CP sin perder trabajo posterior",
-      "detalle": "descubrimiento inicial\n  Modo: git\n  Commit: c326305463ba0de40e994513cc2e053965ff6e07\n  Snapshot: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion/workflow/checkpoints/CP-01/snapshot\n  Alcance comprobado: Solo creación de workflow y validador OK; sin pruebas de producto\n  Recuperar con: product_flow.py recuperar --proyecto … --checkpoint CP-01\n\n=== DEMO B11: recuperar (worktree) ===\n\nWorktree aislado en: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion"
+      "detalle": "descubrimiento inicial\n  Modo: git\n  Commit: 074f84e305fbcdb40562afd5a18e189eaabb2e89\n  Snapshot: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion/workflow/checkpoints/CP-01/snapshot\n  Alcance comprobado: Solo creación de workflow y validador OK; sin pruebas de producto\n  Recuperar con: product_flow.py recuperar --proyecto … --checkpoint CP-01\n\n=== DEMO B11: recuperar (worktree) ===\n\nWorktree aislado en: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion"
     },
     {
       "caso": "escritura_atomica_limpia",

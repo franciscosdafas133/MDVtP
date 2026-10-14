@@ -159,6 +159,33 @@ def git_uncommitted(proyecto: Path) -> list[str]:
     return [ln[3:] for ln in r.stdout.splitlines() if ln.strip()]
 
 
+def sincronizar_preparadas(wf: Path, estado: dict) -> None:
+    """Promueve pendientes cuyas deps ya están verificadas y arregla siguiente_preparada."""
+    tareas = estado.setdefault("tareas", {})
+    for tid, t in list(tareas.items()):
+        if t.get("estado") != "pendiente":
+            continue
+        deps = t.get("depende_de") or []
+        if not deps:
+            continue
+        if all((tareas.get(d) or {}).get("estado") == "verificada" for d in deps):
+            t["estado"] = "preparada"
+            append_event(
+                wf,
+                {
+                    "ts": now_iso(),
+                    "tipo": "tarea.transicion",
+                    "actor": "validador",
+                    "sujeto": tid,
+                    "de": "pendiente",
+                    "a": "preparada",
+                    "detalle": {"accion": "deps_verificadas"},
+                },
+            )
+    prep = [i for i, t in tareas.items() if t.get("estado") == "preparada"]
+    estado["siguiente_preparada"] = prep[0] if prep else None
+
+
 def dependents(relaciones: dict, changed: str) -> list[str]:
     """Nodos que dependen del cambiado (aristas que apuntan a él o salen implementando)."""
     out: set[str] = set()
@@ -618,6 +645,18 @@ def cmd_impactar(proyecto: Path, cambiado: str, motivo: str) -> int:
 
     deps = dependents(rel, cambiado)
     estado = load_estado(wf)
+    if cambiado.startswith("TASK-") and cambiado not in deps:
+        deps.append(cambiado)
+    # Transitivo: quien depende (depende_de) de una tarea ya afectada
+    crecio = True
+    while crecio:
+        crecio = False
+        for tid, tarea in (estado.get("tareas") or {}).items():
+            if tid in deps:
+                continue
+            if any(d in deps for d in (tarea.get("depende_de") or [])):
+                deps.append(tid)
+                crecio = True
     evidencias = load_json(wf / "evidencias.json", {"items": {}})
     items_ev = evidencias.setdefault("items", {})
     afectados: list[str] = []
@@ -684,6 +723,19 @@ def cmd_impactar(proyecto: Path, cambiado: str, motivo: str) -> int:
                     },
                 )
 
+    dec_dir = wf / "decisiones"
+    if dec_dir.is_dir():
+        for path in sorted(dec_dir.glob("DEC-*.json")):
+            dec = load_json(path, {})
+            enlaces = dec.get("enlaces") or []
+            if cambiado in enlaces or any(x in deps for x in enlaces):
+                if dec.get("estado") == "aceptada" and not dec.get("requiere_revision"):
+                    dec["requiere_revision"] = True
+                    dec["motivo_revision"] = f"Cambio en {cambiado}: {motivo}"
+                    atomic_write_json(path, dec)
+                    afectados.append(f"{dec.get('id')}: aceptada, marcada para reabrir")
+
+    sincronizar_preparadas(wf, estado)
     estado["actualizado"] = now_iso()
     atomic_write_json(wf / "estado.json", estado)
     atomic_write_json(wf / "evidencias.json", evidencias)
@@ -959,9 +1011,11 @@ def cmd_recuperar(
             capture_output=True,
             check=False,
         )
+        # Un solo comando desde la raíz git. -B evita el checkout roto
+        # ("unknown switch C") que aparecía al añadir un worktree a una rama ya creada.
+        raiz = root or proyecto
         r = subprocess.run(
-            ["git", "worktree", "add", str(dest), branch],
-            cwd=proyecto,
+            ["git", "-C", str(raiz), "worktree", "add", "-B", branch, str(dest), commit],
             capture_output=True,
             text=True,
             check=False,
@@ -999,8 +1053,13 @@ def cmd_evidenciar(
     origen: str,
     valor: str,
     cubre: str,
+    ejecutar: bool = False,
 ) -> int:
-    """Registra EVID vigente y la enlaza a la tarea (R14)."""
+    """Registra EVID y la enlaza a la tarea (R14).
+
+    Si origen es comando, hay que --ejecutar: el método corre la prueba y guarda
+    el exit code. Exit distinto de 0 no queda vigente y no sirve para verificar.
+    """
     wf = proyecto / "workflow"
     if not (wf / "estado.json").is_file():
         print("No hay workflow/.", file=sys.stderr)
@@ -1014,6 +1073,33 @@ def cmd_evidenciar(
         print("origen debe ser commit|hash_archivo|comando|manual", file=sys.stderr)
         return 2
 
+    exit_code = None
+    salida = None
+    estado_ev = "vigente"
+    if origen == "comando":
+        if not ejecutar:
+            print(
+                "Origen comando exige --ejecutar. "
+                "El método corre la prueba; un texto no cuenta como evidencia.",
+                file=sys.stderr,
+            )
+            return 2
+        r = subprocess.run(
+            valor,
+            cwd=proyecto,
+            shell=True,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        exit_code = r.returncode
+        salida = ((r.stdout or "") + (r.stderr or ""))[-800:]
+        if exit_code != 0:
+            estado_ev = "bloqueada"
+            print(f"Prueba FALLÓ (exit {exit_code}). No queda evidencia vigente.", file=sys.stderr)
+            if salida.strip():
+                print(salida[-400:], file=sys.stderr)
+
     evidencias = load_json(wf / "evidencias.json", {"contrato_version": "0.1.0", "items": {}})
     rel = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
     existing = set(evidencias.get("items") or {}) | set(rel.get("nodos") or {})
@@ -1021,13 +1107,15 @@ def cmd_evidenciar(
     items = evidencias.setdefault("items", {})
     items[eid] = {
         "id": eid,
-        "estado": "vigente",
+        "estado": estado_ev,
         "origen": origen,
         "valor": valor,
         "cubre": [c.strip() for c in cubre.split(",") if c.strip()],
         "registrado": now_iso(),
         "motivo_stale": None,
         "tarea": tarea,
+        "exit_code": exit_code,
+        "salida": salida,
     }
     tareas[tarea].setdefault("evidencia", []).append(eid)
     rel.setdefault("nodos", {})[eid] = {"tipo": "EVID"}
@@ -1051,8 +1139,10 @@ def cmd_evidenciar(
         },
     )
     ok, _ = run_validator(wf)
-    print(f"Evidencia {eid} → {tarea} [{origen}] {valor}")
+    print(f"Evidencia {eid} → {tarea} [{origen}] {estado_ev} exit={exit_code}")
     print(f"Validador: {'OK' if ok else 'FALLA'}")
+    if estado_ev != "vigente":
+        return 1
     return 0 if ok else 1
 
 
@@ -1084,6 +1174,7 @@ def cmd_presentar(proyecto: Path, tarea: str) -> int:
         )
         prev = "en_curso"
     tareas[tarea]["estado"] = "en_revision"
+    sincronizar_preparadas(wf, estado)
     estado["actualizado"] = now_iso()
     atomic_write_json(wf / "estado.json", estado)
     append_event(
@@ -1140,7 +1231,18 @@ def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
     evidencias = load_json(wf / "evidencias.json", {"items": {}})
     items = evidencias.get("items") or {}
     eids = tareas[tarea].get("evidencia") or []
-    vigentes = [e for e in eids if (items.get(e) or {}).get("estado") == "vigente"]
+    vigentes = []
+    for e in eids:
+        ev = items.get(e) or {}
+        if ev.get("estado") != "vigente":
+            continue
+        if ev.get("origen") == "comando" and ev.get("exit_code") != 0:
+            print(
+                f"{e} es comando sin exit 0 (exit={ev.get('exit_code')}). No cuenta.",
+                file=sys.stderr,
+            )
+            continue
+        vigentes.append(e)
     omitidas = [
         e
         for e in eids
@@ -1156,6 +1258,7 @@ def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
 
     tareas[tarea]["estado"] = "verificada"
     tareas[tarea]["depurar_intentos"] = 0
+    sincronizar_preparadas(wf, estado)
     estado["actualizado"] = now_iso()
     atomic_write_json(wf / "estado.json", estado)
     append_event(
@@ -1171,11 +1274,29 @@ def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
         },
     )
     ok, raw = run_validator(wf)
-    print(f"Verificada {tarea} con {vigentes or omitidas}")
-    print(f"Validador: {'OK' if ok else 'FALLA'}")
     if not ok:
+        tareas[tarea]["estado"] = "en_revision"
+        sincronizar_preparadas(wf, estado)
+        estado["actualizado"] = now_iso()
+        atomic_write_json(wf / "estado.json", estado)
+        append_event(
+            wf,
+            {
+                "ts": now_iso(),
+                "tipo": "tarea.transicion",
+                "actor": "validador",
+                "sujeto": tarea,
+                "de": "verificada",
+                "a": "en_revision",
+                "detalle": {"accion": "verificar_revertida", "validador": "FALLA"},
+            },
+        )
+        print(f"NO verificada {tarea}: el validador falló y se deshizo el cierre.")
         print(raw)
-    return 0 if ok else 1
+        return 1
+    print(f"Verificada {tarea} con {vigentes or omitidas}")
+    print("Validador: OK")
+    return 0
 
 
 def cmd_depurar(
@@ -1483,8 +1604,7 @@ def cmd_dividir(
                     "detalle": {},
                 },
             )
-    if preparadas:
-        estado["siguiente_preparada"] = preparadas[0]
+    sincronizar_preparadas(wf, estado)
 
     estado["actualizado"] = now_iso()
     atomic_write_json(wf / "estado.json", estado)
@@ -1766,6 +1886,230 @@ def cmd_operar(
     return 0
 
 
+def _wf_ready(proyecto: Path) -> Path | None:
+    wf = proyecto / "workflow"
+    if not (wf / "estado.json").is_file():
+        print("No hay workflow/. Ejecuta iniciar primero.", file=sys.stderr)
+        return None
+    return wf
+
+
+def cmd_requisito(proyecto: Path, titulo: str, texto: str) -> int:
+    wf = _wf_ready(proyecto)
+    if not wf:
+        return 2
+    rel = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
+    rid = next_id("REQ", set(rel.get("nodos") or {}))
+    rel.setdefault("nodos", {})[rid] = {"tipo": "REQ", "archivo": "requisitos.md"}
+    atomic_write_json(wf / "relaciones.json", rel)
+    path = wf / "requisitos.md"
+    extra = f"\n\n## {rid}\n\n**{titulo.strip()}**\n\n{texto.strip()}\n"
+    with path.open("a", encoding="utf-8") as f:
+        f.write(extra)
+    print(f"Requisito {rid}: {titulo.strip()}")
+    return 0
+
+
+def cmd_tarea(
+    proyecto: Path,
+    titulo: str,
+    comprobacion: str,
+    enlaces: str,
+    depende: str,
+) -> int:
+    wf = _wf_ready(proyecto)
+    if not wf:
+        return 2
+    estado = load_estado(wf)
+    rel = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
+    links = [x.strip() for x in enlaces.split(",") if x.strip()]
+    deps = [x.strip() for x in depende.split(",") if x.strip()]
+    nodos = rel.setdefault("nodos", {})
+    for link in links + deps:
+        if link not in nodos and link not in (estado.get("tareas") or {}):
+            print(f"{link} no existe. Crea el requisito o la tarea antes.", file=sys.stderr)
+            return 2
+    tid = next_id("TASK", set(nodos) | set(estado.get("tareas") or {}))
+    nodos[tid] = {"tipo": "TASK"}
+    for link in links:
+        rel.setdefault("aristas", []).append({"de": tid, "tipo": "implementa", "a": link})
+    tareas = estado.setdefault("tareas", {})
+    tareas[tid] = {
+        "id": tid,
+        "titulo": titulo.strip(),
+        "estado": "pendiente",
+        "depende_de": deps,
+        "enlaces": links,
+        "evidencia": [],
+        "comprobacion": comprobacion.strip(),
+        "bloqueo": None,
+    }
+    append_event(
+        wf,
+        {
+            "ts": now_iso(),
+            "tipo": "tarea.transicion",
+            "actor": "agente",
+            "sujeto": tid,
+            "de": None,
+            "a": "pendiente",
+            "detalle": {"accion": "nueva_tarea"},
+        },
+    )
+    lista = not deps or all(
+        (tareas.get(d) or {}).get("estado") == "verificada" for d in deps
+    )
+    if lista:
+        tareas[tid]["estado"] = "preparada"
+        append_event(
+            wf,
+            {
+                "ts": now_iso(),
+                "tipo": "tarea.transicion",
+                "actor": "agente",
+                "sujeto": tid,
+                "de": "pendiente",
+                "a": "preparada",
+                "detalle": {},
+            },
+        )
+    sincronizar_preparadas(wf, estado)
+    estado["actualizado"] = now_iso()
+    atomic_write_json(wf / "relaciones.json", rel)
+    atomic_write_json(wf / "estado.json", estado)
+    ok, raw = run_validator(wf)
+    print(f"Tarea {tid} ({tareas[tid]['estado']}): {titulo.strip()}")
+    print(f"Validador: {'OK' if ok else 'FALLA'}")
+    if not ok:
+        print(raw)
+        return 1
+    return 0
+
+
+def cmd_decidir(
+    proyecto: Path,
+    titulo: str,
+    elegida: str,
+    motivo: str,
+    aprobado_por: str,
+    enlaces: str,
+    aceptar: bool,
+) -> int:
+    """Registra una decisión. Aceptar exige --aprobado-por (la puerta queda escrita)."""
+    wf = _wf_ready(proyecto)
+    if not wf:
+        return 2
+    if aceptar and not aprobado_por.strip():
+        print("Aceptar exige --aprobado-por (quién tomó la puerta).", file=sys.stderr)
+        return 2
+    rel = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
+    links = [x.strip() for x in enlaces.split(",") if x.strip()]
+    for link in links:
+        if link not in (rel.get("nodos") or {}):
+            print(f"Enlace inexistente: {link}", file=sys.stderr)
+            return 2
+    did = next_id("DEC", set(rel.get("nodos") or {}))
+    estado_dec = "aceptada" if aceptar else "propuesta"
+    dec = {
+        "id": did,
+        "titulo": titulo.strip(),
+        "contexto": motivo.strip(),
+        "alternativas": [
+            {"id": elegida.strip() or "A", "texto": titulo.strip(), "consecuencias": motivo.strip()}
+        ],
+        "estado": estado_dec,
+        "elegida": (elegida.strip() or "A") if aceptar else None,
+        "motivo": motivo.strip(),
+        "aprobado_por": aprobado_por.strip() or None,
+        "apuntes": [],
+        "enlaces": links,
+        "sustituye": None,
+        "version": 1,
+    }
+    (wf / "decisiones").mkdir(parents=True, exist_ok=True)
+    atomic_write_json(wf / "decisiones" / f"{did}.json", dec)
+    rel.setdefault("nodos", {})[did] = {"tipo": "DEC", "archivo": f"decisiones/{did}.json"}
+    atomic_write_json(wf / "relaciones.json", rel)
+    append_event(
+        wf,
+        {
+            "ts": now_iso(),
+            "tipo": "decision.transicion",
+            "actor": aprobado_por.strip() or "agente",
+            "sujeto": did,
+            "de": "propuesta" if aceptar else None,
+            "a": estado_dec,
+            "detalle": {"motivo": motivo.strip()},
+        },
+    )
+    ok, raw = run_validator(wf)
+    print(f"Decisión {did} {estado_dec}: {titulo.strip()}")
+    print(f"Validador: {'OK' if ok else 'FALLA'}")
+    if not ok:
+        print(raw)
+        return 1
+    return 0
+
+
+def cmd_reabrir(proyecto: Path, decision: str, motivo: str, aprobado_por: str) -> int:
+    wf = _wf_ready(proyecto)
+    if not wf:
+        return 2
+    if not aprobado_por.strip():
+        print("Reabrir exige --aprobado-por.", file=sys.stderr)
+        return 2
+    path = wf / "decisiones" / f"{decision}.json"
+    if not path.is_file():
+        print(f"No existe {path}", file=sys.stderr)
+        return 2
+    vieja = load_json(path, {})
+    if vieja.get("estado") != "aceptada":
+        print(f"{decision} está {vieja.get('estado')}; solo se reabre una aceptada.", file=sys.stderr)
+        return 2
+    rel = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
+    nid = next_id("DEC", set(rel.get("nodos") or {}))
+    nueva = {
+        "id": nid,
+        "titulo": vieja.get("titulo") or decision,
+        "contexto": motivo.strip(),
+        "alternativas": vieja.get("alternativas") or [],
+        "estado": "propuesta",
+        "elegida": None,
+        "motivo": motivo.strip(),
+        "aprobado_por": aprobado_por.strip(),
+        "apuntes": [],
+        "enlaces": vieja.get("enlaces") or [],
+        "sustituye": decision,
+        "version": int(vieja.get("version") or 1) + 1,
+    }
+    vieja["estado"] = "sustituida"
+    vieja["sustituye"] = nid
+    atomic_write_json(path, vieja)
+    atomic_write_json(wf / "decisiones" / f"{nid}.json", nueva)
+    rel.setdefault("nodos", {})[nid] = {"tipo": "DEC", "archivo": f"decisiones/{nid}.json"}
+    rel.setdefault("aristas", []).append({"de": nid, "tipo": "sustituye", "a": decision})
+    atomic_write_json(wf / "relaciones.json", rel)
+    append_event(
+        wf,
+        {
+            "ts": now_iso(),
+            "tipo": "decision.transicion",
+            "actor": aprobado_por.strip(),
+            "sujeto": decision,
+            "de": "aceptada",
+            "a": "sustituida",
+            "detalle": {"por": nid, "motivo": motivo.strip()},
+        },
+    )
+    ok, raw = run_validator(wf)
+    print(f"{decision} sustituida por {nid} (propuesta). Motivo: {motivo.strip()}")
+    print(f"Validador: {'OK' if ok else 'FALLA'}")
+    if not ok:
+        print(raw)
+        return 1
+    return 0
+
+
 def cmd_recorrido_simple() -> int:
     """Recorrido automático de un producto mínimo con el método (semilla B18).
 
@@ -1873,7 +2217,9 @@ def cmd_recorrido_simple() -> int:
 
     print("\n=== RECORRIDO: evidenciar → presentar → verificar ===\n")
     cmd = f"bash {app / 'comprobar.sh'}"
-    if cmd_evidenciar(demo, "TASK-10", "comando", cmd, "app/contador.py,app/comprobar.sh") != 0:
+    if cmd_evidenciar(
+        demo, "TASK-10", "comando", cmd, "app/contador.py,app/comprobar.sh", ejecutar=True
+    ) != 0:
         return 1
     if cmd_presentar(demo, "TASK-10") != 0:
         return 1
@@ -2041,8 +2387,9 @@ def cmd_demo_b13() -> int:
             demo,
             "TASK-02",
             "comando",
-            "pytest -q tests/test_peluqueros.py",
+            "python3 -c \"print('ok')\"",
             "src/peluqueros.py",
+            ejecutar=True,
         )
         != 0
     ):
@@ -2553,6 +2900,38 @@ def main(argv: list[str] | None = None) -> int:
     p_ev.add_argument("--origen", required=True, help="commit|hash_archivo|comando|manual")
     p_ev.add_argument("--valor", required=True)
     p_ev.add_argument("--cubre", default="", help="rutas o ids separados por coma")
+    p_ev.add_argument(
+        "--ejecutar",
+        action="store_true",
+        help="Obligatorio si origen=comando: corre la prueba y guarda el exit",
+    )
+
+    p_rq = sub.add_parser("requisito", help="Crear un REQ en el workflow")
+    p_rq.add_argument("--proyecto", type=Path, required=True)
+    p_rq.add_argument("--titulo", required=True)
+    p_rq.add_argument("--texto", required=True)
+
+    p_ta = sub.add_parser("tarea", help="Crear una TASK (pendiente o preparada)")
+    p_ta.add_argument("--proyecto", type=Path, required=True)
+    p_ta.add_argument("--titulo", required=True)
+    p_ta.add_argument("--comprobacion", required=True)
+    p_ta.add_argument("--enlaces", default="", help="REQ/OBJ separados por coma")
+    p_ta.add_argument("--depende", default="", help="TASK separados por coma")
+
+    p_dc = sub.add_parser("decidir", help="Registrar una decisión (aceptar exige --aprobado-por)")
+    p_dc.add_argument("--proyecto", type=Path, required=True)
+    p_dc.add_argument("--titulo", required=True)
+    p_dc.add_argument("--elegida", default="A")
+    p_dc.add_argument("--motivo", required=True)
+    p_dc.add_argument("--aprobado-por", default="")
+    p_dc.add_argument("--enlaces", default="")
+    p_dc.add_argument("--aceptar", action="store_true")
+
+    p_ra = sub.add_parser("reabrir", help="Sustituir una decisión aceptada por una propuesta nueva")
+    p_ra.add_argument("--proyecto", type=Path, required=True)
+    p_ra.add_argument("--decision", required=True)
+    p_ra.add_argument("--motivo", required=True)
+    p_ra.add_argument("--aprobado-por", required=True)
 
     p_pr = sub.add_parser("presentar", help="Pasar tarea a en_revision")
     p_pr.add_argument("--proyecto", type=Path, required=True)
@@ -2655,7 +3034,32 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.cmd == "evidenciar":
         return cmd_evidenciar(
-            args.proyecto, args.tarea, args.origen, args.valor, args.cubre
+            args.proyecto,
+            args.tarea,
+            args.origen,
+            args.valor,
+            args.cubre,
+            ejecutar=args.ejecutar,
+        )
+    if args.cmd == "requisito":
+        return cmd_requisito(args.proyecto, args.titulo, args.texto)
+    if args.cmd == "tarea":
+        return cmd_tarea(
+            args.proyecto, args.titulo, args.comprobacion, args.enlaces, args.depende
+        )
+    if args.cmd == "decidir":
+        return cmd_decidir(
+            args.proyecto,
+            args.titulo,
+            args.elegida,
+            args.motivo,
+            args.aprobado_por,
+            args.enlaces,
+            args.aceptar,
+        )
+    if args.cmd == "reabrir":
+        return cmd_reabrir(
+            args.proyecto, args.decision, args.motivo, args.aprobado_por
         )
     if args.cmd == "presentar":
         return cmd_presentar(args.proyecto, args.tarea)
