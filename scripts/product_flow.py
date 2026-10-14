@@ -115,17 +115,24 @@ def areas_para_iniciar(modo: str) -> list[tuple[str, str, str]]:
     return list(AREAS)
 
 
-def pistas_para_idea(idea: str) -> list[str]:
-    out: list[str] = []
+def pistas_para_idea(idea: str) -> list[tuple[str, str, str]]:
+    """Preguntas de negocio como ASK-10+ (anotables; continuar las exige)."""
+    textos: list[str] = []
     for pat, preguntas in PISTAS_NEGOCIO:
         if pat.search(idea or ""):
-            out.extend(preguntas)
-    # Privacidad genérica si hay roles o datos personales
-    if re.search(r"cliente|paciente|empleado|recepci|m[eé]dic", idea or "", re.I):
-        if not any("sensib" in p for p in out):
-            out.append(
+            textos.extend(preguntas)
+    if re.search(
+        r"cliente|paciente|empleado|recepci|m[eé]dic|profesor|academia",
+        idea or "",
+        re.I,
+    ):
+        if not any("sensib" in p for p in textos):
+            textos.append(
                 "¿Hay datos que una persona no deba ver aunque use el mismo sistema?"
             )
+    out: list[tuple[str, str, str]] = []
+    for i, preg in enumerate(textos):
+        out.append((f"ASK-{10 + i:02d}", "Pista de negocio", preg))
     return out
 
 
@@ -300,12 +307,13 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool, modo: str = "completo")
     idea_corta = idea.strip().split("\n")[0][:120]
     areas = areas_para_iniciar(modo)
     pistas = pistas_para_idea(idea)
+    todas_ask = list(areas) + list(pistas)
     preguntas_md = "\n".join(
         f"- **{aid}** ({area}): {preg}" for aid, area, preg in areas
     )
     if pistas:
         preguntas_md += "\n\n### Preguntas de este tipo de negocio\n\n" + "\n".join(
-            f"- {p}" for p in pistas
+            f"- **{aid}** ({area}): {preg}" for aid, area, preg in pistas
         )
 
     (wf / "decisiones").mkdir(parents=True)
@@ -383,11 +391,11 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool, modo: str = "completo")
             "archivo": f"entregas/{entrega}/tareas.md",
         },
     }
-    for aid, area, _ in areas:
+    for aid, area, _ in todas_ask:
         nodos[aid] = {"tipo": "ASK", "archivo": "descubrimiento.md", "area": area}
 
     aristas = [{"de": "TASK-01", "tipo": "implementa", "a": "OBJ-01"}]
-    for aid, _, _ in areas:
+    for aid, _, _ in todas_ask:
         aristas.append({"de": aid, "tipo": "comenta", "a": "OBJ-01"})
 
     atomic_write_json(
@@ -433,7 +441,7 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool, modo: str = "completo")
         "idea_inicial": idea_corta,
         "entrega_actual": entrega,
         "modo_descubrimiento": modo,
-        "asks_activas": [a[0] for a in areas],
+        "asks_activas": [a[0] for a in todas_ask],
     }
     atomic_write_json(wf / "estado.json", estado)
     (wf / "eventos.jsonl").write_text("", encoding="utf-8")
@@ -488,7 +496,7 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool, modo: str = "completo")
     prioritarias = [a[0] for a in areas[:3]]
     propuesto = [f"{aid}: {preg}" for aid, _, preg in areas if aid in prioritarias]
     if pistas:
-        propuesto.append("Preguntas de este tipo de negocio (ver descubrimiento.md)")
+        propuesto.extend(f"{aid}: {preg}" for aid, _, preg in pistas)
 
     print(
         informe(
@@ -503,16 +511,17 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool, modo: str = "completo")
                 *propuesto,
             ],
             rechazado=[],
-            dudas=[f"{aid}: {preg}" for aid, _, preg in areas],
+            dudas=[f"{aid}: {preg}" for aid, _, preg in todas_ask],
             archivos=files_written,
             comprobaciones=[
                 "Validador: " + ("OK" if ok else "FALLA — ver JSON"),
-                "Puerta: responde o marca 'no aplica' en las ASK activas",
+                "Puerta: responde o marca 'no aplica' en las ASK activas (incl. pistas)",
             ],
             checkpoint="(aún no — se crea al cerrar actividad comprobada; paso 11)",
             siguiente=(
-                f"Responder {', '.join(prioritarias)} (o 'no aplica'). "
-                "Luego: product_flow.py requisito … y continuar."
+                f"Responder {', '.join(prioritarias)} "
+                + (f"y pistas {', '.join(a[0] for a in pistas)}" if pistas else "")
+                + ". Luego: product_flow.py requisito … y continuar."
             ),
         )
     )
@@ -642,7 +651,10 @@ def cmd_continuar(proyecto: Path) -> int:
 
     stale = marcar_evidencias_huella_stale(proyecto, wf)
     if stale:
-        print(f"=== Evidencias pasadas a stale (código cambió): {', '.join(stale)} ===")
+        print(
+            f"=== Evidencias a stale y tareas a en_revision "
+            f"(código cambió): {', '.join(stale)} ==="
+        )
 
     print("=== Contraste al retomar ===")
     ok, raw = run_validator(wf)
@@ -1224,35 +1236,30 @@ def _comando_trivial(cmd: str) -> bool:
     return False
 
 
-def _tokens_comprobacion(comprobacion: str) -> list[str]:
-    """Archivos/scripts que la comprobación nombra (para cruzar con --valor)."""
-    toks = re.findall(r"(?:\./)?[\w./-]+\.(?:sh|py)\b", comprobacion or "")
-    out: list[str] = []
-    for t in toks:
-        out.append(t)
-        out.append(Path(t).name)
-    return list(dict.fromkeys(out))
+def _comando_esperado(comprobacion: str) -> str | None:
+    """Comando completo (script + args) esperado desde --comprobacion."""
+    c = (comprobacion or "").strip()
+    c = re.split(r"[|…]|\bsale\b|\bexit\b|\bimprime\b", c, maxsplit=1)[0].strip()
+    m = re.match(
+        r"^((?:bash|sh|python3?)\s+\S+(?:\s+\S+)*|\./\S+(?:\s+\S+)*|\S+\.(?:sh|py)(?:\s+\S+)*)",
+        c,
+    )
+    return " ".join(m.group(1).split()) if m else None
 
 
 def _comando_alineado_a_comprobacion(cmd: str, comprobacion: str) -> bool:
-    tokens = _tokens_comprobacion(comprobacion)
-    if not tokens:
+    esp = _comando_esperado(comprobacion)
+    if not esp:
         return True
-    return any(t in cmd for t in tokens)
+    return " ".join((cmd or "").split()) == esp
 
 
 def _comando_desde_comprobacion(comprobacion: str) -> str | None:
-    """Si la comprobación es casi un comando, úsalo cuando --valor va vacío."""
-    c = (comprobacion or "").strip()
-    m = re.match(
-        r"^((?:bash|sh|python3?)\s+\S+\.(?:sh|py)|\./\S+\.(?:sh|py)|\S+\.(?:sh|py))\b",
-        c,
-    )
-    return m.group(1) if m else None
+    return _comando_esperado(comprobacion)
 
 
 def marcar_evidencias_huella_stale(proyecto: Path, wf: Path) -> list[str]:
-    """Si un archivo de --cubre cambió, pasa la EVID a stale (no solo avisar)."""
+    """Si un archivo de --cubre cambió: EVID→stale y TASK verificada→en_revision."""
     evidencias = load_json(wf / "evidencias.json", {"items": {}})
     items = evidencias.get("items") or {}
     cambiadas: list[str] = []
@@ -1280,9 +1287,75 @@ def marcar_evidencias_huella_stale(proyecto: Path, wf: Path) -> list[str]:
                     },
                 )
                 break
-    if cambiadas:
-        atomic_write_json(wf / "evidencias.json", evidencias)
+    if not cambiadas:
+        return []
+    atomic_write_json(wf / "evidencias.json", evidencias)
+
+    estado = load_estado(wf)
+    tareas = estado.get("tareas") or {}
+    for tid, tarea in tareas.items():
+        if tarea.get("estado") != "verificada":
+            continue
+        eids = set(tarea.get("evidencia") or [])
+        if not eids.intersection(cambiadas):
+            continue
+        tarea["estado"] = "en_revision"
+        append_event(
+            wf,
+            {
+                "ts": now_iso(),
+                "tipo": "tarea.transicion",
+                "actor": "validador",
+                "sujeto": tid,
+                "de": "verificada",
+                "a": "en_revision",
+                "detalle": {"motivo": "evidencia_stale_por_huella", "evidencias": cambiadas},
+            },
+        )
+    sincronizar_preparadas(wf, estado)
+    estado["actualizado"] = now_iso()
+    atomic_write_json(wf / "estado.json", estado)
     return cambiadas
+
+
+def cerrar_padres_divididos(wf: Path, estado: dict) -> list[str]:
+    """Si todas las hijas de una división están verificadas, cierra el padre."""
+    tareas = estado.get("tareas") or {}
+    cerrados: list[str] = []
+    for tid, t in list(tareas.items()):
+        if t.get("estado") != "bloqueada":
+            continue
+        bloq = str(t.get("bloqueo") or "")
+        if not bloq.startswith("dividida"):
+            continue
+        hijas = [i for i, x in tareas.items() if x.get("padre") == tid]
+        if not hijas and "→" in bloq:
+            hijas = [x.strip() for x in bloq.split("→", 1)[1].split(",") if x.strip()]
+        if not hijas:
+            continue
+        if all((tareas.get(h) or {}).get("estado") == "verificada" for h in hijas):
+            prev = t.get("estado")
+            t["estado"] = "verificada"
+            t["bloqueo"] = None
+            estado["bloqueos"] = [
+                b
+                for b in (estado.get("bloqueos") or [])
+                if b.get("id") != tid and tid not in (b.get("afecta") or [])
+            ]
+            cerrados.append(tid)
+            append_event(
+                wf,
+                {
+                    "ts": now_iso(),
+                    "tipo": "tarea.transicion",
+                    "actor": "validador",
+                    "sujeto": tid,
+                    "de": prev,
+                    "a": "verificada",
+                    "detalle": {"accion": "hijas_verificadas", "hijas": hijas},
+                },
+            )
+    return cerrados
 
 
 def cmd_evidenciar(
@@ -1601,8 +1674,40 @@ def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
             return 1
         vigentes = reales
 
+    # REQ sensible: la evidencia debe mostrar prueba negativa (denegación)
+    rel_chk = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
+    nodos_chk = rel_chk.get("nodos") or {}
+    sensibles = [
+        link
+        for link in (tareas[tarea].get("enlaces") or [])
+        if (nodos_chk.get(link) or {}).get("sensible")
+    ]
+    if sensibles:
+        neg = re.compile(
+            r"DENEGADO|NO\s+LEE|NO\s+puede|ACCESO\s+DENEGADO|"
+            r"PASS\s+[^\n]*\bNO\b",
+            re.I,
+        )
+        tiene_neg = any(
+            neg.search(
+                ((items.get(e) or {}).get("salida") or "")
+                + " "
+                + ((items.get(e) or {}).get("valor") or "")
+            )
+            for e in vigentes
+        )
+        if not tiene_neg:
+            print(
+                f"Requisito sensible ({', '.join(sensibles)}): "
+                "la evidencia debe mostrar una prueba negativa "
+                "(p. ej. ACCESO DENEGADO / RECEPCION NO LEE…).",
+                file=sys.stderr,
+            )
+            return 1
+
     tareas[tarea]["estado"] = "verificada"
     tareas[tarea]["depurar_intentos"] = 0
+    cerrados = cerrar_padres_divididos(wf, estado)
     sincronizar_preparadas(wf, estado)
     estado["actualizado"] = now_iso()
     atomic_write_json(wf / "estado.json", estado)
@@ -1640,6 +1745,8 @@ def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
         print(raw)
         return 1
     print(f"Verificada {tarea} con {vigentes or omitidas}")
+    if cerrados:
+        print(f"Padre(s) de división cerrados: {', '.join(cerrados)}")
     print("Validador: OK")
     return 0
 
@@ -2291,19 +2398,27 @@ def _wf_ready(proyecto: Path) -> Path | None:
     return wf
 
 
-def cmd_requisito(proyecto: Path, titulo: str, texto: str) -> int:
+def cmd_requisito(
+    proyecto: Path, titulo: str, texto: str, sensible: bool = False
+) -> int:
     wf = _wf_ready(proyecto)
     if not wf:
         return 2
     rel = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
     rid = next_id("REQ", set(rel.get("nodos") or {}))
-    rel.setdefault("nodos", {})[rid] = {"tipo": "REQ", "archivo": "requisitos.md"}
+    nodo: dict[str, Any] = {"tipo": "REQ", "archivo": "requisitos.md"}
+    if sensible:
+        nodo["sensible"] = True
+    rel.setdefault("nodos", {})[rid] = nodo
     atomic_write_json(wf / "relaciones.json", rel)
     path = wf / "requisitos.md"
-    extra = f"\n\n## {rid}\n\n**{titulo.strip()}**\n\n{texto.strip()}\n"
+    marca = "\n\n> DATO SENSIBLE: al verificar hace falta prueba negativa.\n" if sensible else "\n"
+    extra = f"\n\n## {rid}\n\n**{titulo.strip()}**\n{marca}\n{texto.strip()}\n"
     with path.open("a", encoding="utf-8") as f:
         f.write(extra)
     print(f"Requisito {rid}: {titulo.strip()}")
+    if sensible:
+        print("  Marca: sensible (verificar exige prueba negativa en la evidencia)")
     return 0
 
 
@@ -3325,6 +3440,11 @@ def main(argv: list[str] | None = None) -> int:
     p_rq.add_argument("--proyecto", type=Path, required=True)
     p_rq.add_argument("--titulo", required=True)
     p_rq.add_argument("--texto", required=True)
+    p_rq.add_argument(
+        "--sensible",
+        action="store_true",
+        help="Dato sensible: verificar exige prueba negativa en la evidencia",
+    )
 
     p_ta = sub.add_parser("tarea", help="Crear una TASK (pendiente o preparada)")
     p_ta.add_argument("--proyecto", type=Path, required=True)
@@ -3462,7 +3582,9 @@ def main(argv: list[str] | None = None) -> int:
             ejecutar=args.ejecutar,
         )
     if args.cmd == "requisito":
-        return cmd_requisito(args.proyecto, args.titulo, args.texto)
+        return cmd_requisito(
+            args.proyecto, args.titulo, args.texto, sensible=args.sensible
+        )
     if args.cmd == "tarea":
         return cmd_tarea(
             args.proyecto, args.titulo, args.comprobacion, args.enlaces, args.depende

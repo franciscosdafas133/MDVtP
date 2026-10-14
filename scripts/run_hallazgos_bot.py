@@ -226,17 +226,21 @@ def main() -> int:
             fails += 1
         else:
             est2 = json.loads((p2 / "workflow" / "estado.json").read_text(encoding="utf-8"))
-            if len(est2.get("asks_activas") or []) != 3:
-                print("FALLA modo rapido no tiene 3 ASK", est2.get("asks_activas"))
+            asks = est2.get("asks_activas") or []
+            if not all(x in asks for x in ("ASK-01", "ASK-06", "ASK-02")):
+                print("FALLA modo rapido sin ASK base", asks)
+                fails += 1
+            elif not any(a.startswith("ASK-1") for a in asks):
+                print("FALLA pistas sin id ASK-1x", asks)
                 fails += 1
             else:
-                print("OK modo rapido = 3 ASK")
+                print("OK modo rapido = ASK base + pistas con id")
             desc = (p2 / "workflow" / "descubrimiento.md").read_text(encoding="utf-8")
-            if "sensib" not in desc.lower() and "recepción" not in desc.lower() and "recepcion" not in desc.lower():
-                print("FALLA sin pistas de privacidad en consultorio")
+            if "ASK-10" not in desc or "sensib" not in desc.lower():
+                print("FALLA sin ASK-10 de privacidad en consultorio")
                 fails += 1
             else:
-                print("OK pistas de consultorio")
+                print("OK pistas de consultorio anotables")
             if "staging" in desc.lower() or "colas" in desc.lower():
                 print("FALLA jerga staging/colas en descubrimiento")
                 fails += 1
@@ -244,7 +248,7 @@ def main() -> int:
                 print("OK lenguaje llano en descubrimiento")
 
         # --- continuar no insiste ASK ya respondidas ---
-        for aid in est2.get("asks_activas") or []:
+        for aid in asks:
             run(
                 [
                     "anotar",

@@ -1,7 +1,7 @@
 {
   "bateria": "B18-determinista",
-  "ts": "2026-10-14T23:25:00Z",
-  "deterministas_ok": 7,
+  "ts": "2026-10-14T23:41:01Z",
+  "deterministas_ok": 5,
   "deterministas_total": 7,
   "observacion_pendiente": [
     "E01",
@@ -12,7 +12,7 @@
     "E16",
     "E18"
   ],
-  "veredicto_determinista": "ok",
+  "veredicto_determinista": "falla",
   "veredicto_agente": "pendiente",
   "casos": [
     {
@@ -37,7 +37,7 @@
       "exit": 0,
       "esperado_exit": 0,
       "nota": "checkpoint + worktree",
-      "tail": "ree) ===\n\nWorktree aislado en: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion-CP-01\n  Rama: recuperar/CP-01\n  Commit: ea5a9eda3803bf70e3a09eb68c7b2a509ecdc033\n  Checkpoint: CP-01 — Después del descubrimiento inicial\n  El trabajo en el proyecto original se conserva intacto.\n\n=== Comprobación demo B11: aislado_sin_cambio_posterior=True, original_conserva_cambio=True → OK ===\n"
+      "tail": "ree) ===\n\nWorktree aislado en: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion-CP-01\n  Rama: recuperar/CP-01\n  Commit: 08c96eead3f974534118a2e11cbdecfe3d91a887\n  Checkpoint: CP-01 — Después del descubrimiento inicial\n  El trabajo en el proyecto original se conserva intacto.\n\n=== Comprobación demo B11: aislado_sin_cambio_posterior=True, original_conserva_cambio=True → OK ===\n"
     },
     {
       "id": "E14",
@@ -57,19 +57,19 @@
     },
     {
       "id": "E17",
-      "ok": true,
-      "exit": 0,
+      "ok": false,
+      "exit": 1,
       "esperado_exit": 0,
       "nota": "producto mínimo cableado",
-      "tail": "s:\n  - pendientes reales listados — no inventar que ya pasaron\nPunto de recuperación disponible:\n  (crear checkpoint si el alcance ya está comprobado)\nSiguiente paso y por qué:\n  Publicar solo con checklist y pendientes a la vista\n\n\n=== RECORRIDO: veredicto=ok TASK-10=verificada validador=OK ===\nResultado: /home/doomf/Documents/creación_método/tests/scenarios/producto-simple/ultimo-resultado.json\n"
+      "tail": "CORRIDO: ejecutar prueba real ===\n\nOK\n\n=== RECORRIDO: evidenciar → presentar → verificar ===\n\nEl comando no coincide con la comprobación de la tarea.\n  Comprobación: comprobar.sh imprime OK (visitas 1 y 2)\n  Comando:      bash /home/doomf/Documents/creación_método/tests/fixtures/demo-recorrido/app/comprobar.sh\nUsa el script/prueba nombrado en la comprobación (o omite --valor para tomarlo de ahí).\n"
     },
     {
       "id": "E12",
-      "ok": true,
-      "exit": 0,
+      "ok": false,
+      "exit": 1,
       "esperado_exit": 0,
       "nota": "batería integridad completa",
-      "tail": "st_dirty_bloquea_checkpoint_commit …\n  [OK] dirty_checkpoint\n→ test_recuperar_aviso_dirty …\n  [OK] recuperacion_aislada\n→ test_atomic_sin_tmp …\n  [OK] escritura_atomica_limpia\n→ test_install_smoke …\n  [OK] instalacion_smoke\n→ test_recorrido_simple …\n  [OK] recorrido_producto_minimo\n\n=== B17: 8/8 → ok ===\nInforme: /home/doomf/Documents/creación_método/tests/scenarios/integridad/ultimo-informe.json\n"
+      "tail": "ty_bloquea_checkpoint_commit …\n  [OK] dirty_checkpoint\n→ test_recuperar_aviso_dirty …\n  [OK] recuperacion_aislada\n→ test_atomic_sin_tmp …\n  [OK] escritura_atomica_limpia\n→ test_install_smoke …\n  [OK] instalacion_smoke\n→ test_recorrido_simple …\n  [FALLA] recorrido_producto_minimo\n\n=== B17: 7/8 → falla ===\nInforme: /home/doomf/Documents/creación_método/tests/scenarios/integridad/ultimo-informe.json\n"
     },
     {
       "id": "E01",

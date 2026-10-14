@@ -1,9 +1,9 @@
 {
   "bateria": "B17-integridad",
-  "ts": "2026-10-14T23:25:00Z",
-  "passed": 8,
+  "ts": "2026-10-14T23:41:01Z",
+  "passed": 7,
   "total": 8,
-  "veredicto": "ok",
+  "veredicto": "falla",
   "casos": [
     {
       "caso": "fixtures_validador",
@@ -15,13 +15,13 @@
       "caso": "estado_invalido",
       "ok": true,
       "esperado": "validador exit=1 y código esquema",
-      "detalle": "FALLA — 4 hallazgo(s) en /tmp/b17-estado-0agbnbs3/workflow\n  [esquema] estado.json sin campo paquete_version (/tmp/b17-estado-0agbnbs3/workflow/estado.json)\n  [esquema] estado.json sin campo actualizado (/tmp/b17-estado-0agbnbs3/workflow/estado.json)\n  [esquema] estado.json sin campo actividad (/tmp/b17-estado-0agbnbs3/workflow/estado.json)\n  [esquema] estado.json sin campo tareas (/tmp/b17-estado-0agbnbs3/workflow/estado.json)"
+      "detalle": "FALLA — 4 hallazgo(s) en /tmp/b17-estado-no38p_f3/workflow\n  [esquema] estado.json sin campo paquete_version (/tmp/b17-estado-no38p_f3/workflow/estado.json)\n  [esquema] estado.json sin campo actualizado (/tmp/b17-estado-no38p_f3/workflow/estado.json)\n  [esquema] estado.json sin campo actividad (/tmp/b17-estado-no38p_f3/workflow/estado.json)\n  [esquema] estado.json sin campo tareas (/tmp/b17-estado-no38p_f3/workflow/estado.json)"
     },
     {
       "caso": "escritura_interrumpida",
       "ok": true,
       "esperado": "JSON truncado → validador falla (detecta incoherencia)",
-      "detalle": "FALLA — 1 hallazgo(s) en /tmp/b17-tmp-mulmns_k/workflow\n  [json_invalido] Unterminated string starting at: line 1 column 31 (char 30) (workflow)"
+      "detalle": "FALLA — 1 hallazgo(s) en /tmp/b17-tmp-t91nnf_3/workflow\n  [json_invalido] Unterminated string starting at: line 1 column 31 (char 30) (workflow)"
     },
     {
       "caso": "dirty_checkpoint",
@@ -33,7 +33,7 @@
       "caso": "recuperacion_aislada",
       "ok": true,
       "esperado": "demo-b11: worktree/rama desde CP sin perder trabajo posterior",
-      "detalle": "descubrimiento inicial\n  Modo: git\n  Commit: bd0104b223853b10ddc7c26a848643d0cc8f4904\n  Snapshot: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion/workflow/checkpoints/CP-01/snapshot\n  Alcance comprobado: Solo creación de workflow y validador OK; sin pruebas de producto\n  Recuperar con: product_flow.py recuperar --proyecto … --checkpoint CP-01\n\n=== DEMO B11: recuperar (worktree) ===\n\nWorktree aislado en: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion"
+      "detalle": "descubrimiento inicial\n  Modo: git\n  Commit: ef3a6ea30af8f02b12f62d786a3b29eb90a98964\n  Snapshot: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion/workflow/checkpoints/CP-01/snapshot\n  Alcance comprobado: Solo creación de workflow y validador OK; sin pruebas de producto\n  Recuperar con: product_flow.py recuperar --proyecto … --checkpoint CP-01\n\n=== DEMO B11: recuperar (worktree) ===\n\nWorktree aislado en: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion"
     },
     {
       "caso": "escritura_atomica_limpia",
@@ -49,9 +49,9 @@
     },
     {
       "caso": "recorrido_producto_minimo",
-      "ok": true,
+      "ok": false,
       "esperado": "recorrido-simple veredicto=ok",
-      "detalle": "s:\n  - pendientes reales listados — no inventar que ya pasaron\nPunto de recuperación disponible:\n  (crear checkpoint si el alcance ya está comprobado)\nSiguiente paso y por qué:\n  Publicar solo con checklist y pendientes a la vista\n\n\n=== RECORRIDO: veredicto=ok TASK-10=verificada validador=OK ===\nResultado: /home/doomf/Documents/creación_método/tests/scenarios/producto-simple/ultimo-resultado.json"
+      "detalle": "CORRIDO: ejecutar prueba real ===\n\nOK\n\n=== RECORRIDO: evidenciar → presentar → verificar ===\n\nEl comando no coincide con la comprobación de la tarea.\n  Comprobación: comprobar.sh imprime OK (visitas 1 y 2)\n  Comando:      bash /home/doomf/Documents/creación_método/tests/fixtures/demo-recorrido/app/comprobar.sh\nUsa el script/prueba nombrado en la comprobación (o omite --valor para tomarlo de ahí)."
     }
   ]
 }
