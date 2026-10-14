@@ -1,6 +1,6 @@
 # Selección de base, extracciones y mapa de cobertura
 
-Tarea: B06 · Fecha: 2026-10-12 · Estado: en_revision (DEC-01 aceptada; [DEC-02 a DEC-08](decisiones.md) pendientes de revisión)
+Tarea: B06 · Fecha: 2026-10-12 · Estado: verificada (DEC-01…08 aceptadas)
 
 ## 1. Base
 
@@ -67,4 +67,4 @@ Cada requisito tiene una solución prevista: extracción (X*) o desarrollo propi
 
 ## 4. Qué permite avanzar
 
-Cuando se acepten DEC-01 a DEC-08 (o se modifiquen), B06 queda verificada y B07 puede completar las especificaciones con esta selección como entrada.
+DEC-01 a DEC-08 aceptadas (2026-10-12). B06 verificada; B07 puede completar las especificaciones con esta selección como entrada.

@@ -1,6 +1,6 @@
 # ESP-03 — Contrato documental
 
-Estado: borrador 0.2 (lista de documentos revisada con el usuario) · Fuente: encargo §5 · Requisitos: R04, R06, R07, R11
+Estado: borrador 0.3 · Fuente: encargo §5 · Decisiones: DEC-02, DEC-04/05 · Contratos: B08 · Requisitos: R04, R06, R07, R11
 
 ## Qué la inicia
 
@@ -53,18 +53,23 @@ Las flechas también se recorren hacia atrás: un cambio en un documento marca c
 
 ## Cómo se revisa
 
-Un validador determinista (B08) detecta identificadores duplicados, referencias rotas y evidencia que apunta a una versión superada.
+Validador: `scripts/validate_workflow.py` (contratos en `core/contracts/`). Detecta ids inválidos, referencias rotas, evidencia `stale` y conflictos de decisión.
 
 ## Qué permite avanzar
 
-Prefijos, formato de metadatos y tipos de relación definidos → ESP-04 y ESP-05 pueden referirse a ellos sin ambigüedad.
+Prefijos, relaciones y evidencia definidos → B09 puede generar plantillas Markdown alineadas a los mismos ids.
+
+## Cerrado en B08
+
+| Pregunta | Resolución |
+|---|---|
+| ¿Formato de metadatos? | **JSON de autoridad** (`relaciones.json`, `estado.json`, `evidencias.json`, `decisiones/*.json`). Markdown de producto con plantillas en B09; no hay segunda autoridad de enlaces. |
+| ¿Dónde viven las relaciones? | **`workflow/relaciones.json`** (única autoridad mecánica). |
+| ¿Estados de afirmación? | `confirmada` \| `hipotesis` \| `pendiente` (`vocabulario.json`). |
+| ¿Versionado de evidencia? | `origen` = commit \| hash_archivo \| comando \| manual + `valor` + `cubre[]`; cambio de hash → `stale`. |
 
 ## Abierto
 
 | Pregunta | Se resuelve en |
 |---|---|
-| ¿Formato de metadatos: front matter YAML, bloques en Markdown o un índice JSON aparte? | B07, B08 |
-| ¿Dónde viven las relaciones: en cada documento o en un índice derivado? | B07 (evitar dos autoridades) |
-| ¿Vocabulario cerrado de estados de una afirmación? | B08 |
-| ¿Cómo se versiona la evidencia (hash, commit, fecha)? | B07, B08 |
-| ¿Qué piezas de OpenSpec (cambios frente a especificación vigente) ayudan a formalizar R11? | B05 (condicional) |
+| ¿OpenSpec para formalizar más R11? | Solo si B10 se queda corto (condicional F09) |

@@ -1,0 +1,17 @@
+{
+  "escenario": "producto-simple",
+  "host": "claude-code",
+  "version_host": "",
+  "version_paquete": "0.1.0-dev",
+  "entrada": "Contador CLI (mismo proyecto que Cursor)",
+  "proyecto": "tests/fixtures/agente-recorrido",
+  "skill_instalada": ".claude/skills/product-flow",
+  "acciones": [
+    "install_metodo --hosts claude en el proyecto de prueba"
+  ],
+  "veredicto_agente": null,
+  "veredicto_evaluador": "ok",
+  "firmado_por": "usuario",
+  "notas": "Usuario: claude ok (2026-10-14). Skill instalada en proyecto de prueba; mismo escenario producto-simple.",
+  "ts": "2026-10-14T20:32:00Z"
+}

@@ -1,0 +1,56 @@
+{
+  "contrato_version": "0.1.0",
+  "descripcion": "Vocabularios cerrados del método. El validador rechaza cualquier valor fuera de estas listas.",
+  "prefijos_id": {
+    "OBJ": "objetivo de producto",
+    "REQ": "requisito o escenario",
+    "DEC": "decisión",
+    "TASK": "tarea",
+    "CHECK": "comprobación",
+    "EVID": "evidencia",
+    "ASK": "pregunta abierta",
+    "NOTE": "apunte del usuario"
+  },
+  "patron_id": "^(OBJ|REQ|DEC|TASK|CHECK|EVID|ASK|NOTE)-[0-9]{2,}$",
+  "estados_afirmacion": ["confirmada", "hipotesis", "pendiente"],
+  "estados_tarea": [
+    "pendiente",
+    "preparada",
+    "en_curso",
+    "bloqueada",
+    "en_revision",
+    "verificada"
+  ],
+  "estados_decision": [
+    "propuesta",
+    "aceptada",
+    "rechazada",
+    "aplazada",
+    "sustituida"
+  ],
+  "estados_evidencia": ["vigente", "stale", "omitida", "bloqueada"],
+  "tipos_relacion": [
+    "deriva_de",
+    "condiciona",
+    "implementa",
+    "verifica",
+    "evidencia_de",
+    "comenta",
+    "sustituye"
+  ],
+  "tipos_evento": [
+    "tarea.transicion",
+    "decision.transicion",
+    "afirmacion.transicion",
+    "evidencia.marcar",
+    "checkpoint.crear",
+    "sesion.reanudar",
+    "nota.anadir",
+    "reconciliar"
+  ],
+  "versionado_evidencia": {
+    "campos_requeridos": ["id", "estado", "origen"],
+    "origen_permitido": ["commit", "hash_archivo", "comando", "manual"],
+    "nota": "Si origen es commit o hash_archivo, hace falta valor. Si el código/doc cubierto cambia después, estado pasa a stale."
+  }
+}

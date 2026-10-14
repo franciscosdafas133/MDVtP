@@ -1,0 +1,132 @@
+{
+  "paquete": "product-flow-metodo",
+  "version": "0.1.0-rc1",
+  "alcance": "dist",
+  "hosts": [
+    "cursor",
+    "claude"
+  ],
+  "instalado": "2026-10-14T20:35:51Z",
+  "archivos": {
+    "SKILL.md": {
+      "sha256": "541d184af3a9cf2f7bd9a6421f09f69c703f867ce3be706e4b8ce655961f5ffb"
+    },
+    "THIRD_PARTY_NOTICES.md": {
+      "sha256": "6e5ccb1a29e3cd36f95e0a543af1e2d60f7a9073bd2ce121c1e81e26d5d0a455"
+    },
+    "contracts/README.md": {
+      "sha256": "d19c7bdd60b843e52380493199c8dc6bb1c17027729048fa9af701ba506e3bd8"
+    },
+    "contracts/esquema-apuntes.json": {
+      "sha256": "486b45ba287e286437c1b375f228fb494d73a1c487db95f15fbf3ad3bf9171cc"
+    },
+    "contracts/esquema-checkpoint.json": {
+      "sha256": "a8dab88613d0c39dd0416e277185e7a86032835f2eece29cc6a86718f7d8828a"
+    },
+    "contracts/esquema-decision.json": {
+      "sha256": "4ff2793ef8c8997dfa1c724f7810ea844acff565feee48f6284624417abf030c"
+    },
+    "contracts/esquema-estado.json": {
+      "sha256": "5c6b7a0343e8cc77d491c25704ec66ca3d5d4f15a3708c095df0f5f07bc9eb88"
+    },
+    "contracts/esquema-evento.json": {
+      "sha256": "83e1c5825744405a0fb905113578204b66ca8d47e2ef079d373786cdb18491a5"
+    },
+    "contracts/esquema-evidencia.json": {
+      "sha256": "78b6776d2022aacf73b7e41d0eecb7b257d841895cbda56f3ede19bf4d23bff4"
+    },
+    "contracts/esquema-relacion.json": {
+      "sha256": "9cf728d4119ef2beaf6bfa69deaf3962837585062e14a883287b85f4d511ee51"
+    },
+    "contracts/reglas-division.json": {
+      "sha256": "76464b93b1cba97ebd7f34ff94220a0ecd22fe156568658a9ed4ccd37f4ef12c"
+    },
+    "contracts/reglas-operacion.json": {
+      "sha256": "c67f84f22ea8bf07f9ddff1c29dc338a4a7a894a68f12887a1b52d7f2b46b1d9"
+    },
+    "contracts/reglas-verificacion-debug.json": {
+      "sha256": "48c9647765d5823c01b35a7add4aaa2edb3930c23fcfa32b387bb180f7d21ae2"
+    },
+    "contracts/transiciones.json": {
+      "sha256": "50d75e1549e0a4506c91badec657a226daec45e13eca67670e375621dca417f6"
+    },
+    "contracts/vocabulario.json": {
+      "sha256": "499f560714a594108755e3c1918c575919ab3635199fd18a4f99b37c685f9888"
+    },
+    "procedures/anotar.md": {
+      "sha256": "059349aca245df65521780e5c5dbc84c1d58144358bdbcf9d2c5ec2d7648d9af"
+    },
+    "procedures/bloquear.md": {
+      "sha256": "0504e3c162e309db53316a1a63bf132958401cdf2deb77d274ef3c50719f27e9"
+    },
+    "procedures/checkpoint.md": {
+      "sha256": "350761102b6d3615df5aa1ebf901c927d56add0fcc1e0b08c84216cf15618a15"
+    },
+    "procedures/continuar.md": {
+      "sha256": "b2f327491c1e586493b18e9d4cfab6d2dfb56964a0be5f273581c2947c2ce1ca"
+    },
+    "procedures/decidir.md": {
+      "sha256": "feea9456b3c743393a3ea8cea11a1c5918d93f5aa262dabda0271389affe2ac6"
+    },
+    "procedures/depurar.md": {
+      "sha256": "0771cd459a69d3609d684da71fdce811182c859bd495c271d841df3542fbd2f0"
+    },
+    "procedures/dividir.md": {
+      "sha256": "1acf857f8cb9832f41478b38a9952e15004b6a5d60c4e56db8fb79039cb14f3b"
+    },
+    "procedures/entregar.md": {
+      "sha256": "a4f617ab30511743b867718973322588189111c8a51e00c1eee3ac5cfbb33d33"
+    },
+    "procedures/impactar.md": {
+      "sha256": "9b8b285b1177f3b4aed69a65886370aae1ab60acf8fee247a3810c98e3fc82ef"
+    },
+    "procedures/implementar.md": {
+      "sha256": "bfe20821dc19c5ca19c0157db3f044a9aa065d833adbf06a6ced53047d41c15b"
+    },
+    "procedures/informe.md": {
+      "sha256": "827dc0aff653e494f3d3ee2a93cd7a25d8820b8852f7fe920b9b320719bdc86d"
+    },
+    "procedures/iniciar.md": {
+      "sha256": "8046cd578bd46c1793043cdf76ea3d9985087bf238fdc944eea745a9f5da52b7"
+    },
+    "procedures/recorrido-agente.md": {
+      "sha256": "989b8c4f32e76370b262e98f691aa398b47ea9846c7f4460a1de6d10e2873139"
+    },
+    "procedures/recuperar.md": {
+      "sha256": "2301152adf5867206394e80a55aa58eff57c6fbd52a5ae4e158c9a610defb296"
+    },
+    "procedures/verificar.md": {
+      "sha256": "160b0ebf417a1666245632d9b781925d7baa48716179fd4e340491bc718086ea"
+    },
+    "scripts/product_flow.py": {
+      "sha256": "509480e3f3d0f27ba0260cc84a60f21b59225bade602d388bff5b28be91af9ac"
+    },
+    "scripts/validate_workflow.py": {
+      "sha256": "306e616a052f6d8cf9a39f9265818aa8682864651cf2a9a6ff489a6ab60857fb"
+    },
+    "templates/descubrimiento.md": {
+      "sha256": "4c1719ee8824ecd16307bd2caf66eca585be8f30124c3089b4b82eaf5e130e08"
+    },
+    "templates/operacion.md": {
+      "sha256": "2b34c275205ca1f7ab257f9886d893ce6f74c191cd69d6f0c9c39a19be0beed9"
+    },
+    "templates/plan.md": {
+      "sha256": "46a5d13a50c907f9eff1b723ef3c075bfc4847071fe03fe6de0e7dc8862119cc"
+    },
+    "templates/producto.md": {
+      "sha256": "1bc79c0d7b62f830a000f0a34f90d49b5efaeea8914f45f70c6706ec5f39c38e"
+    },
+    "templates/requisitos.md": {
+      "sha256": "513d041ade937858948740a96676031fe48fd942e75b445fa494865216242d85"
+    },
+    "templates/sistema.md": {
+      "sha256": "055d7f27a77e427145d9d1c2140b9ce541474655cd574fbd052646ab95cb63db"
+    },
+    "templates/tareas.md": {
+      "sha256": "97d2290a8c885c22e38dbd67773ccf85429085b7de16cf854bf39bc078015c54"
+    },
+    "templates/verificacion.md": {
+      "sha256": "e2469cec7cdb9eb06d87a8eb37b086c2c082ef9916774deffb91e79de8e72f80"
+    }
+  }
+}

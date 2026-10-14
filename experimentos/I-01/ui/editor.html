@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>I-01 Editor de producto</title>
+  <style>
+    :root {
+      --bg: #f7f5f2;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --line: #d6d3d1;
+      --accent: #0f766e;
+      --accent-ink: #f0fdfa;
+      --warn: #9a3412;
+      --panel: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 14px/1.45 "Segoe UI", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    h1 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 650;
+    }
+    .status {
+      font-size: 12px;
+      color: var(--muted);
+      max-width: 50%;
+      text-align: right;
+    }
+    main {
+      display: grid;
+      gap: 12px;
+      padding: 12px 16px 16px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      font: 13px/1.5 ui-monospace, "Cascadia Code", Menlo, monospace;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font: inherit;
+      cursor: pointer;
+    }
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-ink);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .proposal {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 12px;
+    }
+    .proposal.visible { display: block; }
+    .proposal h2 {
+      margin: 0 0 8px;
+      font-size: 13px;
+    }
+    .proposal .reason {
+      color: var(--warn);
+      margin: 0 0 8px;
+      white-space: pre-wrap;
+    }
+    .proposal pre {
+      margin: 0 0 12px;
+      white-space: pre-wrap;
+      font: 12px/1.45 ui-monospace, Menlo, monospace;
+      background: var(--bg);
+      padding: 10px;
+      border-radius: 6px;
+      max-height: 220px;
+      overflow: auto;
+    }
+    .log {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: pre-wrap;
+      max-height: 90px;
+      overflow: auto;
+      border-top: 1px dashed var(--line);
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Producto · editor I-01</h1>
+    <div class="status" id="status">Conectando con el host…</div>
+  </header>
+  <main>
+    <div>
+      <label for="doc">Documento (editable)</label>
+      <textarea id="doc" spellcheck="true"></textarea>
+    </div>
+    <div class="actions">
+      <button class="primary" id="askBtn" disabled>Pedir corrección a la IA</button>
+      <button id="reloadBtn" disabled>Recargar desde disco</button>
+    </div>
+    <section class="proposal" id="proposalBox">
+      <h2>Propuesta de la IA</h2>
+      <p class="reason" id="proposalReason"></p>
+      <pre id="proposalText"></pre>
+      <div class="actions">
+        <button class="primary" id="acceptBtn">Aceptar y guardar</button>
+        <button id="rejectBtn">Rechazar</button>
+      </div>
+    </section>
+    <div class="log" id="log"></div>
+  </main>
+  <script>
+(function () {
+  "use strict";
+
+  var PROTOCOL_VERSION = "2024-11-05";
+  var nextId = 1;
+  var pending = new Map();
+  var hostCapabilities = null;
+  var hostContext = null;
+  var ready = false;
+  var baselineText = "";
+  var currentProposal = null;
+
+  var statusEl = document.getElementById("status");
+  var docEl = document.getElementById("doc");
+  var askBtn = document.getElementById("askBtn");
+  var reloadBtn = document.getElementById("reloadBtn");
+  var proposalBox = document.getElementById("proposalBox");
+  var proposalReason = document.getElementById("proposalReason");
+  var proposalText = document.getElementById("proposalText");
+  var acceptBtn = document.getElementById("acceptBtn");
+  var rejectBtn = document.getElementById("rejectBtn");
+  var logEl = document.getElementById("log");
+
+  function log(msg) {
+    var line = new Date().toISOString().slice(11, 19) + " " + msg;
+    logEl.textContent = (logEl.textContent ? logEl.textContent + "\n" : "") + line;
+  }
+
+  function setStatus(msg) {
+    statusEl.textContent = msg;
+  }
+
+  function post(message) {
+    window.parent.postMessage(message, "*");
+  }
+
+  function request(method, params, timeoutMs) {
+    var id = nextId++;
+    var msg = { jsonrpc: "2.0", id: id, method: method };
+    if (params !== undefined) msg.params = params;
+    return new Promise(function (resolve, reject) {
+      var timer = setTimeout(function () {
+        pending.delete(id);
+        reject(new Error("Timeout en " + method));
+      }, timeoutMs || 60000);
+      pending.set(id, {
+        resolve: function (value) { clearTimeout(timer); resolve(value); },
+        reject: function (err) { clearTimeout(timer); reject(err); },
+      });
+      post(msg);
+    });
+  }
+
+  function notify(method, params) {
+    var msg = { jsonrpc: "2.0", method: method };
+    if (params !== undefined) msg.params = params;
+    post(msg);
+  }
+
+  function onMessage(event) {
+    var data = event.data;
+    if (!data || data.jsonrpc !== "2.0") return;
+
+    if (Object.prototype.hasOwnProperty.call(data, "id") && (data.result !== undefined || data.error)) {
+      var waiter = pending.get(data.id);
+      if (!waiter) return;
+      pending.delete(data.id);
+      if (data.error) {
+        waiter.reject(new Error(data.error.message || JSON.stringify(data.error)));
+      } else {
+        waiter.resolve(data.result);
+      }
+      return;
+    }
+
+    if (!data.method) return;
+
+    if (data.method === "ui/notifications/tool-input") {
+      applyToolArguments((data.params && data.params.arguments) || {});
+      return;
+    }
+    if (data.method === "ui/notifications/tool-result") {
+      applyToolResult(data.params || {});
+      return;
+    }
+    if (data.method === "ui/notifications/tool-input-partial") {
+      return;
+    }
+    if (data.method === "ui/notifications/host-context-changed") {
+      hostContext = Object.assign({}, hostContext || {}, data.params || {});
+      return;
+    }
+    if (data.method === "ui/resource-teardown") {
+      if (Object.prototype.hasOwnProperty.call(data, "id")) {
+        post({ jsonrpc: "2.0", id: data.id, result: {} });
+      }
+      return;
+    }
+    if (data.method === "ping" && Object.prototype.hasOwnProperty.call(data, "id")) {
+      post({ jsonrpc: "2.0", id: data.id, result: {} });
+    }
+  }
+
+  function textFromStructured(structured) {
+    if (!structured) return "";
+    if (typeof structured.text === "string") return structured.text;
+    return "";
+  }
+
+  function textFromContent(content) {
+    if (!Array.isArray(content)) return "";
+    return content
+      .filter(function (block) { return block && block.type === "text" && typeof block.text === "string"; })
+      .map(function (block) { return block.text; })
+      .join("\n");
+  }
+
+  function applyToolArguments(args) {
+    if (typeof args.text === "string") {
+      docEl.value = args.text;
+      baselineText = args.text;
+      log("Documento recibido (tool-input).");
+    }
+  }
+
+  function applyToolResult(params) {
+    var structured = params.structuredContent;
+    var text = textFromStructured(structured);
+    if (!text) text = textFromContent(params.content);
+    if (text) {
+      // Solo rellenar si el área está vacía o coincide con la carga inicial.
+      if (!docEl.value || docEl.value === baselineText) {
+        docEl.value = text;
+        baselineText = text;
+        log("Documento recibido (tool-result).");
+      }
+    }
+  }
+
+  function showProposal(proposal, reason, mode) {
+    currentProposal = { text: proposal, reason: reason || "", mode: mode || "" };
+    proposalReason.textContent = (reason || "(sin explicación)") + (mode ? " · vía " + mode : "");
+    proposalText.textContent = proposal;
+    proposalBox.classList.add("visible");
+  }
+
+  function hideProposal() {
+    currentProposal = null;
+    proposalBox.classList.remove("visible");
+  }
+
+  function extractJsonObject(text) {
+    if (!text) return null;
+    var start = text.indexOf("{");
+    var end = text.lastIndexOf("}");
+    if (start < 0 || end <= start) return null;
+    try {
+      return JSON.parse(text.slice(start, end + 1));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function buildReviewPrompt(doc) {
+    return [
+      "Eres el revisor documental del método. El usuario editó producto.md en una ventana del IDE.",
+      "Documento actual:",
+      "-----",
+      doc,
+      "-----",
+      "Busca ambigüedades o huecos (p. ej. «para todo el mundo»).",
+      "Responde SOLO con un JSON de esta forma, sin markdown:",
+      '{"reason":"por qué hay que corregir","proposal":"texto completo corregido del documento"}',
+      "Si no hay nada que corregir: {\"reason\":\"ok\",\"proposal\":null}",
+    ].join("\n");
+  }
+
+  async function askViaSampling(doc) {
+    if (!hostCapabilities || !hostCapabilities.sampling) {
+      throw new Error("El host no anuncia sampling");
+    }
+    var result = await request("sampling/createMessage", {
+      messages: [
+        {
+          role: "user",
+          content: { type: "text", text: buildReviewPrompt(doc) },
+        },
+      ],
+      maxTokens: 1200,
+      systemPrompt: "Devuelves solo JSON válido. No uses claves de API ajenas: eres el modelo del host.",
+    }, 90000);
+
+    var content = result && result.content;
+    var text = "";
+    if (content && typeof content.text === "string") text = content.text;
+    else if (Array.isArray(content)) text = textFromContent(content);
+    else if (typeof content === "string") text = content;
+
+    var parsed = extractJsonObject(text);
+    if (!parsed) throw new Error("La respuesta de sampling no trae JSON: " + (text || "").slice(0, 180));
+    return { parsed: parsed, raw: text, mode: "sampling/createMessage" };
+  }
+
+  async function askViaChatMessage(doc) {
+    await request("ui/message", {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: [
+            "[I-01 ventana] El usuario editó producto.md y pide corrección ahora.",
+            "Usa la IA del host. Cuando tengas la propuesta, llama a la herramienta aceptar_propuesta SOLO si el usuario acepta en el chat;",
+            "mientras tanto responde en el chat con JSON {reason, proposal}.",
+            "",
+            buildReviewPrompt(doc),
+          ].join("\n"),
+        },
+      ],
+    }, 15000);
+    return { mode: "ui/message", sent: true };
+  }
+
+  async function askCorrection() {
+    askBtn.disabled = true;
+    setStatus("Pidiendo corrección a la IA del host…");
+    hideProposal();
+    var doc = docEl.value;
+    try {
+      try {
+        var sampled = await askViaSampling(doc);
+        if (sampled.parsed.proposal == null) {
+          setStatus("La IA no pidió cambios (" + sampled.mode + ").");
+          log("Sin cambios: " + (sampled.parsed.reason || "ok"));
+        } else {
+          showProposal(sampled.parsed.proposal, sampled.parsed.reason, sampled.mode);
+          setStatus("Propuesta lista. Acepta o rechaza.");
+        }
+      } catch (samplingErr) {
+        log("sampling falló: " + samplingErr.message);
+        setStatus("Sin sampling; enviando mensaje al chat…");
+        await askViaChatMessage(doc);
+        setStatus("Mensaje enviado al chat (plan B). Mira la respuesta del agente.");
+        log("ui/message enviado. Si Cursor no empuja la propuesta aquí, sigue en el chat.");
+      }
+    } catch (err) {
+      setStatus("Error: " + err.message);
+      log("Error al pedir corrección: " + err.message);
+    } finally {
+      askBtn.disabled = !ready;
+    }
+  }
+
+  async function reloadFromDisk() {
+    reloadBtn.disabled = true;
+    try {
+      var result = await request("tools/call", {
+        name: "leer_documento",
+        arguments: {},
+      });
+      var text = textFromStructured(result.structuredContent) || textFromContent(result.content);
+      if (!text) throw new Error("leer_documento no devolvió texto");
+      docEl.value = text;
+      baselineText = text;
+      hideProposal();
+      setStatus("Recargado desde disco.");
+      log("Recarga OK.");
+    } catch (err) {
+      setStatus("No se pudo recargar: " + err.message);
+      log(err.message);
+    } finally {
+      reloadBtn.disabled = !ready;
+    }
+  }
+
+  async function acceptProposal() {
+    if (!currentProposal) return;
+    acceptBtn.disabled = true;
+    rejectBtn.disabled = true;
+    try {
+      await request("tools/call", {
+        name: "aceptar_propuesta",
+        arguments: {
+          text: currentProposal.text,
+          reason: currentProposal.reason || "",
+        },
+      });
+      docEl.value = currentProposal.text;
+      baselineText = currentProposal.text;
+      hideProposal();
+      setStatus("Guardado en producto.md.");
+      log("Aceptada y guardada.");
+    } catch (err) {
+      setStatus("No se guardó: " + err.message);
+      log(err.message);
+    } finally {
+      acceptBtn.disabled = false;
+      rejectBtn.disabled = false;
+    }
+  }
+
+  async function rejectProposal() {
+    if (!currentProposal) return;
+    acceptBtn.disabled = true;
+    rejectBtn.disabled = true;
+    try {
+      await request("tools/call", {
+        name: "rechazar_propuesta",
+        arguments: {
+          proposal: currentProposal.text,
+          reason: currentProposal.reason || "rechazado en ventana",
+        },
+      });
+      hideProposal();
+      setStatus("Rechazada. El archivo no cambió.");
+      log("Rechazo anotado.");
+    } catch (err) {
+      setStatus("No se anotó el rechazo: " + err.message);
+      log(err.message);
+    } finally {
+      acceptBtn.disabled = false;
+      rejectBtn.disabled = false;
+    }
+  }
+
+  async function connect() {
+    window.addEventListener("message", onMessage);
+    try {
+      var result = await request("ui/initialize", {
+        protocolVersion: PROTOCOL_VERSION,
+        appInfo: { name: "i01-editor", version: "0.1.0" },
+        appCapabilities: {
+          availableDisplayModes: ["inline", "fullscreen"],
+        },
+      }, 20000);
+
+      hostCapabilities = (result && result.hostCapabilities) || {};
+      hostContext = (result && result.hostContext) || {};
+      notify("ui/notifications/initialized", {});
+      ready = true;
+      askBtn.disabled = false;
+      reloadBtn.disabled = false;
+
+      var caps = [];
+      if (hostCapabilities.sampling) caps.push("sampling");
+      if (hostCapabilities.tools) caps.push("tools");
+      setStatus(
+        "Conectado" +
+          (caps.length ? " · " + caps.join(", ") : " · sin sampling anunciado") +
+          ". Edita y pide corrección."
+      );
+      log("ui/initialize OK. hostCapabilities=" + JSON.stringify(hostCapabilities));
+
+      // Si el host no empuja el texto, lo pedimos.
+      if (!docEl.value) {
+        try {
+          await reloadFromDisk();
+        } catch (e) {
+          log("Carga inicial falló: " + e.message);
+        }
+      }
+    } catch (err) {
+      setStatus("No hubo handshake UI: " + err.message);
+      log("Fallo ui/initialize: " + err.message);
+    }
+  }
+
+  askBtn.addEventListener("click", askCorrection);
+  reloadBtn.addEventListener("click", reloadFromDisk);
+  acceptBtn.addEventListener("click", acceptProposal);
+  rejectBtn.addEventListener("click", rejectProposal);
+
+  connect();
+})();
+  </script>
+</body>
+</html>

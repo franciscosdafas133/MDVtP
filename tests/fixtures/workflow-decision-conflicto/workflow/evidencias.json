@@ -1,0 +1,14 @@
+{
+  "contrato_version": "0.1.0",
+  "items": {
+    "EVID-01": {
+      "id": "EVID-01",
+      "estado": "vigente",
+      "origen": "comando",
+      "valor": "pytest -q tests/test_login.py",
+      "cubre": ["src/login.py"],
+      "registrado": "2026-10-12T12:00:00Z",
+      "motivo_stale": null
+    }
+  }
+}

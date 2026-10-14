@@ -7,13 +7,13 @@ Fuentes de los argumentos: [F01](auditoria/F01-cc-sdd.md) (hallazgos H*), [F02�
 | ID | Decisión | Estado | Fecha |
 |---|---|---|---|
 | DEC-01 | Reutilizar y conectar las piezas buenas; construir solo lo que las une | **aceptada** | 2026-10-12 |
-| DEC-02 | Coordinación conversacional dentro del host, sin motor externo | propuesta | 2026-10-12 |
-| DEC-03 | Validador determinista propio, solo con biblioteca estándar | propuesta | 2026-10-12 |
-| DEC-04 | Un protocolo de verificación (síntesis de cc-sdd y superpowers) | propuesta | 2026-10-12 |
-| DEC-05 | Un protocolo de depuración (método de superpowers + informe de cc-sdd) | propuesta | 2026-10-12 |
-| DEC-06 | Instalación local al proyecto con manifiesto SHA-256 | propuesta | 2026-10-12 |
-| DEC-07 | Vocabulario y puertas: «checkpoint» = recuperación; decisiones de producto siempre con puerta humana | propuesta | 2026-10-12 |
-| DEC-08 | Política de reutilización por licencia y marca | propuesta | 2026-10-12 |
+| DEC-02 | Coordinación en el host + ventana HTML (localhost) al usar la skill | **aceptada** | 2026-10-12 |
+| DEC-03 | Validador propio: restricciones suficientes para documentar con orden; sin deps raras | **aceptada** | 2026-10-12 |
+| DEC-04 | Verificación: plan con puerta humana; pruebas ligadas al requisito; fallo específico | **aceptada** | 2026-10-12 |
+| DEC-05 | Depuración como experto: leer docs, reproducir, hipótesis, test, parar a los 3 | **aceptada** | 2026-10-12 |
+| DEC-06 | Skill/paquete instalable en Cursor/proyecto, con manifiesto y retirada limpia | **aceptada** | 2026-10-12 |
+| DEC-07 | Checkpoint = recuperar; puerta = decide el humano; aislamiento sin contaminar → B07/B11 | **aceptada** | 2026-10-12 |
+| DEC-08 | Reutilizar lo que sirva; al lanzar, reconocer orígenes (licencia/marca) | **aceptada** | 2026-10-12 |
 
 ---
 
@@ -59,12 +59,15 @@ Fuentes de los argumentos: [F01](auditoria/F01-cc-sdd.md) (hallazgos H*), [F02�
   2. La IA es la del propio host (la suscripción de Claude Code o la de Cursor); no hay una clave ni un modelo aparte.
   3. Mientras se edita, la IA corrige y propone en el momento.
   4. El usuario controla qué se acepta.
-- **Caminos técnicos identificados (sin probar):**
-  - Cursor: MCP App dentro del chat. La ventana puede enviar mensajes y contexto al modelo del host (documentación de MCP Apps).
-  - Claude Code: ventana local más un *channel* de Claude Code (MCP que empuja eventos a la sesión abierta; vista previa de investigación, v2.1.80+, opción `--channels`). Sin confirmar que funcione en la extensión de VS Code ni que la extensión muestre MCP Apps.
-- **Revisión en curso:** se estudia añadir a **B** esa ventana sobre el registro común. El agente sigue en la conversación y la ventana no lo lanza; los cambios hechos desde la ventana pasan por el validador (DEC-03).
-- **Depende de:** la prueba [I-01](investigaciones/I-01-ventana-interactiva.md), que se hará primero en Cursor.
-- **Estado:** propuesta (en revisión con el usuario).
+- **Caminos técnicos:**
+  - ~~Cursor: MCP App dentro del chat~~ — **probado, no pinta** en este Cursor (I-01).
+  - **Cursor: HTML aparte** (navegador + servidor local) enlazado al agente del IDE por archivos/API local — **en prueba** (I-01 reabierta a pedido del usuario).
+  - Claude Code: ventana local + *channel* — sin probar.
+- **Apunte del usuario (2026-10-12, tras el fallo MCP App):** «tal vez no deba ser dentro del chat sino un html aparte».
+- **Decisión:** **B** + ventana **HTML en localhost** (no MCP App en el chat). Al aplicar/ejecutar la skill del método en el host, debe abrirse esa ventana ya enlazada al agente del IDE (misma suscripción; el usuario acepta/rechaza). Sin motor externo. Detalle de la prueba: [I-01](investigaciones/I-01-ventana-interactiva.md).
+- **Apunte del usuario al aceptar (2026-10-12):** «una vez apliques la skill debería abrirse así» (localhost conectado).
+- **Límite (I-01):** en Cursor 3.22.12 la MCP App en chat no pinta; el camino viable probado es HTML aparte. Corrección “en el momento” y pizarra quedan para especificar/implementar después (B07+). Claude Code sin probar (P-02).
+- **Estado:** **aceptada** por el usuario el 2026-10-12.
 
 ## DEC-03 — Validador determinista propio
 
@@ -75,8 +78,10 @@ Fuentes de los argumentos: [F01](auditoria/F01-cc-sdd.md) (hallazgos H*), [F02�
   - **C.** Validador solo con biblioteca estándar.
 - **Consecuencias:** **A** incumple R19. **B** obliga a instalar paquetes en el proyecto del usuario (`npm` no está ni en este entorno; `pip` sin comprobar). **C** limita las herramientas, pero el contrato es pequeño (JSON, hashes, git).
 - **Propuesta:** **C**. Calcula los hechos (tareas preparadas, bloqueos, evidencia `stale`; C3, C4) y rechaza escrituras inválidas. El coordinador aplica la tabla de rutas sobre esos hechos.
-- **Pendiente para B07:** runtime (Node 24 o Python 3.13; ambos presentes aquí) y si se invoca solo desde el coordinador o también desde hooks del host (depende de B15).
-- **Estado:** propuesta.
+- **Apunte del usuario (2026-10-12):** no un «freno simple» débil: **las restricciones suficientes** para crear la documentación de forma ordenada y con sentido (paso a paso, bien guiado). «Simple» solo describe la implementación (biblioteca estándar, sin deps raras), no la pobreza de las reglas.
+- **Decisión:** **C**, con ese matiz. El validador exige el orden y la coherencia del flujo documental; no sustituye al juicio de producto del usuario (puertas humanas, DEC-07).
+- **Pendiente para B07:** runtime (Node 24 o Python 3.13; ambos presentes aquí), catálogo concreto de restricciones, y si se invoca solo desde el coordinador o también desde hooks del host (depende de B15).
+- **Estado:** **aceptada** por el usuario el 2026-10-12.
 
 ## DEC-04 — Un protocolo de verificación
 
@@ -84,8 +89,13 @@ Fuentes de los argumentos: [F01](auditoria/F01-cc-sdd.md) (hallazgos H*), [F02�
   - **A.** `kiro-verify-completion` (F01).
   - **B.** `verification-before-completion` (F07).
   - **C.** Síntesis de ambos.
-- **Propuesta:** **C**. Se toman de cc-sdd los tipos de afirmación y la salida `VERIFIED / NOT_VERIFIED / MANUAL_VERIFY_REQUIRED`, necesaria para E04, E09 y N-45. De superpowers, las señales de alarma y el ciclo rojo-verde de regresión. La regla de evidencia vigente se apoya en DEC-03 (C4). Detalle en F04–F07 §3.1.
-- **Estado:** propuesta.
+- **Propuesta:** **C**, con el orden y el rigor acordados con el usuario.
+- **Orden (no se salta a automático):** (1) requisito claro → (2) plan de pruebas (auto vs manual) → (3) puerta humana sobre el plan → (4) solo entonces pruebas auto → (5) revisión manual → (6) cierre con evidencia fresca. Veredictos: cumple / no cumple / míralo tú.
+- **Rigor de las pruebas (apunte del usuario, 2026-10-12):**
+  - Cada prueba debe **apuntar directamente** a la funcionalidad/requisito que dice comprobar (no “humo” genérico).
+  - Si no cumple, el informe debe ser **específico**: qué se esperaba, qué ocurrió, qué comando/paso falló.
+  - Fuentes: síntesis cc-sdd + superpowers (X01); guía de testing y traza requisito→prueba inspirada en TEA/HumanLayer (ideas, no runtime TEA). Evidencia vigente vía DEC-03.
+- **Estado:** **aceptada** por el usuario el 2026-10-12.
 
 ## DEC-05 — Un protocolo de depuración
 
@@ -93,8 +103,9 @@ Fuentes de los argumentos: [F01](auditoria/F01-cc-sdd.md) (hallazgos H*), [F02�
   - **A.** `kiro-debug` (F01).
   - **B.** `systematic-debugging` (F07).
   - **C.** Síntesis.
-- **Propuesta:** **C**. El método es el de superpowers: reproducir, analizar el patrón, una sola hipótesis, test que falla antes de reparar y parar al tercer intento fallido para cuestionar el diseño (E10). El informe estructurado y las categorías vienen de cc-sdd (`ROOT_CAUSE`, `CATEGORY`, `NEXT_ACTION: RETRY / BLOCK / STOP_FOR_HUMAN`). Detalle en F04–F07 §3.2.
-- **Estado:** propuesta.
+- **Propuesta:** **C**. Método de superpowers + informe de cc-sdd (`ROOT_CAUSE`, `CATEGORY`, `NEXT_ACTION: RETRY / BLOCK / STOP_FOR_HUMAN`).
+- **Apunte del usuario (2026-10-12):** alineado con cómo solucionan fallos los expertos: **leer documentación** (del proyecto, del error, del método) antes de parchear; reproducir; una hipótesis; test que falla y luego arreglo; a la tercera sin avance, parar y preguntar al humano.
+- **Estado:** **aceptada** por el usuario el 2026-10-12.
 
 ## DEC-06 — Instalación local con manifiesto SHA-256
 
@@ -103,17 +114,20 @@ Fuentes de los argumentos: [F01](auditoria/F01-cc-sdd.md) (hallazgos H*), [F02�
   - **B.** Global en el home (GSD).
   - **C.** Local con manifiesto de huellas (Spec Kit).
 - **Propuesta:** **C**. Se instala en el proyecto una sola copia activa por host. El manifiesto registra la SHA-256 de cada archivo; la retirada borra solo lo no modificado y lista lo conservado; el instalador nunca sobrescribe archivos del usuario (C9, C10, R16, E14).
-- **Estado:** propuesta.
+- **Apunte del usuario (2026-10-12):** la documentación es lo que genera/guía su producto; quiere el método como **skill instalable** (en el proyecto), no como lío global ni copia a ciegas.
+- **Apunte del usuario (2026-10-12, matiz):** que se pueda **descargar/instalar directamente en Cursor** y **iniciar ahí** (experiencia de skill/paquete en el IDE), sin un ritual raro aparte. Sigue siendo instalación local al proyecto (o al mecanismo nativo de Cursor para skills del proyecto), con manifiesto y retirada limpia; el detalle de marketplace vs carpeta del proyecto se fija en B07/B16.
+- **Estado:** **aceptada** por el usuario el 2026-10-12.
 
 ## DEC-07 — Vocabulario y puertas humanas
 
 - **Contexto:** «checkpoint» significa cosas distintas en GSD y en el encargo (C8). El modo automático puede decidir por el usuario (C5).
 - **Propuesta:**
-  - «Checkpoint» = punto de recuperación (encargo §5).
-  - «Puerta» = parada para una persona.
+  - «Checkpoint» = punto de recuperación / “guardar partida” (encargo §5); no es el menú general de versiones.
+  - «Puerta» = parada para una persona (aceptar / rechazar / pendiente).
   - Toda decisión de producto, y toda acción irreversible o externa, lleva una puerta que **nunca** se aprueba en automático (equivalente a `blocking-human` de GSD).
   - Las puertas técnicas pueden avanzar solas dentro del alcance autorizado (§4 del encargo).
-- **Estado:** propuesta.
+- **Apunte del usuario (2026-10-12):** checkpoint ≈ mantener lo anterior para poder volver. Las **copias del paquete** son DEC-06. El **trabajo aislado sin contaminar** lo actual (rama/worktree) no se inventa aquí: se especifica en B07 e implementa en B11 (R12, X14/X15).
+- **Estado:** **aceptada** por el usuario el 2026-10-12.
 
 ## DEC-08 — Política de reutilización
 
@@ -127,4 +141,5 @@ Fuentes de los argumentos: [F01](auditoria/F01-cc-sdd.md) (hallazgos H*), [F02�
 | F04 HumanLayer (Apache-2.0) | Solo inspiración salvo necesidad | Si se copia: conservar el aviso de licencia y marcar los cambios |
 | F05 BMAD, F06 TEA (MIT + marca) | Solo inspiración | Ningún nombre ni identificador con «bmad»; «inspirado en BMad Method» en avisos |
 
-- **Estado:** propuesta.
+- **Apunte del usuario (2026-10-12):** se reutiliza el método/piezas que sirvan para integrarlas al producto nuevo; al lanzar, se **reconoce** de dónde salió (avisos, terceros, sin apropiarse de marcas ajenas).
+- **Estado:** **aceptada** por el usuario el 2026-10-12.

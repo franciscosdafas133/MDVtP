@@ -1,0 +1,24 @@
+{
+  "contrato_version": "0.1.0",
+  "archivo": "workflow/checkpoints/CP-NN.json",
+  "campos_requeridos": {
+    "id": "CP-nn",
+    "nombre": "string comprensible",
+    "creado": "ISO-8601",
+    "commit": "sha git o null si solo documental",
+    "modo": "git|documental",
+    "paquete_version": "string",
+    "documentos": ["rutas relativas workflow/"],
+    "tareas": ["TASK-…"],
+    "comprobaciones": ["qué se verificó de verdad"],
+    "pendientes": ["qué no se verificó"],
+    "dependencias_externas": ["credenciales, APIs…"],
+    "alcance_comprobado": "string — nunca más amplio que lo real",
+    "snapshot": "ruta a copia documental opcional bajo checkpoints/CP-nn/snapshot/"
+  },
+  "reglas": [
+    "No copiar secretos.",
+    "Recuperar crea worktree/rama; no borra el trabajo posterior en la línea actual.",
+    "Sin git: solo snapshot documental + aviso."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "product-flow-metodo",
+  "displayName": "Product Flow (el método)",
+  "description": "Skill coordinadora para documentar y desarrollar productos con estado, puertas humanas, validador y recuperación.",
+  "version": "0.1.0-rc1",
+  "author": {
+    "name": "creación_método"
+  },
+  "license": "SEE THIRD_PARTY_NOTICES.md",
+  "skills": "./skills/"
+}

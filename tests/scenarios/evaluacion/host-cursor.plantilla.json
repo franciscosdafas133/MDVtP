@@ -1,0 +1,15 @@
+{
+  "escenario": "producto-simple",
+  "host": "cursor",
+  "version_host": "",
+  "version_paquete": "0.0.0-dev",
+  "entrada": "Contador CLI: imprime visitas: N y guarda el número",
+  "acciones": [],
+  "cumplio_ciclo_codigo": null,
+  "evidencia_antes_de_verificar": null,
+  "invento_requisitos": null,
+  "veredicto_agente": null,
+  "veredicto_evaluador": "pendiente",
+  "notas": "",
+  "ts": null
+}

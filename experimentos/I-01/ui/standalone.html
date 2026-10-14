@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Producto · editor (HTML aparte)</title>
+  <style>
+    :root {
+      --bg: #eef2f0;
+      --ink: #14201c;
+      --muted: #4b5c56;
+      --line: #c5d0cb;
+      --accent: #0b6e4f;
+      --accent-ink: #f3fbf7;
+      --warn: #9a3412;
+      --panel: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font: 15px/1.45 "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 420px at 10% -10%, #d7ebe2 0%, transparent 55%),
+        radial-gradient(700px 380px at 100% 0%, #e7e2d6 0%, transparent 50%),
+        var(--bg);
+    }
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 24px 12px;
+    }
+    h1 {
+      margin: 0;
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 1.55rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+    .sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      max-width: 40rem;
+    }
+    .status {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: right;
+      max-width: 16rem;
+    }
+    main {
+      display: grid;
+      gap: 14px;
+      padding: 0 24px 28px;
+      max-width: 920px;
+    }
+    label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    textarea {
+      width: 100%;
+      min-height: 280px;
+      resize: vertical;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      color: var(--ink);
+      font: 13.5px/1.55 "IBM Plex Mono", ui-monospace, monospace;
+      box-shadow: 0 1px 0 rgba(20, 32, 28, 0.04);
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-ink);
+    }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .proposal {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel);
+      padding: 14px 16px;
+    }
+    .proposal.visible { display: block; }
+    .proposal h2 { margin: 0 0 8px; font-size: 1rem; }
+    .proposal .reason {
+      color: var(--warn);
+      margin: 0 0 10px;
+      white-space: pre-wrap;
+    }
+    .proposal pre {
+      margin: 0 0 12px;
+      white-space: pre-wrap;
+      font: 12.5px/1.5 "IBM Plex Mono", ui-monospace, monospace;
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 8px;
+      max-height: 260px;
+      overflow: auto;
+    }
+    .log {
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: pre-wrap;
+      border-top: 1px dashed var(--line);
+      padding-top: 10px;
+      max-height: 110px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Producto · reservas de peluquería</h1>
+      <p class="sub">
+        Ventana aparte (navegador), no dentro del chat. Editas aquí; la IA del IDE
+        propone; tú aceptas o rechazas. El archivo solo cambia si aceptas.
+      </p>
+    </div>
+    <div class="status" id="status">Cargando…</div>
+  </header>
+  <main>
+    <div>
+      <label for="doc">Documento editable</label>
+      <textarea id="doc" spellcheck="true"></textarea>
+    </div>
+    <div class="actions">
+      <button class="primary" id="askBtn">Pedir corrección a la IA del IDE</button>
+      <button id="reloadBtn">Recargar desde disco</button>
+    </div>
+    <section class="proposal" id="proposalBox">
+      <h2>Propuesta de la IA</h2>
+      <p class="reason" id="proposalReason"></p>
+      <pre id="proposalText"></pre>
+      <div class="actions">
+        <button class="primary" id="acceptBtn">Aceptar y guardar</button>
+        <button id="rejectBtn">Rechazar</button>
+      </div>
+    </section>
+    <div class="log" id="log"></div>
+  </main>
+  <script>
+(function () {
+  var statusEl = document.getElementById("status");
+  var docEl = document.getElementById("doc");
+  var askBtn = document.getElementById("askBtn");
+  var reloadBtn = document.getElementById("reloadBtn");
+  var proposalBox = document.getElementById("proposalBox");
+  var proposalReason = document.getElementById("proposalReason");
+  var proposalText = document.getElementById("proposalText");
+  var acceptBtn = document.getElementById("acceptBtn");
+  var rejectBtn = document.getElementById("rejectBtn");
+  var logEl = document.getElementById("log");
+  var currentProposal = null;
+  var pollTimer = null;
+
+  function log(msg) {
+    logEl.textContent = (logEl.textContent ? logEl.textContent + "\n" : "") +
+      new Date().toISOString().slice(11, 19) + " " + msg;
+  }
+
+  function setStatus(msg) { statusEl.textContent = msg; }
+
+  async function api(path, options) {
+    var res;
+    try {
+      res = await fetch(path, options);
+    } catch (err) {
+      throw new Error(
+        "No hay conexión con el servidor local (¿se apagó?). " +
+        "Vuelve a Cursor y pide reiniciar http://127.0.0.1:8765/ — detalle: " +
+        (err && err.message ? err.message : err)
+      );
+    }
+    var data = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
+    return data;
+  }
+
+  function showProposal(p) {
+    currentProposal = p;
+    proposalReason.textContent = p.reason || "(sin explicación)";
+    proposalText.textContent = p.proposal || "";
+    proposalBox.classList.add("visible");
+  }
+
+  function hideProposal() {
+    currentProposal = null;
+    proposalBox.classList.remove("visible");
+  }
+
+  async function reload() {
+    var data = await api("/api/documento");
+    docEl.value = data.text || "";
+    setStatus("Documento cargado desde disco.");
+    log("Recarga OK (" + (data.text || "").length + " chars).");
+  }
+
+  async function askCorrection() {
+    askBtn.disabled = true;
+    hideProposal();
+    try {
+      await api("/api/solicitar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: docEl.value }),
+      });
+      setStatus("Solicitud enviada. Esperando propuesta de la IA del IDE…");
+      log("Solicitud escrita. El agente del IDE debe depositar la propuesta.");
+      startPolling();
+    } catch (err) {
+      setStatus("Error: " + err.message);
+      log(err.message);
+    } finally {
+      askBtn.disabled = false;
+    }
+  }
+
+  function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(async function () {
+      try {
+        var st = await api("/api/estado");
+        if (st.propuesta && st.propuesta.proposal) {
+          showProposal(st.propuesta);
+          setStatus("Propuesta lista. Acepta o rechaza.");
+          log("Propuesta recibida.");
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+      } catch (e) {
+        log("Poll: " + e.message);
+      }
+    }, 1500);
+  }
+
+  async function accept() {
+    if (!currentProposal) return;
+    try {
+      await api("/api/aceptar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: currentProposal.proposal,
+          reason: currentProposal.reason || "",
+        }),
+      });
+      docEl.value = currentProposal.proposal;
+      hideProposal();
+      setStatus("Guardado en producto.md.");
+      log("Aceptada y guardada.");
+    } catch (err) {
+      setStatus("No se guardó: " + err.message);
+      log(err.message);
+    }
+  }
+
+  async function reject() {
+    if (!currentProposal) return;
+    try {
+      await api("/api/rechazar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          proposal: currentProposal.proposal,
+          reason: currentProposal.reason || "rechazado en HTML aparte",
+        }),
+      });
+      hideProposal();
+      setStatus("Rechazada. El archivo no cambió.");
+      log("Rechazo anotado.");
+    } catch (err) {
+      setStatus("No se anotó: " + err.message);
+      log(err.message);
+    }
+  }
+
+  askBtn.addEventListener("click", askCorrection);
+  reloadBtn.addEventListener("click", function () {
+    reload().catch(function (e) { setStatus(e.message); });
+  });
+  acceptBtn.addEventListener("click", accept);
+  rejectBtn.addEventListener("click", reject);
+
+  reload()
+    .then(function () {
+      setStatus("Listo. Edita y pide corrección a la IA del IDE.");
+    })
+    .catch(function (e) {
+      setStatus("No se pudo cargar: " + e.message);
+    });
+
+  // Aviso si el servidor local se cae mientras la página sigue abierta.
+  setInterval(function () {
+    fetch("/api/salud")
+      .then(function (r) {
+        if (!r.ok) throw new Error("salud " + r.status);
+      })
+      .catch(function () {
+        setStatus("Servidor local caído. En Cursor pide reiniciar el editor en :8765.");
+      });
+  }, 5000);
+})();
+  </script>
+</body>
+</html>

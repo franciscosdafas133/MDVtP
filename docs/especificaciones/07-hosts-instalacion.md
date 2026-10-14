@@ -1,6 +1,6 @@
 # ESP-07 — Contrato de hosts e instalación
 
-Estado: borrador 0.1 · Fuente: encargo §5, §6 · Requisitos: R01, R16, R20
+Estado: borrador 0.3 · Fuente: encargo §5, §6 · Decisiones: DEC-02, DEC-06, DEC-08 · Prototipo: B15/B16 · Requisitos: R01, R16, R20
 
 ## Qué la inicia
 
@@ -38,12 +38,33 @@ B16 (instalación en una carpeta de prueba, conflictos y retirada), E13, E14, E1
 
 Ubicaciones, manifiesto y diferencias de host comprobadas → B15 y B16.
 
+## Cerrado en B07
+
+| Pregunta | Resolución |
+|---|---|
+| ¿Forma de entrega? | DEC-06: **skill/paquete instalable** en el proyecto; experiencia “descargar e iniciar en Cursor”. |
+| ¿Ventana? | DEC-02: al iniciar la skill, levantar/usar servidor local HTML (patrón I-01). |
+| ¿Runtime instalador + ventana + validador? | **Python 3** stdlib. |
+| ¿Manifiesto? | JSON con ruta relativa + SHA-256 + versión del paquete; retirada según DEC-06. |
+| ¿Avisos? | `THIRD_PARTY_NOTICES.md` (DEC-08). |
+| ¿Deriva cc-sdd entre hosts? | Un solo núcleo; adaptadores solo metadatos/rutas (hallazgo H4). |
+
+## Cerrado en B15/B16 (1.ª parte)
+
+| Pregunta | Resolución |
+|---|---|
+| Instalador | `scripts/install_metodo.py` (`--alcance global\|proyecto`, status, uninstall, build-dist, demo) |
+| Dónde | Skill **self-contained** en `~/.cursor/skills/product-flow` (global) o `.cursor/skills/` (proyecto); igual Claude |
+| Publicación | `skills/product-flow/` + `.cursor-plugin/plugin.json` + [INSTALL.md](../../INSTALL.md) |
+| Manifiesto | SHA-256; conflictos sin `--fuerza`; retirada solo de lo propio |
+| Adaptadores | `adapters/cursor/`, `adapters/claude-code/` |
+| Demo | `install_metodo.py demo` OK (proyecto + HOME fake) |
+
 ## Abierto
 
 | Pregunta | Se resuelve en |
 |---|---|
-| ¿Qué diferencias reales hay entre las variantes `claude-code-skills` y `cursor-skills` de cc-sdd? | B03 |
-| ¿Qué ubicaciones de compatibilidad escanea Cursor? ¿Puede descubrir también `.claude/skills/`? | B03, B15 (comprobar en el host real) |
-| ¿Cómo se implementa la entrada `/product-flow` en cada host: skill invocable, comando o regla? | B15 |
-| ¿Formato del manifiesto y del registro de migraciones? | B07, B16 |
-| ¿Runtime del instalador según el entorno confirmado? | B07 |
+| ¿Cursor carga también `.claude/skills/`? | Probar en host real (B19); por eso una sola skill activa por host que uses |
+| Arranque automático de ventana localhost al usar la skill | Enlace fino post-instalación / uso |
+| Migraciones entre versiones del paquete | R20 / B22 |
+| Versión Claude Code registrada | P-02 / B19 |

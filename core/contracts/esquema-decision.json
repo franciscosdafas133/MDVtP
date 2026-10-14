@@ -1,0 +1,34 @@
+{
+  "contrato_version": "0.1.0",
+  "archivo": "workflow/decisiones/DEC-NN.json",
+  "campos_requeridos": {
+    "id": "DEC-nn",
+    "titulo": "string",
+    "contexto": "string",
+    "alternativas": [
+      {
+        "id": "string local A/B/…",
+        "texto": "string",
+        "consecuencias": "string"
+      }
+    ],
+    "estado": "vocabulario.estados_decision",
+    "elegida": "id de alternativa o null",
+    "motivo": "string",
+    "apuntes": [
+      {
+        "id": "NOTE-nn",
+        "texto": "string",
+        "ts": "ISO-8601"
+      }
+    ],
+    "enlaces": ["REQ-…", "TASK-…", "OBJ-…"],
+    "sustituye": "DEC-id o null",
+    "version": "entero ≥ 1"
+  },
+  "reglas": [
+    "No puede haber dos DEC aceptadas que condicionen el mismo asunto (mismo id de asunto en enlaces+titulo normalizado) sin que una esté sustituida.",
+    "aceptada exige elegida no null.",
+    "sustituida exige sustituye apuntando a la nueva o la nueva apunta con sustituye a esta."
+  ]
+}

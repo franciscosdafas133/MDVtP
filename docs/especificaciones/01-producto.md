@@ -1,6 +1,6 @@
 # ESP-01 — Producto del paquete
 
-Estado: borrador 0.1 · Fuente: encargo §1–§3, §11, §14 · Objetivos: [objetivos.md](../objetivos.md)
+Estado: borrador 0.2 · Fuente: encargo §1–§3, §11, §14 · Decisiones: DEC-01…08 · Objetivos: [objetivos.md](../objetivos.md)
 
 ## Qué la inicia
 
@@ -45,10 +45,16 @@ El usuario la revisa en la Entrega A. Cada requisito debe tener una solución pr
 
 ESP-01 aceptada y el mapa de cobertura de B06 sin requisitos huérfanos → se pueden cerrar ESP-02 a ESP-08.
 
+## Cerrado en B06/B07
+
+| Pregunta | Resolución |
+|---|---|
+| ¿Base? | DEC-01: reutilizar y conectar; mapa en [seleccion.md](../seleccion.md) |
+| ¿Profundidad (R17)? | Señales: incertidumbre alta, dinero/datos sensibles, integraciones externas, irreversibilidad → más descubrimiento y más puertas. Proyectos triviales pueden fusionar documentos (ESP-03) sin saltarse puertas de producto. |
+| ¿Ventana? | DEC-02: HTML localhost al usar la skill |
+
 ## Abierto
 
 | Pregunta | Se resuelve en |
 |---|---|
-| ¿Qué fuente sirve de base (cc-sdd como candidata) y qué se desarrolla por cuenta propia? | B06 |
-| ¿Qué nivel de profundidad corresponde a cada tipo de proyecto (criterios de R17)? | B07 |
 | ¿Qué afirmaciones exactas permitirá la versión candidata? | B21 (§14) |

@@ -1,0 +1,22 @@
+{
+  "contrato_version": "0.1.0",
+  "origen": "R18 · ESP-02 entregar/operar · ESP-06 recuperación en producción",
+  "operar": {
+    "entrada": ["incremento_verificado_o_listo", "resumen_contextual"],
+    "salida": [
+      "workflow/operacion.md con checklist antes/durante/después",
+      "comprobaciones_reales_pendientes explícitas",
+      "recuperacion_produccion distinta de git/worktree"
+    ],
+    "obligatorio": [
+      "Listar lo que aún no se comprobó de verdad (credenciales, pago, SMS, etc.)",
+      "No marcar como hecho una prueba omitida o simulada",
+      "Separar recuperación de código (checkpoint/worktree) de producción (datos/APIs/pagos)"
+    ],
+    "prohibido": [
+      "Afirmar que el flujo termina al generar código",
+      "Inventar que ya hubo smoke/pago/credenciales reales",
+      "Usar git como único plan de recuperación en producción"
+    ]
+  }
+}

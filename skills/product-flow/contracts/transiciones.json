@@ -1,0 +1,28 @@
+{
+  "contrato_version": "0.1.0",
+  "tarea": {
+    "pendiente": ["preparada", "bloqueada"],
+    "preparada": ["en_curso", "bloqueada", "pendiente"],
+    "en_curso": ["en_revision", "bloqueada"],
+    "bloqueada": ["pendiente", "preparada", "en_curso", "en_revision"],
+    "en_revision": ["verificada", "en_curso", "bloqueada"],
+    "verificada": ["en_revision"]
+  },
+  "decision": {
+    "propuesta": ["aceptada", "rechazada", "aplazada"],
+    "aceptada": ["sustituida"],
+    "rechazada": ["propuesta"],
+    "aplazada": ["propuesta", "aceptada", "rechazada"],
+    "sustituida": []
+  },
+  "afirmacion": {
+    "pendiente": ["hipotesis", "confirmada"],
+    "hipotesis": ["confirmada", "pendiente"],
+    "confirmada": ["pendiente"]
+  },
+  "reglas_tarea": {
+    "a_preparada": "Todas las dependencias TASK listadas deben estar en verificada.",
+    "a_verificada": "Debe existir al menos una EVID en estado vigente enlazada por evidencia_de, o declaración explícita omitida/bloqueada en el campo evidencia de la tarea.",
+    "desde_verificada": "Solo a en_revision cuando un REQ/DEC del que depende cambió (R11)."
+  }
+}

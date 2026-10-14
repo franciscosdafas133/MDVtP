@@ -1,0 +1,30 @@
+{
+  "escenario": "producto-simple",
+  "clase": "determinista_paquete",
+  "veredicto": "ok",
+  "host": "script",
+  "version_paquete": "0.1.0-rc1",
+  "entrada": "Contador CLI: al ejecutar imprime 'visitas: N' y guarda el número en un archivo",
+  "acciones": [
+    "iniciar",
+    "escribir app/contador.py",
+    "bash app/comprobar.sh",
+    "evidenciar",
+    "presentar",
+    "verificar",
+    "operar"
+  ],
+  "evidencia": {
+    "tarea": "TASK-10",
+    "estado_tarea": "verificada",
+    "pendientes_operacion": [
+      "No hay despliegue web",
+      "no hay usuarios reales",
+      "no hay persistencia en nube"
+    ],
+    "validador": "OK",
+    "proyecto": "/home/doomf/Documents/creación_método/tests/fixtures/demo-recorrido"
+  },
+  "nota": "Recorrido mecánico. Un agente (Cursor/Claude/Grok) debe usar el PLAYBOOK y no autojuzgarse: el veredicto lo da este JSON + el usuario.",
+  "ts": "2026-10-14T20:35:51Z"
+}

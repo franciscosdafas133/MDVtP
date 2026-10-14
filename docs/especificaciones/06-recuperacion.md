@@ -1,6 +1,6 @@
 # ESP-06 — Contrato de recuperación
 
-Estado: borrador 0.1 · Fuente: encargo §5 · Requisitos: R12, R13, R18
+Estado: borrador 0.3 · Fuente: encargo §5 · Decisiones: DEC-07 · Prototipo: B11 · Requisitos: R12, R13, R18
 
 ## Qué la inicia
 
@@ -31,11 +31,23 @@ Escenarios E11 y E18 y pruebas de B17 (cambios sin commit, recuperación aislada
 
 Formato de checkpoint y procedimiento de recuperación aislada aceptados → B11.
 
+## Cerrado en B07
+
+| Pregunta | Resolución |
+|---|---|
+| ¿Rama o worktree? | **Worktree por defecto** si `git worktree` está disponible (X14); si no, rama. Salvaguardas de undo (X15): no borrar sin confirmar. |
+| ¿Commits ↔ tareas? | El metadato del checkpoint guarda ids de tareas/docs; al revertir se lista impacto por esas relaciones (ESP-03). |
+| ¿Sin git? | Checkpoints documentales (copia versionada bajo `workflow/checkpoints/`) + aviso: no hay recuperación de código aislada. El propio repo del método ya usa git (P-01 resuelta). |
+
+## Cerrado en B11
+
+| Pregunta | Resolución |
+|---|---|
+| Comandos | `product_flow.py checkpoint` / `recuperar`; esquema `core/contracts/esquema-checkpoint.json` |
+| Demo | `product_flow.py demo-b11` (worktree aislado; trabajo posterior conservado) |
+
 ## Abierto
 
 | Pregunta | Se resuelve en |
 |---|---|
-| ¿Rama o worktree por defecto? ¿Qué toma de `using-git-worktrees` (F07) y de `undo` de GSD Core (F03)? | B04, B05 |
-| ¿Cómo se relacionan commits con tareas para analizar dependencias al revertir? | B04 (F03 relaciona commits y dependencias) |
-| ¿Qué hacer en proyectos sin git? Hoy la propia carpeta de construcción no lo es (P-01 del tablero). | B07 |
-| ¿Cómo se describe el procedimiento de datos de `operacion.md` para que el checkpoint lo referencie? | B14 |
+| Procedimiento de datos en `operacion.md` referenciado por checkpoint | B14 |

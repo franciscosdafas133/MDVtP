@@ -1,6 +1,6 @@
 # ESP-08 — Plan de evaluación
 
-Estado: borrador 0.1 · Fuente: encargo §10, §14 · Requisitos: R14, R15, R19 y, de forma transversal, R01–R20
+Estado: borrador 0.2 · Fuente: encargo §10, §14 · Decisiones: DEC-04, DEC-05 · Requisitos: R14, R15, R19 y, de forma transversal, R01–R20
 
 ## Qué la inicia
 
@@ -46,11 +46,16 @@ El usuario revisa en B18 y B19 el criterio de éxito de cada escenario antes de 
 
 Escenarios con resultado esperado y criterio de éxito definidos → B18 y B19. Resultados registrados → B21 enumera lo que puede afirmarse y lo pendiente.
 
+## Cerrado en B07
+
+| Pregunta | Resolución |
+|---|---|
+| ¿TEA? | Solo principios/formato (X20); no el arnés. Sus JSON demuestran procedencia, no eficacia (B05). |
+| ¿Evaluador independiente? | (1) Scripts deterministas del paquete; (2) el **usuario** en puertas manuales y en revisión de B18; (3) opcional segunda sesión/modelo solo si hace falta desempate — nunca el mismo agente autojuzgándose. |
+| ¿Formato de resultado? | JSON por escenario: host, versión, entrada, acciones, veredicto, evidencia, timestamp (inspiración X20). |
+
 ## Abierto
 
 | Pregunta | Se resuelve en |
 |---|---|
-| ¿Qué casos y criterios de TEA (F06) se adaptan? ¿Qué demuestran de verdad sus registros de ejecución? | B05 |
-| ¿Quién o qué hace de evaluador independiente: otra sesión, otro modelo, un script o el usuario? | B07 |
-| ¿Umbral de estabilidad por escenario? | B18 |
-| ¿Formato de registro de resultados por host y versión? | B07 |
+| Umbral de estabilidad por escenario | B18 |

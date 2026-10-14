@@ -1,0 +1,46 @@
+{
+  "bateria": "regresion-B22",
+  "version": "0.1.0-rc1",
+  "ts": "2026-10-14T20:35:51Z",
+  "passed": 6,
+  "total": 6,
+  "veredicto": "ok",
+  "casos": [
+    {
+      "label": "validador_self_test",
+      "ok": true,
+      "exit": 0,
+      "tail": "[OK] workflow-ok: exit=0 codigos=[]\n[OK] workflow-ref-rota: exit=1 codigos=['referencia_rota']\n[OK] workflow-transicion-invalida: exit=1 codigos=['incoherencia_estado_eventos', 'transicion_invalida']\n[OK] workflow-evidencia-stale: exit=1 codigos=['evidencia_stale']\n[OK] workflow-decision-conflicto: exit=1 codigos=['decision_conflicto']\n"
+    },
+    {
+      "label": "integridad_b17",
+      "ok": true,
+      "exit": 0,
+      "tail": "invalido …\n  [OK] estado_invalido\n→ test_escritura_interrumpida …\n  [OK] escritura_interrumpida\n→ test_dirty_bloquea_checkpoint_commit …\n  [OK] dirty_checkpoint\n→ test_recuperar_aviso_dirty …\n  [OK] recuperacion_aislada\n→ test_atomic_sin_tmp …\n  [OK] escritura_atomica_limpia\n→ test_install_smoke …\n  [OK] instalacion_smoke\n→ test_recorrido_simple …\n  [OK] recorrido_producto_minimo\n\n=== B17: 8/8 → ok ===\nInforme: /home/doomf/Documents/creación_método/tests/scenarios/integridad/ultimo-informe.json\n"
+    },
+    {
+      "label": "evaluar_determinista_b18",
+      "ok": true,
+      "exit": 0,
+      "tail": "→ E08 …\n  [OK] E08\n→ E05 …\n  [OK] E05\n→ E11 …\n  [OK] E11\n→ E14 …\n  [OK] E14\n→ E15 …\n  [OK] E15\n→ E17 …\n  [OK] E17\n→ E12 …\n  [OK] E12\n\n=== B18 determinista: 7/7 → ok ===\nObservación agente: pendiente (E01, E02, E03, E09, E13, E16, E18)\nInforme: /home/doomf/Documents/creación_método/tests/scenarios/evaluacion/ultimo-informe.json\n"
+    },
+    {
+      "label": "integracion_b20",
+      "ok": true,
+      "exit": 0,
+      "tail": "obaciones y pendientes:\n  - Evidencias históricas se conservan pero ya no cuentan como vigentes\nPunto de recuperación disponible:\n  (sin tocar código automáticamente)\nSiguiente paso y por qué:\n  Puerta humana: revisar TASK-20 y aceptar/rechazar.\n\n\nInvalidación OK: tareas en_revision, evidencias stale=['EVID-01', 'EVID-02']\n\n=== B20: adaptar código v2 + re-verificar ===\n\nOK_INTEGRACION\n\n=== B20: ok ===\nInforme: /home/doomf/Documents/creación_método/tests/scenarios/integracion/ultimo-informe.json\n"
+    },
+    {
+      "label": "build_dist",
+      "ok": true,
+      "exit": 0,
+      "tail": "Bundle de distribución: /home/doomf/Documents/creación_método/skills/product-flow\n"
+    },
+    {
+      "label": "recorrido_simple",
+      "ok": true,
+      "exit": 0,
+      "tail": "Archivos actualizados:\n  - workflow/operacion.md\n  - workflow/estado.json\nComprobaciones y pendientes:\n  - pendientes reales listados — no inventar que ya pasaron\nPunto de recuperación disponible:\n  (crear checkpoint si el alcance ya está comprobado)\nSiguiente paso y por qué:\n  Publicar solo con checklist y pendientes a la vista\n\n\n=== RECORRIDO: veredicto=ok TASK-10=verificada validador=OK ===\nResultado: /home/doomf/Documents/creación_método/tests/scenarios/producto-simple/ultimo-resultado.json\n"
+    }
+  ]
+}

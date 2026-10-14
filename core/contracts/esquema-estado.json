@@ -1,0 +1,29 @@
+{
+  "contrato_version": "0.1.0",
+  "archivo": "workflow/estado.json",
+  "autoridad": "Navegación y ejecución. Si discrepa con eventos.jsonl, el validador marca incoherencia.",
+  "campos_requeridos": {
+    "contrato_version": "string — debe coincidir con core/contracts (mayor.menor compatible)",
+    "paquete_version": "string — versión del método instalada",
+    "actualizado": "string ISO-8601",
+    "actividad": {
+      "id": "string",
+      "nombre": "string",
+      "estado": "pendiente|preparada|en_curso|bloqueada|en_revision|verificada"
+    },
+    "tareas": "objeto id→tarea",
+    "bloqueos": "lista de {id, motivo, afecta[]}",
+    "siguiente_preparada": "TASK-id o null"
+  },
+  "tarea": {
+    "id": "TASK-nn",
+    "titulo": "string",
+    "estado": "vocabulario.estados_tarea",
+    "depende_de": ["TASK-…"],
+    "enlaces": ["REQ-…", "DEC-…"],
+    "evidencia": ["EVID-…"] ,
+    "comprobacion": "string o null",
+    "bloqueo": "id de bloqueo o null"
+  },
+  "escritura": "temporal + rename en el mismo directorio; un solo escritor; evento después del estado"
+}

@@ -1,0 +1,39 @@
+{
+  "contrato_version": "0.1.0",
+  "origen": "Adaptado de cc-sdd tasks-generation + tasks-parallel-analysis (X05). Sin tamaño por horas (H6 / N-21).",
+  "cuando_dividir": [
+    {
+      "id": "varios_resultados_verificables",
+      "descripcion": "La tarea mezcla dos o más resultados que se pueden comprobar por separado."
+    },
+    {
+      "id": "varias_fronteras",
+      "descripcion": "Toca componentes/límites distintos (p. ej. API + UI + migración) salvo que sea explícitamente una tarea de integración."
+    },
+    {
+      "id": "duda_determinante",
+      "descripcion": "Hay una duda que cambia el diseño; hay que aclararla o aislarla antes de implementar el resto."
+    },
+    {
+      "id": "una_evidencia_no_basta",
+      "descripcion": "No se puede dar por hecha con una sola evidencia/comprobación coherente."
+    }
+  ],
+  "cuando_no_dividir": [
+    "Un solo resultado verificable y una sola frontera.",
+    "Tareas de integración explícitas que unen piezas ya hechas.",
+    "Trozos tan pequeños que son solo bookkeeping (renombrar un símbolo, etc.)."
+  ],
+  "cada_hija_debe": [
+    "Tener una condición de terminación observable (qué será verdad al acabar).",
+    "No usar horas ni 'implementar soporte' / 'cablear' sin resultado concreto.",
+    "Declarar si va en cadena (depende de la anterior) o en paralelo (misma oleada)."
+  ],
+  "paralelo_solo_si": [
+    "No depende de datos que otra hija pendiente aún no produce.",
+    "No pisa los mismos archivos / recurso mutable.",
+    "Se puede probar sola.",
+    "La base (fundación) que necesita ya está hecha o es dependencia explícita común."
+  ],
+  "orden": "Por defecto las hijas van en cadena (la N depende de la N-1). El paralelo es opt-in y hay que marcarlo."
+}

@@ -1,6 +1,6 @@
 # ESP-04 — Contrato de estado
 
-Estado: borrador 0.1 · Fuente: encargo §5, §6, §8 · Requisitos: R08, R13, R14, R19
+Estado: borrador 0.3 · Fuente: encargo §5, §6, §8 · Decisiones: DEC-02, DEC-03 · Contratos: B08 · Requisitos: R08, R13, R14, R19
 
 ## Qué la inicia
 
@@ -23,9 +23,9 @@ Cualquier transición de una tarea, decisión, comprobación o actividad, y cada
 - **Integridad (R19):** cambios de estado inválidos, referencias rotas y comprobaciones desactualizadas se detectan mecánicamente cuando sea posible.
 - No se diseña copiando a la vez los modelos de estado de cc-sdd, Spec Kit y GSD Core (§7).
 
-**Estados de tarea de referencia** (los del tablero de construcción, §8; su uso en proyectos de usuario se confirma en B08): `pendiente`, `preparada`, `en_curso`, `bloqueada`, `en_revision`, `verificada`.
+**Estados de tarea** (confirmados en B08, mismos nombres que el tablero de construcción): `pendiente`, `preparada`, `en_curso`, `bloqueada`, `en_revision`, `verificada`.
 
-Transiciones candidatas (a validar en B08):
+Transiciones permitidas (`core/contracts/transiciones.json`):
 
 | Desde | Hacia | Condición |
 |---|---|---|
@@ -45,11 +45,21 @@ Pruebas deterministas de B17: estado inválido, escritura interrumpida, referenc
 
 Esquema de `estado.json`, formato de evento, transiciones y validador definidos → B09 y B10.
 
+## Cerrado en B07
+
+| Pregunta | Resolución |
+|---|---|
+| ¿Estado o eventos? | **Instantánea + registro:** `estado.json` es la autoridad de “dónde estamos”; `eventos.jsonl` audita y permite reparar. Si discrepan, el validador marca incoherencia y se reconcilia antes de avanzar (no event-sourcing puro). |
+| ¿Motor Spec Kit? | DEC-02/03: solo **contrato** (transiciones, atómico, eventos después del estado); validador propio. |
+| ¿Escritura atómica? | Archivo temporal + `rename` en el mismo directorio (Python stdlib); comprobar en B15/B17. |
+| ¿Runtime del validador? | **Python 3** (biblioteca estándar), alineado con DEC-03 y el servidor de ventana I-01. |
+
+## Cerrado en B08
+
+| Pregunta | Resolución |
+|---|---|
+| Esquema de `estado.json` y eventos | `core/contracts/esquema-estado.json`, `esquema-evento.json`; fixture `tests/fixtures/workflow-ok/` |
+
 ## Abierto
 
-| Pregunta | Se resuelve en |
-|---|---|
-| ¿Cuál es la fuente de verdad ante un desacuerdo: el estado o los eventos? ¿Event sourcing o instantánea más registro? | B04, B07 |
-| ¿Adaptar los principios del motor de Spec Kit a un validador pequeño o adoptar parte del motor con sus dependencias? | B04 (decisión pendiente de §7, F02) |
-| ¿Mecanismo de escritura atómica disponible en ambos hosts (archivo temporal + rename)? | B07, B15 |
-| ¿Runtime del validador (Node, Python o shell + jq)? | B07 (runtime mínimo) |
+Ninguno bloqueante para B09.

@@ -5,3 +5,23 @@
 .vscode/
 .DS_Store
 *.swp
+__pycache__/
+*.pyc
+.cursor/
+
+# I-01 probe oficial
+experimentos/I-01/probe-oficial/node_modules/
+
+# Demos generadas por product_flow.py (pueden incluir .git / worktrees)
+tests/fixtures/demo-iniciar/
+tests/fixtures/demo-continuidad/
+tests/fixtures/demo-recuperacion/
+tests/fixtures/demo-recuperacion-CP-*/
+tests/fixtures/demo-instalacion/
+tests/fixtures/demo-home-global/
+tests/fixtures/demo-tareas/
+tests/fixtures/demo-verificar/
+tests/fixtures/demo-operar/
+tests/fixtures/demo-recorrido/
+tests/fixtures/agente-recorrido/
+tests/fixtures/demo-integracion/

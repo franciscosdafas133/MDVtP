@@ -1,0 +1,63 @@
+{
+  "contrato_version": "0.1.0",
+  "nodos": {
+    "OBJ-01": {
+      "tipo": "OBJ",
+      "estado_afirmacion": "confirmada"
+    },
+    "REQ-01": {
+      "tipo": "REQ",
+      "estado_afirmacion": "confirmada"
+    },
+    "DEC-01": {
+      "tipo": "DEC"
+    },
+    "TASK-01": {
+      "tipo": "TASK"
+    },
+    "TASK-02": {
+      "tipo": "TASK"
+    },
+    "CHECK-01": {
+      "tipo": "CHECK"
+    },
+    "EVID-01": {
+      "tipo": "EVID"
+    },
+    "DEC-02": {
+      "tipo": "DEC"
+    }
+  },
+  "aristas": [
+    {
+      "de": "REQ-01",
+      "tipo": "deriva_de",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "DEC-01",
+      "tipo": "condiciona",
+      "a": "REQ-01"
+    },
+    {
+      "de": "TASK-01",
+      "tipo": "implementa",
+      "a": "REQ-01"
+    },
+    {
+      "de": "TASK-02",
+      "tipo": "implementa",
+      "a": "REQ-01"
+    },
+    {
+      "de": "CHECK-01",
+      "tipo": "verifica",
+      "a": "TASK-01"
+    },
+    {
+      "de": "EVID-01",
+      "tipo": "evidencia_de",
+      "a": "CHECK-01"
+    }
+  ]
+}

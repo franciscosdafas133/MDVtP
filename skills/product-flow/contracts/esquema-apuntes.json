@@ -1,0 +1,20 @@
+{
+  "contrato_version": "0.1.0",
+  "archivo": "workflow/apuntes.json",
+  "campos_requeridos": {
+    "contrato_version": "string",
+    "items": {
+      "NOTE-nn": {
+        "id": "NOTE-nn",
+        "texto": "string",
+        "enlaza": "ASK-|DEC-|REQ-|OBJ-|TASK-…",
+        "ts": "ISO-8601",
+        "pendiente": "boolean — visible en informe de estado si true"
+      }
+    }
+  },
+  "reglas": [
+    "Cada apunte tiene nodo NOTE en relaciones.json y arista comenta → enlaza.",
+    "No es una decisión: no cambia estados de DEC por sí solo."
+  ]
+}

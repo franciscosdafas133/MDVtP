@@ -1,0 +1,21 @@
+{
+  "bateria": "B20-integracion",
+  "ts": "2026-10-14T20:35:50Z",
+  "veredicto": "ok",
+  "pasos": [
+    "iniciar",
+    "registrar REQ-01",
+    "prueba integración v1 OK",
+    "TASK-20 y TASK-21 verificadas",
+    "impactar REQ-01",
+    "tareas invalidas + evidencia stale",
+    "prueba integración v2 OK",
+    "re-verificar + operar + validador OK"
+  ],
+  "proyecto": "/home/doomf/Documents/creación_método/tests/fixtures/demo-integracion",
+  "tareas_final": {
+    "TASK-20": "verificada",
+    "TASK-21": "verificada"
+  },
+  "nota": "Dos componentes interactúan; cambio de REQ-01 invalidó y se recuperó el flujo."
+}

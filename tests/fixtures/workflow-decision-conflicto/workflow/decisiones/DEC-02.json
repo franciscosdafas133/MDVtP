@@ -1,0 +1,21 @@
+{
+  "id": "DEC-02",
+  "titulo": "Autenticación por contraseña",
+  "contexto": "Duplicada a propósito",
+  "alternativas": [
+    {
+      "id": "A",
+      "texto": "Otra",
+      "consecuencias": "x"
+    }
+  ],
+  "estado": "aceptada",
+  "elegida": "A",
+  "motivo": "conflicto",
+  "apuntes": [],
+  "enlaces": [
+    "REQ-01"
+  ],
+  "sustituye": null,
+  "version": 1
+}

@@ -1,0 +1,15 @@
+{
+  "contrato_version": "0.1.0",
+  "archivo": "workflow/eventos.jsonl",
+  "formato": "una línea JSON por evento; append-only",
+  "campos_requeridos": {
+    "ts": "ISO-8601",
+    "tipo": "vocabulario.tipos_evento",
+    "actor": "usuario|agente|validador",
+    "sujeto": "id afectado (TASK-/DEC-/EVID-/…)",
+    "de": "estado anterior o null",
+    "a": "estado nuevo o null",
+    "detalle": "objeto libre pequeño"
+  },
+  "regla": "Tras mutar estado.json se escribe el evento. Al reanudar, el validador puede recomendar reconciliar si el último evento no cuadra con el estado."
+}

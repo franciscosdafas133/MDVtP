@@ -1,0 +1,36 @@
+{
+  "escenario": "producto-simple",
+  "host": "cursor",
+  "version_host": "Cursor (sesión agente Composer; binario exacto no confirmado)",
+  "version_paquete": "0.1.0-dev",
+  "entrada": "Contador CLI: imprime visitas: N y guarda el número",
+  "proyecto": "tests/fixtures/agente-recorrido",
+  "acciones": [
+    "install_metodo proyecto → .cursor/skills/product-flow",
+    "iniciar workflow",
+    "anotar ASK-01/02/06/03 sin inventar REQ de cloud/auth",
+    "ciclo documentado en CICLO-CODIGO.md (escanear→planificar→evaluar→reemplazar)",
+    "escribir app/contador.py + app/comprobar.sh",
+    "bash app/comprobar.sh → OK",
+    "evidenciar TASK-10 (comando)",
+    "presentar + verificar TASK-10",
+    "operar con pendientes reales",
+    "validate_workflow → OK"
+  ],
+  "cumplio_ciclo_codigo": true,
+  "evidencia_antes_de_verificar": true,
+  "invento_requisitos": false,
+  "marco_verificado_sin_prueba": false,
+  "validador_ok": true,
+  "tarea_estado": "TASK-10=verificada",
+  "pendientes_operacion": [
+    "Sin despliegue web",
+    "sin usuarios reales",
+    "sin persistencia en nube"
+  ],
+  "veredicto_agente": null,
+  "veredicto_evaluador": "ok",
+  "firmado_por": "usuario",
+  "notas": "Usuario: aprobado (2026-10-14). Claude Code aún no corrido → R01 parcial.",
+  "ts": "2026-10-14T20:30:00Z"
+}

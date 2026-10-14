@@ -1,0 +1,29 @@
+{
+  "contrato_version": "0.1.0",
+  "archivo": "workflow/relaciones.json",
+  "autoridad": "Única autoridad mecánica de enlaces entre ids. Los Markdown humanos deben coincidir; si no, gana este archivo y el validador avisa desvío cuando B09 compare.",
+  "campos_requeridos": {
+    "contrato_version": "string",
+    "nodos": {
+      "ID": {
+        "tipo": "OBJ|REQ|DEC|TASK|CHECK|EVID|ASK|NOTE",
+        "estado_afirmacion": "solo REQ/OBJ si aplica: confirmada|hipotesis|pendiente",
+        "archivo": "ruta relativa opcional"
+      }
+    },
+    "aristas": [
+      {
+        "de": "ID",
+        "tipo": "vocabulario.tipos_relacion",
+        "a": "ID"
+      }
+    ]
+  },
+  "cadena_ilustrativa": "OBJ → REQ → DEC → TASK → CHECK → EVID",
+  "reglas": [
+    "Todo de/a debe existir en nodos.",
+    "Sin ids duplicados.",
+    "evidencia_de: de=EVID, a=CHECK|TASK|REQ.",
+    "sustituye: de y a son DEC."
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "bateria": "B18-determinista",
+  "ts": "2026-10-14T20:35:49Z",
+  "deterministas_ok": 7,
+  "deterministas_total": 7,
+  "observacion_pendiente": [
+    "E01",
+    "E02",
+    "E03",
+    "E09",
+    "E13",
+    "E16",
+    "E18"
+  ],
+  "veredicto_determinista": "ok",
+  "veredicto_agente": "pendiente",
+  "casos": [
+    {
+      "id": "E08",
+      "ok": true,
+      "exit": 0,
+      "esperado_exit": 0,
+      "nota": "verificar sin evidencia falla; depurar×3",
+      "tail": " una hipótesis nueva, test, arreglo mínimo.\nTOPE 3/3 en TASK-03. No sigas parcheando a ciegas.\nPregunta al usuario con las hipótesis probadas:\n  1. param mal leído → fallo\n  2. zona horaria → fallo\n  3. índice BD → fallo\n\n=== Comprobación B13: TASK-02=verificada, TASK-03=bloqueada, intentos=3 → OK ===\nProhibido marcar verificada sin EVID vigente (ni omitida/bloqueada justificada en comprobacion).\n"
+    },
+    {
+      "id": "E05",
+      "ok": true,
+      "exit": 0,
+      "esperado_exit": 0,
+      "nota": "dividir + bloqueo parcial",
+      "tail": " confirma y el registro queda en BD\nValidador: OK\n\n=== DEMO B12: bloquear una hija (parcial) ===\n\nBloqueada TASK-03: Falta acceso a la BD de staging\n  Marca: MANUAL_VERIFY_REQUIRED\n  Otras tareas que pueden seguir (no dependen de ella): TASK-01, TASK-02, TASK-80\nValidador: OK\n\n=== Comprobación B12: padre_dividido=bloqueada, hija_bloqueada=bloqueada, independiente_sigue=preparada, hijas=3 → OK ===\n"
+    },
+    {
+      "id": "E11",
+      "ok": true,
+      "exit": 0,
+      "esperado_exit": 0,
+      "nota": "checkpoint + worktree",
+      "tail": "ree) ===\n\nWorktree aislado en: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion-CP-01\n  Rama: recuperar/CP-01\n  Commit: 9f8ac8e07ae3e2edef72f36aa0241203fc20f4fc\n  Checkpoint: CP-01 — Después del descubrimiento inicial\n  El trabajo en el proyecto original se conserva intacto.\n\n=== Comprobación demo B11: aislado_sin_cambio_posterior=True, original_conserva_cambio=True → OK ===\n"
+    },
+    {
+      "id": "E14",
+      "ok": true,
+      "exit": 0,
+      "esperado_exit": 0,
+      "nota": "instalación smoke",
+      "tail": "f/Documents/creación_método/tests/fixtures/demo-home-global/.cursor/skills/product-flow/scripts/product_flow.py iniciar --proyecto . --idea \"…\"\nglobal en fake HOME: OK\nRetirado: /home/doomf/Documents/creación_método/tests/fixtures/demo-home-global/.cursor/skills/product-flow\nArchivos retirados≈41; conservados modificados=0\nConflictos (revisa o usa --fuerza):\n  · product-flow/SKILL.md (modificado)\n"
+    },
+    {
+      "id": "E15",
+      "ok": true,
+      "exit": 0,
+      "esperado_exit": 0,
+      "nota": "fixture sano + defectos conocidos",
+      "tail": "[OK] workflow-ok: exit=0 codigos=[]\n[OK] workflow-ref-rota: exit=1 codigos=['referencia_rota']\n[OK] workflow-transicion-invalida: exit=1 codigos=['incoherencia_estado_eventos', 'transicion_invalida']\n[OK] workflow-evidencia-stale: exit=1 codigos=['evidencia_stale']\n[OK] workflow-decision-conflicto: exit=1 codigos=['decision_conflicto']\n"
+    },
+    {
+      "id": "E17",
+      "ok": true,
+      "exit": 0,
+      "esperado_exit": 0,
+      "nota": "producto mínimo cableado",
+      "tail": "s:\n  - pendientes reales listados — no inventar que ya pasaron\nPunto de recuperación disponible:\n  (crear checkpoint si el alcance ya está comprobado)\nSiguiente paso y por qué:\n  Publicar solo con checklist y pendientes a la vista\n\n\n=== RECORRIDO: veredicto=ok TASK-10=verificada validador=OK ===\nResultado: /home/doomf/Documents/creación_método/tests/scenarios/producto-simple/ultimo-resultado.json\n"
+    },
+    {
+      "id": "E12",
+      "ok": true,
+      "exit": 0,
+      "esperado_exit": 0,
+      "nota": "batería integridad completa",
+      "tail": "st_dirty_bloquea_checkpoint_commit …\n  [OK] dirty_checkpoint\n→ test_recuperar_aviso_dirty …\n  [OK] recuperacion_aislada\n→ test_atomic_sin_tmp …\n  [OK] escritura_atomica_limpia\n→ test_install_smoke …\n  [OK] instalacion_smoke\n→ test_recorrido_simple …\n  [OK] recorrido_producto_minimo\n\n=== B17: 8/8 → ok ===\nInforme: /home/doomf/Documents/creación_método/tests/scenarios/integridad/ultimo-informe.json\n"
+    },
+    {
+      "id": "E01",
+      "ok": null,
+      "exit": null,
+      "esperado_exit": null,
+      "nota": "observación de agente — pendiente B18/B19 (no autojuzgar)",
+      "tail": ""
+    },
+    {
+      "id": "E02",
+      "ok": null,
+      "exit": null,
+      "esperado_exit": null,
+      "nota": "observación de agente — pendiente B18/B19 (no autojuzgar)",
+      "tail": ""
+    },
+    {
+      "id": "E03",
+      "ok": null,
+      "exit": null,
+      "esperado_exit": null,
+      "nota": "observación de agente — pendiente B18/B19 (no autojuzgar)",
+      "tail": ""
+    },
+    {
+      "id": "E09",
+      "ok": null,
+      "exit": null,
+      "esperado_exit": null,
+      "nota": "observación de agente — pendiente B18/B19 (no autojuzgar)",
+      "tail": ""
+    },
+    {
+      "id": "E13",
+      "ok": null,
+      "exit": null,
+      "esperado_exit": null,
+      "nota": "observación de agente — pendiente B18/B19 (no autojuzgar)",
+      "tail": ""
+    },
+    {
+      "id": "E16",
+      "ok": null,
+      "exit": null,
+      "esperado_exit": null,
+      "nota": "observación de agente — pendiente B18/B19 (no autojuzgar)",
+      "tail": ""
+    },
+    {
+      "id": "E18",
+      "ok": null,
+      "exit": null,
+      "esperado_exit": null,
+      "nota": "observación de agente — pendiente B18/B19 (no autojuzgar)",
+      "tail": ""
+    }
+  ],
+  "regla": "El mismo agente no se autoaprueba. Hosts reales = B19."
+}

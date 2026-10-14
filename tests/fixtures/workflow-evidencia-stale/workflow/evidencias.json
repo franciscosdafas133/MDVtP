@@ -1,0 +1,16 @@
+{
+  "contrato_version": "0.1.0",
+  "items": {
+    "EVID-01": {
+      "id": "EVID-01",
+      "estado": "vigente",
+      "origen": "hash_archivo",
+      "valor": "hash-viejo",
+      "cubre": [
+        "src/app.py"
+      ],
+      "registrado": "2026-10-12T12:00:00Z",
+      "motivo_stale": null
+    }
+  }
+}

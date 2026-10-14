@@ -1,0 +1,51 @@
+{
+  "contrato_version": "0.1.1",
+  "origen": "Síntesis X01/X02 + DEC-04/DEC-05 + apunte usuario 2026-10-14",
+  "ciclo_cambio_codigo": {
+    "orden_obligatorio": [
+      "escanear",
+      "planificar",
+      "evaluar",
+      "reemplazar_aplicar"
+    ],
+    "notas": [
+      "Siempre proponer un escaneo de código/docs antes de planear el cambio.",
+      "Planificar el cambio concreto.",
+      "Evaluar el plan contra requisito, pruebas y riesgos.",
+      "Solo entonces reemplazar/aplicar el cambio mínimo."
+    ]
+  },
+  "verificar": {
+    "orden": [
+      "requisito_o_tarea_clara",
+      "plan_pruebas_auto_vs_manual",
+      "puerta_humana_al_plan",
+      "ejecutar_pruebas_ligadas",
+      "revision_manual_si_aplica",
+      "cerrar_con_evidencia_vigente"
+    ],
+    "prohibido": [
+      "Marcar verificada sin EVID vigente ni omitida/bloqueada justificada",
+      "Reutilizar evidencia stale como prueba del estado nuevo",
+      "Declarar éxito si el comando de prueba falló",
+      "Saltar el ciclo escanear→planificar→evaluar→reemplazar"
+    ]
+  },
+  "depurar": {
+    "orden": [
+      "escanear_codigo_y_docs",
+      "reproducir_el_fallo",
+      "planificar_hipotesis_unica",
+      "evaluar_hipotesis",
+      "reemplazar_arreglo_minimo",
+      "verificar_de_nuevo"
+    ],
+    "max_intentos_sin_preguntar": 3,
+    "al_tercer_fallo": "Parar, informar hipótesis probadas, preguntar al usuario (DEC-05)"
+  },
+  "implementar": {
+    "alcance": "Una sola TASK preparada/en_curso por ciclo",
+    "salida": ["escaneo", "plan", "evaluacion", "cambios", "comprobaciones", "pendientes", "siguiente"],
+    "prohibido": ["reset destructivo", "marcar verificada desde implementar", "cambiar sin escanear ni plan"]
+  }
+}

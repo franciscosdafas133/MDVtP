@@ -1,6 +1,6 @@
 # ESP-05 — Contrato de decisiones
 
-Estado: borrador 0.1 · Fuente: encargo §4, §5 · Requisitos: R05, R06, R11
+Estado: borrador 0.3 · Fuente: encargo §4, §5 · Decisiones: DEC-07 · Contratos: B08 · Requisitos: R05, R06, R11
 
 ## Qué la inicia
 
@@ -34,10 +34,16 @@ Escenarios E02, E03 y E07. Validador: transiciones de estado válidas y sin deci
 
 Formato de registro y transiciones aceptados → el coordinador (ESP-02) implementa las acciones `decidir`, `anotar` y `reabrir`.
 
-## Abierto
+## Cerrado en B07
 
-| Pregunta | Se resuelve en |
+| Pregunta | Resolución |
 |---|---|
-| ¿Qué umbral convierte una elección en «decisión significativa» con registro propio? | B07 (proporcional, R17) |
-| ¿Qué toma de `bmad-correct-course` para el análisis de impacto y qué de `bmad-advanced-elicitation` para revisar propuestas? | B05 |
-| ¿Los apuntes viven dentro de la decisión o en un registro de apuntes enlazado? | B07 |
+| ¿Decisión significativa? | Tiene registro propio si cambia alcance, requisitos, arquitectura, datos personales/dinero, o si el usuario pide decidir. Elecciones triviales de redacción pueden ser apunte sin DEC. |
+| ¿Impacto / elicitación BMAD? | Solo **inspiración** (DEC-08: sin marca bmad); checklist de impacto propio en B09/B10. |
+| ¿Dónde viven los apuntes? | Campo `apuntes[]` **dentro** del registro de la decisión/pregunta/requisito enlazado; índice de pendientes en el informe de estado (R06). |
+
+## Cerrado en B08
+
+| Pregunta | Resolución |
+|---|---|
+| Formato por decisión | `workflow/decisiones/DEC-NN.json` según `core/contracts/esquema-decision.json` |

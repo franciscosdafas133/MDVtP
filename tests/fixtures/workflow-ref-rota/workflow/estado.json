@@ -1,0 +1,43 @@
+{
+  "contrato_version": "0.1.0",
+  "paquete_version": "0.0.0-dev",
+  "actualizado": "2026-10-12T12:05:00Z",
+  "actividad": {
+    "id": "act-1",
+    "nombre": "primer incremento",
+    "estado": "en_curso"
+  },
+  "tareas": {
+    "TASK-01": {
+      "id": "TASK-01",
+      "titulo": "Login básico",
+      "estado": "verificada",
+      "depende_de": [],
+      "enlaces": [
+        "REQ-01",
+        "DEC-01"
+      ],
+      "evidencia": [
+        "EVID-01"
+      ],
+      "comprobacion": null,
+      "bloqueo": null
+    },
+    "TASK-02": {
+      "id": "TASK-02",
+      "titulo": "Recordar sesión",
+      "estado": "preparada",
+      "depende_de": [
+        "TASK-01"
+      ],
+      "enlaces": [
+        "REQ-99"
+      ],
+      "evidencia": [],
+      "comprobacion": null,
+      "bloqueo": null
+    }
+  },
+  "bloqueos": [],
+  "siguiente_preparada": "TASK-02"
+}

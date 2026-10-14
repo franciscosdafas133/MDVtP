@@ -1,0 +1,16 @@
+{
+  "id": "DEC-01",
+  "titulo": "Autenticación por contraseña",
+  "contexto": "Necesitamos identificar al usuario en la primera versión.",
+  "alternativas": [
+    {"id": "A", "texto": "Usuario y contraseña", "consecuencias": "Simple; hay que hashear."},
+    {"id": "B", "texto": "Solo magic link", "consecuencias": "Depende del correo."}
+  ],
+  "estado": "aceptada",
+  "elegida": "A",
+  "motivo": "Más rápido de entregar para el piloto.",
+  "apuntes": [],
+  "enlaces": ["REQ-01"],
+  "sustituye": null,
+  "version": 1
+}

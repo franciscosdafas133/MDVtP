@@ -1,6 +1,6 @@
 # ESP-02 — Contrato del coordinador
 
-Estado: borrador 0.1 · Fuente: encargo §4, §5, §13 · Requisitos: R02, R03, R08, R09, R17
+Estado: borrador 0.3 · Fuente: encargo §4, §5, §13 · Decisiones: DEC-02, DEC-03, DEC-07 · Prototipo: B09 · Requisitos: R02, R03, R08, R09, R17
 
 ## Qué la inicia
 
@@ -41,24 +41,52 @@ Siguiente paso y por qué:
 - Cuando un paso necesita una investigación, la crea con su pregunta y su condición de cierre.
 - Al retomar, contrasta estado, eventos, documentos y árbol de trabajo antes de actuar; detecta entradas ausentes o desactualizadas (§9).
 - Una skill coordinadora carga procedimientos según la actividad; las skills auxiliares, si existen, solo se usan a través del coordinador (§5).
+- **DEC-02:** al iniciar/continuar la skill, se asegura la ventana HTML en localhost (servidor local del paquete) enlazada al agente del host; el chat no es el único lugar para editar documentación.
+- **DEC-03 / DEC-07:** el coordinador propone; el validador bloquea transiciones inválidas; las puertas de producto las responde el usuario.
 
 ## Actividades que enruta
 
-Las doce de §2: entender el problema, descubrir necesidades, investigar viabilidad, diseñar el sistema, preparar una base, planificar incrementos, implementar e integrar, verificar, diagnosticar, entregar, operar y mantener, y aprender. Para cada una se definirá en B07 su entrada, su salida, su condición de avance y qué hacer si falta evidencia (columna «Si falta evidencia» de §2).
+Las doce de §2. Entrada/salida/avance (resumen B07):
+
+| Actividad | Entrada mínima | Sale con | Si falta evidencia |
+|---|---|---|---|
+| Entender problema | Idea o producto.md | producto.md usable + puertas pendientes | Preguntas R03; no inventar requisitos |
+| Descubrir | producto | descubrimiento + preguntas | Marcar área «falta / cómo averiguarlo» |
+| Viabilidad | descubrimiento | hipótesis con estado | Bloqueo parcial (R10), no frenar todo |
+| Diseñar sistema | requisitos aceptados | sistema.md (+ flujos) | No avanzar implementación |
+| Base / plan | sistema + decisiones | plan y tareas | Dividir (R09) |
+| Implementar | tarea preparada | código + eventos | Distinguir simulación vs real (E04) |
+| Verificar | plan de pruebas OK (DEC-04) | evidencia o no cumple | MANUAL_VERIFY_REQUIRED |
+| Diagnosticar | fallo | informe + test que falla | Parar a los 3 (DEC-05) |
+| Entregar / operar | verificación | operación.md | Checklist pendiente explícito |
+| Aprender | cierre incremento | apuntes / mejoras al método | No borrar historia |
+
+**Selección del próximo paso:** tabla de rutas (inspiración X11) sobre **hechos del validador** (tareas preparadas, bloqueos, evidencia stale), no sobre la narración del modelo.
 
 ## Cómo se revisa
 
-Escenarios E01, E03, E05 y E06, y el ejemplo de §11, ejecutados en ambos hosts (B19).
+Escenarios E01, E03, E05 y E06, y el ejemplo de §11, ejecutados en ambos hosts (B19). Revisión de diseño: [REVISION-paso-7.md](REVISION-paso-7.md).
 
 ## Qué permite avanzar
 
-Contrato aceptado con todas las acciones asignadas a una transición de ESP-04 → B09 puede construir el prototipo.
+Contrato aceptado con acciones ↔ transiciones ESP-04 → B09.
+
+## Cerrado en B09 (prototipo)
+
+| Pregunta | Resolución |
+|---|---|
+| Procedimientos internos | `core/skills/product-flow/procedures/` + script `scripts/product_flow.py` (iniciar/estado/continuar/demo) |
+| Idea vaga → incremento | Crea `workflow/`, OBJ-01 hipótesis, ASK-01…09, TASK-01 en descubrimiento; validador OK |
+
+## Cerrado en B14
+
+| Pregunta | Resolución |
+|---|---|
+| ¿Cómo se entrega / opera? | `product_flow.py operar` rellena `operacion.md`: checklist contextual, pendientes reales obligatorios, recuperación prod ≠ git. |
 
 ## Abierto
 
 | Pregunta | Se resuelve en |
 |---|---|
-| ¿Cómo se selecciona el próximo paso? ¿Tabla de enrutamiento por estado (estilo `progress` de GSD Core) u otra? | B04, B07 |
-| ¿Argumentos o conversación en cada host? | B15 (según capacidades comprobadas) |
-| ¿Qué procedimientos internos existen y cómo se cargan sin saturar el contexto? | B03, B07 (Agent OS como referencia condicional) |
-| ¿Cómo se gradúa la profundidad (R17): criterios y señales de riesgo? | B07 |
+| ¿Argumentos o conversación en cada host? | B15 (adaptadores ya existen; afinado en uso real) |
+| Escenarios E17/E18 con despliegue real | B18–B20 |

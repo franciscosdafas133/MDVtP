@@ -1,0 +1,22 @@
+{
+  "contrato_version": "0.1.0",
+  "archivo": "workflow/evidencias.json",
+  "campos_requeridos": {
+    "contrato_version": "string",
+    "items": {
+      "EVID-nn": {
+        "id": "EVID-nn",
+        "estado": "vigente|stale|omitida|bloqueada",
+        "origen": "commit|hash_archivo|comando|manual",
+        "valor": "string (hash, commit, comando o nota)",
+        "cubre": ["rutas o ids cubiertos"],
+        "registrado": "ISO-8601",
+        "motivo_stale": "string o null"
+      }
+    }
+  },
+  "reglas": [
+    "Una tarea no puede estar verificada si todas sus EVID están stale/omitida/bloqueada sin justificación en comprobacion.",
+    "Si cubre incluye una ruta y el llamador pasa --huellas con hash distinto al valor (origen hash_archivo), el validador reporta evidencia_stale."
+  ]
+}

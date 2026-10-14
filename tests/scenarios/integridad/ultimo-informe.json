@@ -1,0 +1,57 @@
+{
+  "bateria": "B17-integridad",
+  "ts": "2026-10-14T20:35:49Z",
+  "passed": 8,
+  "total": 8,
+  "veredicto": "ok",
+  "casos": [
+    {
+      "caso": "fixtures_validador",
+      "ok": true,
+      "esperado": "workflow-ok pasa; ref-rota/transicion/stale/conflicto fallan con código esperado",
+      "detalle": "[OK] workflow-ok: exit=0 codigos=[]\n[OK] workflow-ref-rota: exit=1 codigos=['referencia_rota']\n[OK] workflow-transicion-invalida: exit=1 codigos=['incoherencia_estado_eventos', 'transicion_invalida']\n[OK] workflow-evidencia-stale: exit=1 codigos=['evidencia_stale']\n[OK] workflow-decision-conflicto: exit=1 codigos=['decision_conflicto']"
+    },
+    {
+      "caso": "estado_invalido",
+      "ok": true,
+      "esperado": "validador exit=1 y código esquema",
+      "detalle": "FALLA — 4 hallazgo(s) en /tmp/b17-estado-bt5212cl/workflow\n  [esquema] estado.json sin campo paquete_version (/tmp/b17-estado-bt5212cl/workflow/estado.json)\n  [esquema] estado.json sin campo actualizado (/tmp/b17-estado-bt5212cl/workflow/estado.json)\n  [esquema] estado.json sin campo actividad (/tmp/b17-estado-bt5212cl/workflow/estado.json)\n  [esquema] estado.json sin campo tareas (/tmp/b17-estado-bt5212cl/workflow/estado.json)"
+    },
+    {
+      "caso": "escritura_interrumpida",
+      "ok": true,
+      "esperado": "JSON truncado → validador falla (detecta incoherencia)",
+      "detalle": "FALLA — 1 hallazgo(s) en /tmp/b17-tmp-2t4sf99b/workflow\n  [json_invalido] Unterminated string starting at: line 1 column 31 (char 30) (workflow)"
+    },
+    {
+      "caso": "dirty_checkpoint",
+      "ok": true,
+      "esperado": "checkpoint --commit con dirty → exit 2, no borra ni force-commit",
+      "detalle": "Hay archivos sin commit. No se hará commit automático de todo el repo.\nOpciones: confirma tú el commit, o usa --sin-commit (solo snapshot documental).\n  · sucio.txt"
+    },
+    {
+      "caso": "recuperacion_aislada",
+      "ok": true,
+      "esperado": "demo-b11: worktree/rama desde CP sin perder trabajo posterior",
+      "detalle": "descubrimiento inicial\n  Modo: git\n  Commit: c326305463ba0de40e994513cc2e053965ff6e07\n  Snapshot: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion/workflow/checkpoints/CP-01/snapshot\n  Alcance comprobado: Solo creación de workflow y validador OK; sin pruebas de producto\n  Recuperar con: product_flow.py recuperar --proyecto … --checkpoint CP-01\n\n=== DEMO B11: recuperar (worktree) ===\n\nWorktree aislado en: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion"
+    },
+    {
+      "caso": "escritura_atomica_limpia",
+      "ok": true,
+      "esperado": "tras iniciar no quedan *.tmp en workflow/",
+      "detalle": "tmp huérfanos: []"
+    },
+    {
+      "caso": "instalacion_smoke",
+      "ok": true,
+      "esperado": "install_metodo.py demo (proyecto + global fake) OK",
+      "detalle": "0-rc1)\n  → /home/doomf/Documents/creación_método/tests/fixtures/demo-home-global/.cursor/skills/product-flow\n  Ya puedes abrir cualquier proyecto y usar /product-flow\n  Ejemplo:\n    python3 /home/doomf/Documents/creación_método/tests/fixtures/demo-home-global/.cursor/skills/product-flow/scripts/product_flow.py iniciar --proyecto . --idea \"…\"\nglobal en fake HOME: OK\nRetirado: /home/doomf/Documents/creación_método/tests/fixtures/demo-home-global/.cursor/skills/product-flow\nArchivos retirados≈41; c"
+    },
+    {
+      "caso": "recorrido_producto_minimo",
+      "ok": true,
+      "esperado": "recorrido-simple veredicto=ok",
+      "detalle": "s:\n  - pendientes reales listados — no inventar que ya pasaron\nPunto de recuperación disponible:\n  (crear checkpoint si el alcance ya está comprobado)\nSiguiente paso y por qué:\n  Publicar solo con checklist y pendientes a la vista\n\n\n=== RECORRIDO: veredicto=ok TASK-10=verificada validador=OK ===\nResultado: /home/doomf/Documents/creación_método/tests/scenarios/producto-simple/ultimo-resultado.json"
+    }
+  ]
+}
