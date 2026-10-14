@@ -1,7 +1,7 @@
 {
   "bateria": "regresion-B22",
   "version": "0.1.0-rc1",
-  "ts": "2026-10-14T23:07:45Z",
+  "ts": "2026-10-14T23:25:07Z",
   "passed": 7,
   "total": 7,
   "veredicto": "ok",
@@ -46,7 +46,7 @@
       "label": "hallazgos_bot",
       "ok": true,
       "exit": 0,
-      "tail": "OK no ejecuta texto suelto\nOK prueba en rojo no es vigente\nOK no verifica en rojo\nOK verifica solo con exit 0\nOK rechaza comando trivial true\nOK rechaza manual si hay comprobacion\nOK modo rapido = 3 ASK\nOK pistas de consultorio\nOK lenguaje llano en descubrimiento\nOK continuar tras ASK respondidas\nOK bloqueo tarjeta → MANUAL_VERIFY_REQUIRED\nOK no desbloquea cobro simulado\nOK impactar DEC → TASK en_revision\nHALLAZGOS OK\n"
+      "tail": "OK no ejecuta texto suelto\nOK prueba en rojo no es vigente\nOK no verifica en rojo\nOK verifica solo con exit 0\nOK rechaza comando trivial true\nOK rechaza python3 -c pass / no alineado a comprobacion\nOK rechaza manual si hay comprobacion\nOK modo rapido = 3 ASK\nOK pistas de consultorio\nOK lenguaje llano en descubrimiento\nOK continuar tras ASK respondidas\nOK bloqueo tarjeta → MANUAL_VERIFY_REQUIRED\nOK no desbloquea cobro simulado\nOK impactar DEC → TASK en_revision\nHALLAZGOS OK\n"
     }
   ]
 }

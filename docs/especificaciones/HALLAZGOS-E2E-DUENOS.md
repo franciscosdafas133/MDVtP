@@ -9,6 +9,13 @@ Fallo grave: desbloquear/verificar tarjeta con simulación.
 
 Veredicto del probador: útil con huecos. Documental bien; promesa de pruebas honestas rota (evidencia texto libre; `siguiente_preparada`; `recuperar` worktree; `impactar` TASK/DEC).
 
+## Oleada D — e2e-v3-nivel-1 lavandería (a8885a3)
+
+Formular **4/5**, construir **4/5**. Modo rápido, continuar→requisito, `--ejecutar`, huellas, impactar DEC: OK.  
+Huecos: `python3 -c pass` aún verificaba; stale solo avisaba; sin pistas lavandería; operar sin «cómo se usa».
+
+**Tras el informe (local):** comando debe alinear con `--comprobacion`; `python -c pass` rechazado; `continuar` marca stale; pistas lavandería/academia/hostal; `operar --uso`.
+
 ## Oleada C — e2e-v2-nivel-1 (95f38ae en GitHub)
 
 Comparado con b0d336d:

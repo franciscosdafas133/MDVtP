@@ -3,17 +3,16 @@
 > Depende de: sistema, verificación  
 > Dependen de este: —
 
-## Entornos
+## Cómo se usa
 
-| Entorno | URL / notas | Secretos necesarios |
-|---|---|---|
-| local | | |
-| staging | | |
-| producción | | |
+{{como_se_usa}}
 
-## Configuración necesaria
+## Dónde corre
 
--
+| Sitio | Notas |
+|---|---|
+| Este ordenador / local | |
+| Otros (si aplica) | |
 
 ## Plan de entrega (incremento actual)
 
@@ -35,7 +34,7 @@
 
 {{pendientes_reales}}
 
-## Recuperación en producción
+## Recuperación
 
 - Git **no** deshace: un pago, una migración de datos ya aplicada, ni una llamada a API externa ya ejecutada.
 - Procedimiento:
@@ -44,6 +43,6 @@
 
 ## Mantenimiento
 
-- Backups:
-- Alertas:
-- Quién responde si falla:
+- Copias de seguridad:
+- Avisos si falla:
+- Quién responde:

@@ -44,7 +44,7 @@ def main() -> int:
                     "--titulo",
                     "Guardar nota",
                     "--comprobacion",
-                    "python imprime ok",
+                    "bash test_nota.sh",
                     "--enlaces",
                     "REQ-01",
                 ]
@@ -53,6 +53,14 @@ def main() -> int:
         ):
             print("FALLA tarea")
             return 1
+        (p / "test_nota.sh").write_text(
+            "#!/bin/bash\npython3 -c 'print(1)'\n", encoding="utf-8"
+        )
+        (p / "test_nota.sh").chmod(0o755)
+        (p / "test_nota_fail.sh").write_text(
+            "#!/bin/bash\nexit 1\n", encoding="utf-8"
+        )
+        (p / "test_nota_fail.sh").chmod(0o755)
 
         mentira = run(
             [
@@ -83,7 +91,7 @@ def main() -> int:
                 "--origen",
                 "comando",
                 "--valor",
-                "python3 -c 'import sys; sys.exit(1)'",
+                "bash test_nota_fail.sh",
                 "--ejecutar",
             ]
         )
@@ -113,7 +121,7 @@ def main() -> int:
                 "--origen",
                 "comando",
                 "--valor",
-                "python3 -c 'print(1)'",
+                "bash test_nota.sh",
                 "--ejecutar",
             ]
         )
@@ -138,7 +146,7 @@ def main() -> int:
                 "--titulo",
                 "Otra pieza",
                 "--comprobacion",
-                "./test_x.sh sale 0",
+                "bash test_nota.sh",
             ]
         )
         triv = run(
@@ -160,6 +168,25 @@ def main() -> int:
             fails += 1
         else:
             print("OK rechaza comando trivial true")
+        passc = run(
+            [
+                "evidenciar",
+                "--proyecto",
+                str(p),
+                "--tarea",
+                "TASK-03",
+                "--origen",
+                "comando",
+                "--valor",
+                'python3 -c "pass"',
+                "--ejecutar",
+            ]
+        )
+        if passc.returncode == 0:
+            print("FALLA: aceptó python3 -c pass")
+            fails += 1
+        else:
+            print("OK rechaza python3 -c pass / no alineado a comprobacion")
         man = run(
             [
                 "evidenciar",

@@ -64,7 +64,7 @@ AREAS_RAPIDO_IDS = ("ASK-01", "ASK-06", "ASK-02")
 # Pistas según la idea (no sustituyen a AREAS; se añaden al descubrimiento).
 PISTAS_NEGOCIO = [
     (
-        re.compile(r"peluquer|barber|sal[oó]n|cita|reserv", re.I),
+        re.compile(r"peluquer|barber|sal[oó]n|cita|reserv|taller|mec[aá]nic", re.I),
         [
             "¿Cuánto dura cada servicio y en qué horario atienden?",
             "¿Qué pasa si el cliente cancela o no llega?",
@@ -72,19 +72,22 @@ PISTAS_NEGOCIO = [
         ],
     ),
     (
-        re.compile(r"m[eé]dic|consultor|cl[ií]nic|paciente|nota cl[ií]nic", re.I),
+        re.compile(
+            r"m[eé]dic|consultor|cl[ií]nic|paciente|nota cl[ií]nic|academia|profesor|evaluaci",
+            re.I,
+        ),
         [
-            "¿Qué datos son sensibles y quién NO debe verlos (p. ej. recepción vs médico)?",
-            "¿La nota clínica puede salir del consultorio?",
-            "¿Hace falta historial largo o solo la cita de hoy?",
+            "¿Qué datos son sensibles y quién NO debe verlos (p. ej. recepción vs médico/profesor)?",
+            "¿Esas notas pueden salir del local?",
+            "¿Hace falta historial largo o solo lo de hoy?",
         ],
     ),
     (
-        re.compile(r"restaurant|comanda|cocina|mesero|plato", re.I),
+        re.compile(r"restaurant|comanda|cocina|mesero|plato|hostal|habitaci|limpieza", re.I),
         [
-            "¿Hay carta y precios fijos, o cambian seguido?",
-            "¿La cocina ve la comanda en tiempo real?",
-            "¿El cobro con tarjeta es obligatorio ahora o puede quedar pendiente?",
+            "¿Hay carta/precios o tarifas fijas, o cambian seguido?",
+            "¿Quién ve el trabajo en curso (cocina, limpieza) en tiempo real?",
+            "¿El cobro o el portal online es obligatorio ahora o puede quedar pendiente?",
         ],
     ),
     (
@@ -93,6 +96,14 @@ PISTAS_NEGOCIO = [
             "¿Vendes por unidades y el stock debe bajar al vender?",
             "¿Hay precios o solo cantidades?",
             "¿Quién puede registrar una venta?",
+        ],
+    ),
+    (
+        re.compile(r"lavander|pedido|prenda|entrega|recoger|listo", re.I),
+        [
+            "¿Hace falta fecha o día de entrega / recogida?",
+            "¿El cliente recibe un número o ticket para recoger?",
+            "¿Hay que avisar al cliente cuando esté listo, o solo mirarlo en el local?",
         ],
     ),
 ]
@@ -332,6 +343,7 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool, modo: str = "completo")
     (wf / "operacion.md").write_text(
         render(
             "operacion.md",
+            como_se_usa="(generar con `operar --uso \"…\"`)",
             checklist_antes="(generar con `operar` cuando toque entregar)",
             checklist_durante="(generar con `operar`)",
             checklist_despues="(generar con `operar`)",
@@ -627,6 +639,10 @@ def cmd_continuar(proyecto: Path) -> int:
     if not (wf / "estado.json").is_file():
         print("No hay workflow/. Ejecuta: product_flow.py iniciar …", file=sys.stderr)
         return 2
+
+    stale = marcar_evidencias_huella_stale(proyecto, wf)
+    if stale:
+        print(f"=== Evidencias pasadas a stale (código cambió): {', '.join(stale)} ===")
 
     print("=== Contraste al retomar ===")
     ok, raw = run_validator(wf)
@@ -1197,7 +1213,76 @@ def _comando_trivial(cmd: str) -> bool:
     # "true && true", "echo ok | true", etc.
     if re.fullmatch(r"(true|:|exit\s+0)(\s*(&&|\|\|)\s*(true|:|exit\s+0))*", c, re.I):
         return True
+    # python3 -c "pass" / bash -c "exit 0" — no prueban el producto
+    m = re.search(r"(?:python3?|bash|sh)\s+-c\s+(['\"])(.*?)\1", c, re.I | re.S)
+    if m:
+        code = (m.group(2) or "").strip()
+        if not code or code in ("pass", "True", "true", ":") or re.fullmatch(
+            r"exit\s*\(\s*0\s*\)", code
+        ):
+            return True
     return False
+
+
+def _tokens_comprobacion(comprobacion: str) -> list[str]:
+    """Archivos/scripts que la comprobación nombra (para cruzar con --valor)."""
+    toks = re.findall(r"(?:\./)?[\w./-]+\.(?:sh|py)\b", comprobacion or "")
+    out: list[str] = []
+    for t in toks:
+        out.append(t)
+        out.append(Path(t).name)
+    return list(dict.fromkeys(out))
+
+
+def _comando_alineado_a_comprobacion(cmd: str, comprobacion: str) -> bool:
+    tokens = _tokens_comprobacion(comprobacion)
+    if not tokens:
+        return True
+    return any(t in cmd for t in tokens)
+
+
+def _comando_desde_comprobacion(comprobacion: str) -> str | None:
+    """Si la comprobación es casi un comando, úsalo cuando --valor va vacío."""
+    c = (comprobacion or "").strip()
+    m = re.match(
+        r"^((?:bash|sh|python3?)\s+\S+\.(?:sh|py)|\./\S+\.(?:sh|py)|\S+\.(?:sh|py))\b",
+        c,
+    )
+    return m.group(1) if m else None
+
+
+def marcar_evidencias_huella_stale(proyecto: Path, wf: Path) -> list[str]:
+    """Si un archivo de --cubre cambió, pasa la EVID a stale (no solo avisar)."""
+    evidencias = load_json(wf / "evidencias.json", {"items": {}})
+    items = evidencias.get("items") or {}
+    cambiadas: list[str] = []
+    for eid, ev in items.items():
+        if ev.get("estado") != "vigente" or not isinstance(ev.get("huellas"), dict):
+            continue
+        for ruta, digest in (ev.get("huellas") or {}).items():
+            fp = proyecto / ruta
+            if not fp.is_file() or not digest:
+                continue
+            if _sha256_file(fp) != digest:
+                ev["estado"] = "stale"
+                ev["motivo_stale"] = f"{ruta} cambió desde la evidencia"
+                cambiadas.append(eid)
+                append_event(
+                    wf,
+                    {
+                        "ts": now_iso(),
+                        "tipo": "evidencia.marcar",
+                        "actor": "validador",
+                        "sujeto": eid,
+                        "de": "vigente",
+                        "a": "stale",
+                        "detalle": {"por": "huella", "archivo": ruta},
+                    },
+                )
+                break
+    if cambiadas:
+        atomic_write_json(wf / "evidencias.json", evidencias)
+    return cambiadas
 
 
 def cmd_evidenciar(
@@ -1253,16 +1338,25 @@ def cmd_evidenciar(
             return 2
         cmd = (valor or "").strip()
         if not cmd and comprobacion:
-            # Si la comprobación parece un comando (empieza por ./ o palabra)
-            m = re.match(r"^(\./\S+|\S+\.(?:sh|py)|python3?\s+\S+|bash\s+\S+)", comprobacion)
-            if m:
-                cmd = m.group(1)
+            derivado = _comando_desde_comprobacion(comprobacion)
+            if derivado:
+                cmd = derivado
                 print(f"(Usando comando de la comprobación: {cmd})")
         if _comando_trivial(cmd):
             print(
-                "Ese comando no prueba el producto (p. ej. true / echo). "
+                "Ese comando no prueba el producto (p. ej. true / echo / python -c). "
                 "Pasa el script de prueba real en --valor "
                 "(el de la --comprobacion de la tarea).",
+                file=sys.stderr,
+            )
+            return 2
+        if comprobacion and not _comando_alineado_a_comprobacion(cmd, comprobacion):
+            print(
+                f"El comando no coincide con la comprobación de la tarea.\n"
+                f"  Comprobación: {comprobacion}\n"
+                f"  Comando:      {cmd}\n"
+                "Usa el script/prueba nombrado en la comprobación "
+                "(o omite --valor para tomarlo de ahí).",
                 file=sys.stderr,
             )
             return 2
@@ -2074,6 +2168,7 @@ def cmd_operar(
     resumen: str,
     pendientes: str,
     recuperacion: str = "",
+    uso: str = "",
 ) -> int:
     """Genera plan contextual de entrega/operación (R18); pendientes reales explícitos."""
     wf = proyecto / "workflow"
@@ -2098,11 +2193,11 @@ def cmd_operar(
     )
     durante = (
         "Publicar solo el alcance del incremento; "
-        "anotar cualquier paso manual (migraciones, secretos, DNS); "
+        "anotar cualquier paso manual; "
         "no marcar como hecho lo no ejecutado"
     )
     despues = (
-        "Smoke en el entorno destino; "
+        "Probar el uso básico en el sitio real; "
         "actualizar operacion.md si cambió la realidad; "
         "registrar comprobaciones reales que sigan pendientes"
     )
@@ -2113,14 +2208,22 @@ def cmd_operar(
         recup_md = "\n".join(
             [
                 "- Código/docs: checkpoint + worktree/rama (no borrar trabajo posterior)",
-                "- Producción: procedimiento aparte para datos, pagos y APIs ya ejecutadas",
+                "- Datos/pagos/APIs ya hechos: procedimiento aparte (git no los deshace)",
                 f"- Contexto de este incremento: {resumen}",
             ]
+        )
+    if uso.strip():
+        uso_md = _bullets_from_semi(uso)
+    else:
+        uso_md = (
+            f"- (Completar) Cómo arranca el dueño este incremento: {resumen}\n"
+            "- Ejemplo: `python3 <app>.py …` o el comando real de uso"
         )
 
     (wf / "operacion.md").write_text(
         render(
             "operacion.md",
+            como_se_usa=uso_md,
             checklist_antes=antes,
             checklist_durante=durante,
             checklist_despues=despues,
@@ -2315,7 +2418,7 @@ def cmd_decidir(
     dec = {
         "id": did,
         "titulo": titulo.strip(),
-        "contexto": titulo.strip(),
+        "contexto": "",
         "alternativas": [
             {
                 "id": alt_id,
@@ -3306,6 +3409,11 @@ def main(argv: list[str] | None = None) -> int:
         default="",
         help="Pasos de recuperación en prod (separados por ;); si vacío, texto base",
     )
+    p_op.add_argument(
+        "--uso",
+        default="",
+        help="Cómo arranca/usa el dueño la app (separado por ;)",
+    )
 
     sub.add_parser("demo", help="Demo paso 9: idea vaga → incremento")
     sub.add_parser("demo-b10", help="Demo paso 10: apunte + impacto + continuar")
@@ -3395,6 +3503,7 @@ def main(argv: list[str] | None = None) -> int:
             args.resumen,
             args.pendientes,
             recuperacion=args.recuperacion,
+            uso=args.uso,
         )
     if args.cmd == "demo":
         return cmd_demo()

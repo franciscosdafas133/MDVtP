@@ -6,7 +6,7 @@
     "cursor",
     "claude"
   ],
-  "instalado": "2026-10-14T23:10:27Z",
+  "instalado": "2026-10-14T23:27:41Z",
   "archivos": {
     "SKILL.md": {
       "sha256": "541d184af3a9cf2f7bd9a6421f09f69c703f867ce3be706e4b8ce655961f5ffb"
@@ -99,7 +99,7 @@
       "sha256": "160b0ebf417a1666245632d9b781925d7baa48716179fd4e340491bc718086ea"
     },
     "scripts/product_flow.py": {
-      "sha256": "0bdb5d0e371ad962a0f0e99c5166f321a3eb75c02f772a9e39d042c455aeb3ab"
+      "sha256": "7d170564c911c240da37f7aaa17ab4ec667f69bae080f5f9819a08b5286a386a"
     },
     "scripts/validate_workflow.py": {
       "sha256": "4eee6df7e649ec421d48c6f8fd742f24a7fd62442b0725bd7c69f6df17c06df3"
@@ -108,7 +108,7 @@
       "sha256": "38e6a07e17ccaba08ddbb4152b173c1ba01d88ea2aeaf81cb15712ed0283a1d8"
     },
     "templates/operacion.md": {
-      "sha256": "2b34c275205ca1f7ab257f9886d893ce6f74c191cd69d6f0c9c39a19be0beed9"
+      "sha256": "1c6750a7294855378defef471e3ba49fe3a90982011b1f17ae03542431700234"
     },
     "templates/plan.md": {
       "sha256": "46a5d13a50c907f9eff1b723ef3c075bfc4847071fe03fe6de0e7dc8862119cc"
