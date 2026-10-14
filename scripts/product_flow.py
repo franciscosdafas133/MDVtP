@@ -1236,22 +1236,78 @@ def _comando_trivial(cmd: str) -> bool:
     return False
 
 
+_PROSA_COMPROB = re.compile(
+    r"^(imprime|sale|exit|ok|pass|fail|visitas|con|y|de|el|la|los|las|\(.*\))$",
+    re.I,
+)
+
+
+def _tokens_comprobacion_cmd(comprobacion: str) -> list[str]:
+    """Tokens de comando en la comprobación (script + subargs; sin prosa)."""
+    c = (comprobacion or "").strip().replace("…", " ")
+    c = re.split(r"[|]", c, maxsplit=1)[0].strip()
+    parts = c.split()
+    if not parts:
+        return []
+    out: list[str] = []
+    i = 0
+    if parts[0] in ("bash", "sh", "python", "python3"):
+        out.append(parts[0])
+        i = 1
+    if i >= len(parts):
+        return out
+    if not re.search(r"\.(sh|py)$", parts[i]) and not parts[i].startswith("./"):
+        return out
+    out.append(parts[i])
+    i += 1
+    while i < len(parts):
+        p = parts[i]
+        if _PROSA_COMPROB.match(p) or p.startswith("("):
+            break
+        if re.fullmatch(r"[\w./:+-]+", p):
+            out.append(p)
+            i += 1
+        else:
+            break
+    return out
+
+
 def _comando_esperado(comprobacion: str) -> str | None:
-    """Comando completo (script + args) esperado desde --comprobacion."""
-    c = (comprobacion or "").strip()
-    c = re.split(r"[|…]|\bsale\b|\bexit\b|\bimprime\b", c, maxsplit=1)[0].strip()
-    m = re.match(
-        r"^((?:bash|sh|python3?)\s+\S+(?:\s+\S+)*|\./\S+(?:\s+\S+)*|\S+\.(?:sh|py)(?:\s+\S+)*)",
-        c,
-    )
-    return " ".join(m.group(1).split()) if m else None
+    toks = _tokens_comprobacion_cmd(comprobacion)
+    if not toks:
+        return None
+    # Si solo hay script.sh, preferir bash script.sh
+    if len(toks) == 1 and re.search(r"\.(sh|py)$", toks[0]):
+        if toks[0].endswith(".py"):
+            return f"python3 {toks[0]}"
+        return f"bash {toks[0]}"
+    return " ".join(toks)
 
 
 def _comando_alineado_a_comprobacion(cmd: str, comprobacion: str) -> bool:
-    esp = _comando_esperado(comprobacion)
+    """El script (y subargs significativos) de la comprobación deben estar en --valor."""
+    esp = _tokens_comprobacion_cmd(comprobacion)
     if not esp:
         return True
-    return " ".join((cmd or "").split()) == esp
+    got = (cmd or "").split()
+    scripts = [t for t in esp if re.search(r"\.(sh|py)$", t) or t.startswith("./")]
+    if not scripts:
+        return " ".join(got) == " ".join(esp)
+    script = scripts[0]
+    base = Path(script).name
+    if not any(base == Path(g).name or script == g for g in got):
+        return False
+    # Subargs tras el script (p. ej. "notas") deben aparecer en el comando
+    try:
+        idx = esp.index(script)
+    except ValueError:
+        idx = 0
+    for arg in esp[idx + 1 :]:
+        if arg in ("bash", "sh", "python", "python3"):
+            continue
+        if arg not in got and Path(arg).name not in got:
+            return False
+    return True
 
 
 def _comando_desde_comprobacion(comprobacion: str) -> str | None:
@@ -2706,7 +2762,7 @@ def cmd_recorrido_simple() -> int:
         "depende_de": [],
         "enlaces": ["OBJ-01"],
         "evidencia": [],
-        "comprobacion": "comprobar.sh imprime OK (visitas 1 y 2)",
+        "comprobacion": "bash app/comprobar.sh",
         "bloqueo": None,
     }
     for de, a in [("pendiente", "preparada"), ("preparada", "en_curso")]:
