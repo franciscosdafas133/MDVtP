@@ -6,7 +6,7 @@
     "cursor",
     "claude"
   ],
-  "instalado": "2026-10-15T00:21:30Z",
+  "instalado": "2026-10-15T00:43:57Z",
   "archivos": {
     "SKILL.md": {
       "sha256": "541d184af3a9cf2f7bd9a6421f09f69c703f867ce3be706e4b8ce655961f5ffb"
@@ -99,7 +99,7 @@
       "sha256": "160b0ebf417a1666245632d9b781925d7baa48716179fd4e340491bc718086ea"
     },
     "scripts/product_flow.py": {
-      "sha256": "68bce3933e6c29a74b5c98969b1016d1d2b6b6e6882e78c956106c102f8c1f1f"
+      "sha256": "6365b97c896c83ef6085519d6bc77fd52c5bb30e3e3e4a8964ab3e777ad16d75"
     },
     "scripts/validate_workflow.py": {
       "sha256": "d2a32fbf412260eab01d8457a4454a23f9586065b10ba89a96f04513aa1be02b"

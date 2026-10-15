@@ -3,19 +3,28 @@
 ## Se puede afirmar
 
 - Hay una entrada única (`product-flow`) con scripts y validador.
-- Instalación global/proyecto en Cursor y Claude Code (adaptadores).
-- Flujo documental + estado + checkpoints + división + verificación con evidencia + operar.
-- Baterías deterministas: integridad (B17), eval D (B18), integración+impacto (B20).
-- Pasada de observación en Cursor y Claude Code firmada por el usuario (producto mínimo).
+- Instalación en un proyecto o global, en Cursor y Claude Code.
+- De una idea a preguntas en lenguaje llano (`--modo rapido`), requisitos, decisiones y tareas, sin editar JSON a mano.
+- Evidencia: `evidenciar --ejecutar` corre la prueba; en rojo no se verifica.
+- Un cambio de código deja la evidencia obsoleta y reabre la tarea.
+- Dividir, bloquear una pieza y seguir con el resto. El padre de una división se cierra con transiciones legales cuando las hijas están verificadas.
+- Integración real (`MANUAL_VERIFY_REQUIRED`): un script local, aunque salga 0, no la desbloquea ni la verifica. Hace falta declarar quién probó el sistema real (`--aprobado-por` y `--sistema`).
+- Regresión: `python3 scripts/run_regresion.py`.
 
 ## No se puede afirmar (aún)
 
-- Que el método “ya sirve” en productos grandes o de producción real sin más pruebas.
+- Que ya sirva, sin más pruebas, para un producto grande (agente educativo, grafos de conocimiento, LLM).
+- Que un extraño haya repetido el nivel 4 después del cierre del mock local (el informe e2e-v3-nivel-4 es de `1c46568`, anterior a ese cierre).
 - Marketplace oficial de Cursor.
-- Que la ventana HTML se abre sola al instalar (I-01: patrón existe; auto-arranque no).
-- Migración automática entre versiones del paquete (eso es el paso 22).
-- Que Git deshace pagos/APIs en producción (el método solo advierte el procedimiento).
+- Que la ventana HTML se abre sola al instalar.
+- Que Git deshace pagos o APIs ya ejecutadas.
 
-## Cómo mejorar desde aquí
+## Cómo comprobarlo en otra máquina
 
-Usar el método en un producto real tuyo, anotar fricciones, y cerrar el paso 22 (política de versiones y regresiones).
+```bash
+git clone https://github.com/franciscosdafas133/MDVtP.git
+cd MDVtP
+python3 scripts/run_regresion.py
+```
+
+Tiene que terminar en `7/7 → ok`. Uso diario: [GUIA-USUARIO.md](GUIA-USUARIO.md) e [INSTALL.md](../INSTALL.md).

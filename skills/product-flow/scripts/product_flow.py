@@ -443,6 +443,7 @@ def cmd_iniciar(proyecto: Path, idea: str, fuerza: bool, modo: str = "completo")
                 "evidencia": [],
                 "comprobacion": None,
                 "bloqueo": None,
+                "descubrimiento": True,
             }
         },
         "bloqueos": [],
@@ -1235,14 +1236,25 @@ def _comando_trivial(cmd: str) -> bool:
     # "true && true", "echo ok | true", etc.
     if re.fullmatch(r"(true|:|exit\s+0)(\s*(&&|\|\|)\s*(true|:|exit\s+0))*", c, re.I):
         return True
-    # python3 -c "pass" / bash -c "exit 0" — no prueban el producto
-    m = re.search(r"(?:python3?|bash|sh)\s+-c\s+(['\"])(.*?)\1", c, re.I | re.S)
-    if m:
-        code = (m.group(2) or "").strip()
-        if not code or code in ("pass", "True", "true", ":") or re.fullmatch(
-            r"exit\s*\(\s*0\s*\)", code
-        ):
-            return True
+    # python/bash -c no es la prueba del producto (aunque el código no sea "pass")
+    if re.search(r"(?:python3?|bash|sh)\s+-c\s+", c, re.I):
+        return True
+    return False
+
+
+def _comando_es_local(cmd: str) -> bool:
+    """Script o one-liner en esta máquina: no prueba un portal/pasarela real."""
+    c = (cmd or "").strip()
+    if not c or _comando_trivial(c):
+        return True
+    if re.search(r"(?:python3?|bash|sh)\s+-c\s+", c, re.I):
+        return True
+    if re.search(r"(?:bash|sh|python3?)\s+\S+\.(?:sh|py)\b", c) or re.search(
+        r"(?:^|\s)\./\S+\.(?:sh|py)\b", c
+    ):
+        return True
+    if re.search(r"\b(mock|simula)\b", c, re.I):
+        return True
     return False
 
 
@@ -1509,6 +1521,12 @@ def cmd_evidenciar(
                 file=sys.stderr,
             )
             return 2
+        if (comprobacion or "").lower().startswith("dividida"):
+            print(
+                "Esta tarea es un padre dividido. Evidencia y verifica las hijas, no el padre.",
+                file=sys.stderr,
+            )
+            return 2
         cmd = (valor or "").strip()
         if not cmd and comprobacion:
             derivado = _comando_desde_comprobacion(comprobacion)
@@ -1761,18 +1779,27 @@ def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
             )
             return 1
 
-    # Hallazgo restaurante: integración real exige comando en verde, no nota simulada
+    # Integración real: un script local en verde (mock_portal.sh) no basta.
     if marca in ("MANUAL_VERIFY_REQUIRED", "integracion_real"):
-        reales = [e for e in vigentes if _evidencia_comando_real(items.get(e) or {})]
-        if not reales:
+        att = tareas[tarea].get("atestacion_integracion") or {}
+        if not (att.get("aprobado_por") or "").strip() or not (att.get("sistema") or "").strip():
             print(
                 f"Esta tarea exige integración real ({marca}). "
-                "Verifica solo con evidenciar --origen comando --ejecutar en verde. "
-                "Una simulación o nota libre no basta.",
+                "Un comando local en verde no la verifica. "
+                "Desbloquea con --aprobado-por y --sistema "
+                "(quién probó el sistema real y cuál fue).",
                 file=sys.stderr,
             )
             return 1
-        vigentes = reales
+        if _texto_simula(att.get("sistema")) or re.search(
+            r"\b(mock|simula)\b", att.get("sistema") or "", re.I
+        ):
+            print(
+                "La declaración habla de simulación o mock. No verifica integración real.",
+                file=sys.stderr,
+            )
+            return 1
+        vigentes = [e for e in vigentes if not _comando_es_local((items.get(e) or {}).get("valor"))]
 
     # REQ sensible: la evidencia debe mostrar prueba negativa (denegación)
     rel_chk = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
@@ -1981,6 +2008,17 @@ def cmd_dividir(
         return 2
     if not ID_RE.match(padre) or not padre.startswith("TASK-"):
         print(f"Padre inválido: {padre}", file=sys.stderr)
+        return 2
+    estado_pre = load_estado(wf)
+    padre_t = (estado_pre.get("tareas") or {}).get(padre) or {}
+    if padre_t.get("descubrimiento") or "descubrimiento" in (
+        padre_t.get("titulo") or ""
+    ).lower():
+        print(
+            f"{padre} es la tarea de descubrimiento. No se divide: "
+            "crea tareas de producto con `tarea` y divide esas.",
+            file=sys.stderr,
+        )
         return 2
     if porque not in _CRITERIOS_DIVIDIR:
         print(
@@ -2307,7 +2345,13 @@ def cmd_bloquear(proyecto: Path, tarea: str, motivo: str, marca: str) -> int:
     return 0 if ok else 1
 
 
-def cmd_desbloquear(proyecto: Path, tarea: str, evidencia: str) -> int:
+def cmd_desbloquear(
+    proyecto: Path,
+    tarea: str,
+    evidencia: str,
+    aprobado_por: str = "",
+    sistema: str = "",
+) -> int:
     """Quita bloqueo si hay evidencia de resolución; vuelve a preparada o pendiente."""
     wf = proyecto / "workflow"
     estado = load_estado(wf)
@@ -2323,26 +2367,42 @@ def cmd_desbloquear(proyecto: Path, tarea: str, evidencia: str) -> int:
     marca = _marca_integracion_real(tareas[tarea], estado)
     bid = tareas[tarea].get("bloqueo")
 
-    # Hallazgo restaurante: no desbloquear cobro/integración real con texto "simulación"
+    # Integración real: un mock local (exit 0) no desbloquea. Puerta humana.
     if marca in ("MANUAL_VERIFY_REQUIRED", "integracion_real"):
-        if not evidencia.startswith("EVID-"):
+        if evidencia.startswith("EVID-"):
+            items = (load_json(wf / "evidencias.json", {"items": {}}) or {}).get("items") or {}
+            ev = items.get(evidencia) or {}
+            if _comando_es_local(ev.get("valor") or "") or _texto_simula(
+                ev.get("valor"), ev.get("salida"), evidencia
+            ):
+                print(
+                    f"{evidencia} es una prueba local o habla de simulación. "
+                    "No desbloquea integración real.",
+                    file=sys.stderr,
+                )
+                return 2
+        if not aprobado_por.strip() or not sistema.strip():
             print(
                 f"Esta tarea exige integración real ({marca}). "
-                "Desbloquea solo con un id EVID-… vigente creado con "
-                "evidenciar --origen comando --ejecutar (prueba real en verde). "
-                "Una nota de simulación no vale.",
+                "Un script en esta máquina (aunque salga 0) no basta. "
+                "Desbloquea con --aprobado-por QUIÉN y --sistema "
+                "«qué sistema real se probó».",
                 file=sys.stderr,
             )
             return 2
-        items = (load_json(wf / "evidencias.json", {"items": {}}) or {}).get("items") or {}
-        ev = items.get(evidencia) or {}
-        if not _evidencia_comando_real(ev):
+        if _texto_simula(sistema, evidencia) or re.search(
+            r"\b(mock|simula)\b", sistema, re.I
+        ):
             print(
-                f"{evidencia} no es una prueba de comando en verde sin simulación. "
-                "No se desbloquea una marca de integración real así.",
+                "La declaración habla de simulación o mock. No desbloquea integración real.",
                 file=sys.stderr,
             )
             return 2
+        tareas[tarea]["atestacion_integracion"] = {
+            "aprobado_por": aprobado_por.strip(),
+            "sistema": sistema.strip(),
+            "ts": now_iso(),
+        }
     elif _texto_simula(evidencia) and re.search(
         r"tarjeta|pasarela|stripe|pago real|cobro",
         (tareas[tarea].get("titulo") or "") + " " + (tareas[tarea].get("motivo_bloqueo") or ""),
@@ -3083,12 +3143,14 @@ def cmd_demo_b13() -> int:
     print("(bloqueo sin evidencia — OK)")
 
     print("\n=== DEMO B13: evidenciar + verificar ===\n")
+    (demo / "ok.sh").write_text("#!/bin/bash\necho ok\n", encoding="utf-8")
+    (demo / "ok.sh").chmod(0o755)
     if (
         cmd_evidenciar(
             demo,
             "TASK-02",
             "comando",
-            "python3 -c \"print('ok')\"",
+            "bash ok.sh",
             "src/peluqueros.py",
             ejecutar=True,
         )
@@ -3679,7 +3741,7 @@ def main(argv: list[str] | None = None) -> int:
     p_div.add_argument(
         "--hijas",
         required=True,
-        help="titulo|condicion|cadena|paralelo;… (mín. 2; sin horas)",
+        help="titulo|condicion|cadena|paralelo|REQ-01;… (mín. 2; sin horas; REQ opcional por hija)",
     )
     p_div.add_argument("--motivo", required=True)
     p_div.add_argument(
@@ -3701,7 +3763,21 @@ def main(argv: list[str] | None = None) -> int:
     p_db = sub.add_parser("desbloquear", help="Quitar bloqueo con evidencia")
     p_db.add_argument("--proyecto", type=Path, required=True)
     p_db.add_argument("--tarea", required=True)
-    p_db.add_argument("--evidencia", required=True)
+    p_db.add_argument(
+        "--evidencia",
+        default="",
+        help="Id EVID-… o nota. En integración real no basta un script local.",
+    )
+    p_db.add_argument(
+        "--aprobado-por",
+        default="",
+        help="Obligatorio si la marca es integración real / MANUAL_VERIFY",
+    )
+    p_db.add_argument(
+        "--sistema",
+        default="",
+        help="Qué sistema real se probó (no un mock local)",
+    )
 
     p_op = sub.add_parser(
         "operar",
@@ -3809,7 +3885,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "bloquear":
         return cmd_bloquear(args.proyecto, args.tarea, args.motivo, args.marca)
     if args.cmd == "desbloquear":
-        return cmd_desbloquear(args.proyecto, args.tarea, args.evidencia)
+        return cmd_desbloquear(
+            args.proyecto,
+            args.tarea,
+            args.evidencia,
+            aprobado_por=args.aprobado_por,
+            sistema=args.sistema,
+        )
     if args.cmd == "operar":
         return cmd_operar(
             args.proyecto,

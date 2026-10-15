@@ -328,6 +328,47 @@ def main() -> int:
         else:
             print("OK no desbloquea cobro simulado")
 
+        (p3 / "mock_portal.sh").write_text("#!/bin/bash\necho ok\n", encoding="utf-8")
+        (p3 / "mock_portal.sh").chmod(0o755)
+        evmock = run(
+            [
+                "evidenciar",
+                "--proyecto",
+                str(p3),
+                "--tarea",
+                "TASK-02",
+                "--origen",
+                "comando",
+                "--valor",
+                "bash mock_portal.sh",
+                "--ejecutar",
+            ]
+        )
+        # puede fallar por no coincidir con comprobación en prosa; si crea EVID, desbloquear no debe pasar
+        mock_id = "EVID-01"
+        if "EVID-" in (evmock.stdout or ""):
+            import re as _re
+
+            m = _re.search(r"EVID-\d+", evmock.stdout or "")
+            if m:
+                mock_id = m.group(0)
+        desm = run(
+            [
+                "desbloquear",
+                "--proyecto",
+                str(p3),
+                "--tarea",
+                "TASK-02",
+                "--evidencia",
+                mock_id,
+            ]
+        )
+        if desm.returncode == 0:
+            print("FALLA: desbloqueó integración con script local")
+            fails += 1
+        else:
+            print("OK no desbloquea integración con script local")
+
         # --- impactar DEC invalida TASK verificada ---
         p4 = p / "dec"
         p4.mkdir()
@@ -351,11 +392,13 @@ def main() -> int:
                 "--titulo",
                 "Enviar confirmación",
                 "--comprobacion",
-                "mensaje enviado",
+                "bash test_ok.sh",
                 "--enlaces",
                 "REQ-01",
             ]
         )
+        (p4 / "test_ok.sh").write_text("#!/bin/bash\necho ok\n", encoding="utf-8")
+        (p4 / "test_ok.sh").chmod(0o755)
         run(
             [
                 "decidir",
@@ -383,7 +426,7 @@ def main() -> int:
                 "--origen",
                 "comando",
                 "--valor",
-                "python3 -c 'print(ok)'",
+                "bash test_ok.sh",
                 "--ejecutar",
             ]
         )

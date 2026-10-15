@@ -1,6 +1,6 @@
 {
   "bateria": "B18-determinista",
-  "ts": "2026-10-15T00:20:22Z",
+  "ts": "2026-10-15T00:42:58Z",
   "deterministas_ok": 7,
   "deterministas_total": 7,
   "observacion_pendiente": [
@@ -37,7 +37,7 @@
       "exit": 0,
       "esperado_exit": 0,
       "nota": "checkpoint + worktree",
-      "tail": "ree) ===\n\nWorktree aislado en: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion-CP-01\n  Rama: recuperar/CP-01\n  Commit: 1bc9716887dfed39c606e7723120e92fb58433aa\n  Checkpoint: CP-01 — Después del descubrimiento inicial\n  El trabajo en el proyecto original se conserva intacto.\n\n=== Comprobación demo B11: aislado_sin_cambio_posterior=True, original_conserva_cambio=True → OK ===\n"
+      "tail": "ree) ===\n\nWorktree aislado en: /home/doomf/Documents/creación_método/tests/fixtures/demo-recuperacion-CP-01\n  Rama: recuperar/CP-01\n  Commit: 6b0a10681edc8863b897e065fe38e17e4ded72bd\n  Checkpoint: CP-01 — Después del descubrimiento inicial\n  El trabajo en el proyecto original se conserva intacto.\n\n=== Comprobación demo B11: aislado_sin_cambio_posterior=True, original_conserva_cambio=True → OK ===\n"
     },
     {
       "id": "E14",

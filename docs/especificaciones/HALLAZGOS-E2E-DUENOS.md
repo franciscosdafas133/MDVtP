@@ -9,6 +9,12 @@ Fallo grave: desbloquear/verificar tarjeta con simulación.
 
 Veredicto del probador: útil con huecos. Documental bien; promesa de pruebas honestas rota (evidencia texto libre; `siguiente_preparada`; `recuperar` worktree; `impactar` TASK/DEC).
 
+## Oleada G — e2e-v3-nivel-4 hostal (1c46568)
+
+Formular 4/5, construir 3/5. Flujo y cierre del padre OK. **Grave:** un mock local con nombre neutro verificaba `MANUAL_VERIFY_REQUIRED`.
+
+**Hecho:** script local no desbloquea ni verifica esa marca; hace falta `--aprobado-por` y `--sistema`. No se divide la tarea de descubrimiento. `python -c` no cuenta como prueba.
+
 ## Oleada F — e2e-v3-nivel-3 taller (d3cfabf)
 
 Formular 4/5, construir 3/5. **Grave:** cierre del padre `bloqueada→verificada` ilegal.  

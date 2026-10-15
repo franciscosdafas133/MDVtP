@@ -24,8 +24,9 @@ Vista mantenible del progreso de construcción **del método** (no de una aplica
 | bloqueada | — |
 | verificada | B01–B22, I-01 |
 
-**Siguiente actividad:** publicar / mantener en GitHub.  
-**Entrega B:** cerrada · **Entrega C:** cerrada (tablero completo).
+**Siguiente actividad:** cerrar e2e v3 nivel 4 → luego sonda “producto complejo” (grafo de conceptos + recuperación; ver [OBJETIVO-PRODUCTO-COMPLEJO.md](especificaciones/OBJETIVO-PRODUCTO-COMPLEJO.md)). Mantener/publicar en GitHub al afinar.  
+**Entrega B:** cerrada · **Entrega C:** cerrada (tablero completo).  
+**Norte de producto (no es un hito B):** aprender con grafos de conceptos + recuperar conocimiento + LLM con fronteras honestas.
 
 ## Tareas
 
@@ -233,6 +234,7 @@ Notas del encargo: B05 puede explorar fuentes condicionales (F08–F10) si detec
 
 | Fecha | Cambio | Motivo |
 |---|---|---|
+| 2026-10-14 | Norte explícito: producto complejo (grafos de conceptos + recuperación + LLM con fronteras). Camino: cerrar e2e-4 → sondas complejas. | Usuario: apuntar a ese tipo de producto, no hacerlo de golpe. |
 | 2026-10-14 | Oleada C (e2e-v2-1 @ 95f38ae): construir 4/5; formular 2/5. Local: modo rápido, anti-true/manual, huellas cubre, decidir. Falta publicar. | Usuario pegó INFORME-METODO + e2e-v2. |
 | 2026-10-14 | Oleada e2e dueños: anti-simulación, modo rápido, pistas de negocio, impactar DEC, regresión OK. | Usuario: analizar pruebas para mejorar, no reinventar. |
 | 2026-10-14 | B22 verificada; publicación a GitHub MDVtP. | Usuario: paso 22 ok + URL del repo. |
