@@ -1,6 +1,0 @@
-{
-  "ts": "2026-10-12T21:05:02.602203+00:00",
-  "status": "propuesta_lista",
-  "text": "# Producto — Reservas de peluquería\n\n## Idea\n\nUna app para que la gente reserve cita en una peluquería del barrio.\n\n## Quién la usa\n\nLa app es para todo el mundo.\n\n## Qué hace (borrador)\n\n- Ver horarios libres.\n- Reservar un corte.\n- Recibir un recordatorio.\n",
-  "hint": "Agente del host: lee este archivo, propone corrección del documento de producto (peluquería) y escribe state/propuesta.json con {\"reason\":\"...\",\"proposal\":\"texto completo\"}."
-}

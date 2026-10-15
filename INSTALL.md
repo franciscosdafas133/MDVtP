@@ -1,80 +1,55 @@
-# Cómo instalar el método (en cualquier proyecto)
+# Cómo instalar el método
 
-Versión candidata: ver [VERSION](VERSION).  
-Guía de uso: [docs/GUIA-USUARIO.md](docs/GUIA-USUARIO.md).  
+Versión: ver [VERSION](VERSION).  
+Uso: [docs/GUIA-USUARIO.md](docs/GUIA-USUARIO.md).  
 Límites: [docs/LIMITES-CANDIDATA.md](docs/LIMITES-CANDIDATA.md).
 
-## Lo que quieres
+Lo que se descarga para usar es la skill en `skills/product-flow/` (y el plugin en `.cursor-plugin/`).
 
-Abrir **cualquier** carpeta de proyecto en Cursor y poder usar `product-flow`
-(empezar idea → docs → decisiones → checkpoints), sin copiar el repo del método
-a mano cada vez.
-
-## Opción recomendada: instalación global (una vez)
-
-Desde este repositorio (clonado):
+## Opción A — Skill (la más directa)
 
 ```bash
-python3 scripts/install_metodo.py install --alcance global --hosts cursor
-# o también Claude Code:
-python3 scripts/install_metodo.py install --alcance global --hosts cursor,claude
+git clone https://github.com/franciscosdafas133/MDVtP.git
+cp -R MDVtP/skills/product-flow ~/.cursor/skills/product-flow
+# Claude Code:
+# cp -R MDVtP/skills/product-flow ~/.claude/skills/product-flow
 ```
 
-Eso deja la skill en:
-
-- `~/.cursor/skills/product-flow/`
-- y/o `~/.claude/skills/product-flow/`
-
-Luego, en **cualquier** proyecto:
+En el chat: pide **product-flow**.
 
 ```bash
 python3 ~/.cursor/skills/product-flow/scripts/product_flow.py iniciar --proyecto . --idea "Mi app…"
 ```
 
-En el chat de Cursor: pide usar la skill **product-flow** (o `/product-flow` si tu host lo lista así).
+## Opción B — Plugin en Cursor
 
-Comprobar / quitar:
+1. Clona o abre este repo.
+2. En Cursor: Customize → importar plugin **From GitHub Repository**  
+   `https://github.com/franciscosdafas133/MDVtP`  
+   (o “from folder” si tu Cursor lo permite sobre este clone).
+3. Debe cargar la skill desde `skills/` (ver `.cursor-plugin/plugin.json`).
+
+Aún no está en el Marketplace oficial.
+
+## Opción C — Instalador del repo
 
 ```bash
+cd MDVtP
+python3 scripts/install_metodo.py install --alcance global --hosts cursor,claude
 python3 scripts/install_metodo.py status --alcance global
-python3 scripts/install_metodo.py uninstall --alcance global
 ```
 
-## Opción: solo un proyecto (para el equipo que clona ese repo)
+Solo un proyecto:
 
 ```bash
 python3 scripts/install_metodo.py install --alcance proyecto --proyecto /ruta/al/proyecto --hosts cursor
 ```
 
-Queda en `/ruta/al/proyecto/.cursor/skills/product-flow/`.
-
-## Publicar en GitHub para que otros instalen
-
-1. Genera el bundle publicable:
+## Comprobar el paquete
 
 ```bash
-python3 scripts/install_metodo.py build-dist
+cd MDVtP
+python3 scripts/run_regresion.py
 ```
 
-Eso escribe `skills/product-flow/` (self-contained) y el repo ya tiene
-`.cursor-plugin/plugin.json`.
-
-2. Sube el repo a GitHub (sin `.reference-sources/`).
-
-3. Quien lo use puede:
-
-   - **A.** Clonar y correr `install --alcance global`, o  
-   - **B.** En Cursor: Customize → importar plugin **From GitHub Repository**
-     (cuando el marketplace/plugin del host lo permita), o  
-   - **C.** Copiar `skills/product-flow/` a `~/.cursor/skills/product-flow/`.
-
-## Qué NO hace todavía
-
-- No está en el Marketplace oficial de Cursor (hace falta revisión de Cursor).
-- La ventana HTML localhost no se arranca sola al instalar (sí existe el patrón I-01).
-
-## Demo local
-
-```bash
-python3 scripts/install_metodo.py demo
-```
+Tiene que terminar en `7/7 → ok`.

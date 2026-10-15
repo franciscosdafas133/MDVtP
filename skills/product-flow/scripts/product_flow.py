@@ -61,17 +61,19 @@ AREAS = [
 # Modo rápido: 3 preguntas (hallazgo e2e: 9 de golpe abruman).
 AREAS_RAPIDO_IDS = ("ASK-01", "ASK-06", "ASK-02")
 
-# Pistas según la idea (no sustituyen a AREAS; se añaden al descubrimiento).
+# Pistas según la idea. Solo gana UNA familia (la de mayor coincidencia).
 PISTAS_NEGOCIO = [
     (
-        re.compile(r"peluquer|barber|sal[oó]n|cita|reserv", re.I),
+        "hostal",
+        re.compile(r"hostal|habitaci[oó]n|hu[eé]sped|\bcama\b|porter[ií]a", re.I),
         [
-            "¿Cuánto dura cada servicio y en qué horario atienden?",
-            "¿Qué pasa si el cliente cancela o no llega?",
-            "¿Quién ve la agenda: solo el local o también el cliente?",
+            "¿Se vende por habitación entera o por cama?",
+            "¿Cómo se cuentan las noches y qué pasa si se va antes?",
+            "¿El portal de reservas online es obligatorio ahora o puede quedar pendiente?",
         ],
     ),
     (
+        "taller",
         re.compile(r"taller|mec[aá]nic|patente|elevador|\bauto\b|\bcoche\b", re.I),
         [
             "¿Cuántos elevadores o mecánicos atienden a la vez?",
@@ -81,8 +83,9 @@ PISTAS_NEGOCIO = [
         ],
     ),
     (
+        "salud_academia",
         re.compile(
-            r"m[eé]dic|consultor|cl[ií]nic|paciente|nota cl[ií]nic|academia|profesor|evaluaci",
+            r"m[eé]dic|consultor|cl[ií]nic|paciente|nota cl[ií]nic|academia|profesor|evaluaci|veterinar",
             re.I,
         ),
         [
@@ -92,15 +95,26 @@ PISTAS_NEGOCIO = [
         ],
     ),
     (
-        re.compile(r"restaurant|comanda|cocina|mesero|plato|hostal|habitaci|limpieza", re.I),
+        "restaurante",
+        re.compile(r"restaurant|comanda|cocina|mesero|plato", re.I),
         [
             "¿Hay carta/precios o tarifas fijas, o cambian seguido?",
-            "¿Quién ve el trabajo en curso (cocina, limpieza) en tiempo real?",
-            "¿El cobro o el portal online es obligatorio ahora o puede quedar pendiente?",
+            "¿Quién ve el trabajo en curso (cocina) en tiempo real?",
+            "¿El cobro con tarjeta es obligatorio ahora o puede quedar pendiente?",
         ],
     ),
     (
-        re.compile(r"tienda|inventario|stock|almac[eé]n|producto", re.I),
+        "lavanderia",
+        re.compile(r"lavander|prenda|entrega|recoger", re.I),
+        [
+            "¿Hace falta fecha o día de entrega / recogida?",
+            "¿El cliente recibe un número o ticket para recoger?",
+            "¿Hay que avisar al cliente cuando esté listo, o solo mirarlo en el local?",
+        ],
+    ),
+    (
+        "tienda",
+        re.compile(r"tienda|inventario|stock|almac[eé]n", re.I),
         [
             "¿Vendes por unidades y el stock debe bajar al vender?",
             "¿Hay precios o solo cantidades?",
@@ -108,11 +122,12 @@ PISTAS_NEGOCIO = [
         ],
     ),
     (
-        re.compile(r"lavander|pedido|prenda|entrega|recoger|listo", re.I),
+        "citas",
+        re.compile(r"peluquer|barber|sal[oó]n|\bcitas?\b", re.I),
         [
-            "¿Hace falta fecha o día de entrega / recogida?",
-            "¿El cliente recibe un número o ticket para recoger?",
-            "¿Hay que avisar al cliente cuando esté listo, o solo mirarlo en el local?",
+            "¿Cuánto dura cada servicio y en qué horario atienden?",
+            "¿Qué pasa si el cliente cancela o no llega?",
+            "¿Quién ve la agenda: solo el local o también el cliente?",
         ],
     ),
 ]
@@ -125,17 +140,23 @@ def areas_para_iniciar(modo: str) -> list[tuple[str, str, str]]:
 
 
 def pistas_para_idea(idea: str) -> list[tuple[str, str, str]]:
-    """Preguntas de negocio como ASK-10+ (anotables; continuar las exige)."""
-    textos: list[str] = []
-    for pat, preguntas in PISTAS_NEGOCIO:
-        if pat.search(idea or ""):
-            textos.extend(preguntas)
+    """Preguntas de negocio como ASK-10+ (una sola familia; anotables)."""
+    idea = idea or ""
+    mejor: tuple[int, list[str]] | None = None
+    for _nombre, pat, preguntas in PISTAS_NEGOCIO:
+        hits = pat.findall(idea)
+        if not hits:
+            continue
+        score = sum(len(h) if isinstance(h, str) else len(h[0]) for h in hits)
+        if mejor is None or score > mejor[0]:
+            mejor = (score, list(preguntas))
+    textos = list(mejor[1]) if mejor else []
     if re.search(
-        r"cliente|paciente|empleado|recepci|m[eé]dic|profesor|academia",
-        idea or "",
+        r"cliente|paciente|empleado|recepci|m[eé]dic|profesor|academia|veterinar",
+        idea,
         re.I,
     ):
-        if not any("sensib" in p for p in textos):
+        if not any("sensib" in p or "NO debe" in p for p in textos):
             textos.append(
                 "¿Hay datos que una persona no deba ver aunque use el mismo sistema?"
             )
@@ -1242,22 +1263,6 @@ def _comando_trivial(cmd: str) -> bool:
     return False
 
 
-def _comando_es_local(cmd: str) -> bool:
-    """Script o one-liner en esta máquina: no prueba un portal/pasarela real."""
-    c = (cmd or "").strip()
-    if not c or _comando_trivial(c):
-        return True
-    if re.search(r"(?:python3?|bash|sh)\s+-c\s+", c, re.I):
-        return True
-    if re.search(r"(?:bash|sh|python3?)\s+\S+\.(?:sh|py)\b", c) or re.search(
-        r"(?:^|\s)\./\S+\.(?:sh|py)\b", c
-    ):
-        return True
-    if re.search(r"\b(mock|simula)\b", c, re.I):
-        return True
-    return False
-
-
 _PROSA_COMPROB = re.compile(
     r"^(imprime|sale|exit|ok|pass|fail|visitas|con|y|de|el|la|los|las|\(.*\))$",
     re.I,
@@ -1498,6 +1503,38 @@ def cmd_evidenciar(
 
     cubre_list = [c.strip() for c in cubre.split(",") if c.strip()]
     comprobacion = (tareas[tarea].get("comprobacion") or "").strip()
+    marca_ev = _marca_integracion_real(tareas[tarea], estado)
+
+    # Integración real: no inventes evidencia de comando; queda pendiente.
+    if origen == "comando" and marca_ev in ("MANUAL_VERIFY_REQUIRED", "integracion_real"):
+        print(
+            f"Esta tarea exige integración real ({marca_ev}). "
+            "No registres evidencia de comando aquí: sigue bloqueada y pendiente.",
+            file=sys.stderr,
+        )
+        return 2
+
+    # Con comprobación de código: hay que nombrar el programa (--cubre).
+    if origen == "comando" and comprobacion:
+        if not cubre_list:
+            print(
+                "origen=comando con comprobación exige --cubre con el programa "
+                "(p. ej. app.py,test_app.sh). Sin eso, un cambio del código no invalida la evidencia.",
+                file=sys.stderr,
+            )
+            return 2
+        solo_test = all(
+            re.search(r"(^|/)(test_|comprobar)", c, re.I)
+            or (c.endswith(".sh") and "test" in c.lower())
+            for c in cubre_list
+        )
+        if solo_test and len(cubre_list) == 1:
+            print(
+                "--cubre solo nombra el script de prueba. "
+                "Incluye también el programa que se prueba (p. ej. hostal.py,test_hostal.sh).",
+                file=sys.stderr,
+            )
+            return 2
 
     # Tarea con comprobación de código: no basta un "lo probé" manual
     if origen == "manual" and comprobacion:
@@ -1779,27 +1816,16 @@ def cmd_verificar(proyecto: Path, tarea: str, fallo: str | None) -> int:
             )
             return 1
 
-    # Integración real: un script local en verde (mock_portal.sh) no basta.
+    # Integración real: el método no puede ver el sistema de fuera.
+    # Una frase, un script local o una declaración no la cierran.
     if marca in ("MANUAL_VERIFY_REQUIRED", "integracion_real"):
-        att = tareas[tarea].get("atestacion_integracion") or {}
-        if not (att.get("aprobado_por") or "").strip() or not (att.get("sistema") or "").strip():
-            print(
-                f"Esta tarea exige integración real ({marca}). "
-                "Un comando local en verde no la verifica. "
-                "Desbloquea con --aprobado-por y --sistema "
-                "(quién probó el sistema real y cuál fue).",
-                file=sys.stderr,
-            )
-            return 1
-        if _texto_simula(att.get("sistema")) or re.search(
-            r"\b(mock|simula)\b", att.get("sistema") or "", re.I
-        ):
-            print(
-                "La declaración habla de simulación o mock. No verifica integración real.",
-                file=sys.stderr,
-            )
-            return 1
-        vigentes = [e for e in vigentes if not _comando_es_local((items.get(e) or {}).get("valor"))]
+        print(
+            f"Esta tarea exige integración real ({marca}). "
+            "No se verifica con un comando de esta máquina ni con una declaración "
+            "de que alguien lo probó. Queda pendiente.",
+            file=sys.stderr,
+        )
+        return 1
 
     # REQ sensible: la evidencia debe mostrar prueba negativa (denegación)
     rel_chk = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
@@ -2367,42 +2393,16 @@ def cmd_desbloquear(
     marca = _marca_integracion_real(tareas[tarea], estado)
     bid = tareas[tarea].get("bloqueo")
 
-    # Integración real: un mock local (exit 0) no desbloquea. Puerta humana.
+    # Integración real: ni un script local ni una declaración la sacan de bloqueada.
     if marca in ("MANUAL_VERIFY_REQUIRED", "integracion_real"):
-        if evidencia.startswith("EVID-"):
-            items = (load_json(wf / "evidencias.json", {"items": {}}) or {}).get("items") or {}
-            ev = items.get(evidencia) or {}
-            if _comando_es_local(ev.get("valor") or "") or _texto_simula(
-                ev.get("valor"), ev.get("salida"), evidencia
-            ):
-                print(
-                    f"{evidencia} es una prueba local o habla de simulación. "
-                    "No desbloquea integración real.",
-                    file=sys.stderr,
-                )
-                return 2
-        if not aprobado_por.strip() or not sistema.strip():
-            print(
-                f"Esta tarea exige integración real ({marca}). "
-                "Un script en esta máquina (aunque salga 0) no basta. "
-                "Desbloquea con --aprobado-por QUIÉN y --sistema "
-                "«qué sistema real se probó».",
-                file=sys.stderr,
-            )
-            return 2
-        if _texto_simula(sistema, evidencia) or re.search(
-            r"\b(mock|simula)\b", sistema, re.I
-        ):
-            print(
-                "La declaración habla de simulación o mock. No desbloquea integración real.",
-                file=sys.stderr,
-            )
-            return 2
-        tareas[tarea]["atestacion_integracion"] = {
-            "aprobado_por": aprobado_por.strip(),
-            "sistema": sistema.strip(),
-            "ts": now_iso(),
-        }
+        print(
+            f"Esta tarea exige integración real ({marca}). "
+            "No se desbloquea con una frase, un script de esta máquina "
+            "ni una declaración de que alguien lo probó. "
+            "Sigue bloqueada y pendiente.",
+            file=sys.stderr,
+        )
+        return 2
     elif _texto_simula(evidencia) and re.search(
         r"tarjeta|pasarela|stripe|pago real|cobro",
         (tareas[tarea].get("titulo") or "") + " " + (tareas[tarea].get("motivo_bloqueo") or ""),
@@ -2410,7 +2410,7 @@ def cmd_desbloquear(
     ):
         print(
             "No desbloquees cobro/tarjeta con una nota de simulación. "
-            "Usa marca MANUAL_VERIFY_REQUIRED y evidencia de comando real.",
+            "Pon marca MANUAL_VERIFY_REQUIRED: esa tarea queda pendiente.",
             file=sys.stderr,
         )
         return 2
@@ -2580,24 +2580,67 @@ def _wf_ready(proyecto: Path) -> Path | None:
     return wf
 
 
+def _bloque_requisito(rid: str, titulo: str, texto: str, sensible: bool) -> str:
+    marca = (
+        "\n\n> DATO SENSIBLE: al verificar hace falta prueba negativa.\n"
+        if sensible
+        else "\n"
+    )
+    return f"\n\n## {rid}\n\n**{titulo.strip()}**\n{marca}\n{texto.strip()}\n"
+
+
 def cmd_requisito(
-    proyecto: Path, titulo: str, texto: str, sensible: bool = False
+    proyecto: Path,
+    titulo: str,
+    texto: str,
+    sensible: bool = False,
+    req_id: str = "",
 ) -> int:
+    """Crea un REQ, o actualiza uno existente con --id REQ-…."""
     wf = _wf_ready(proyecto)
     if not wf:
         return 2
     rel = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
-    rid = next_id("REQ", set(rel.get("nodos") or {}))
-    nodo: dict[str, Any] = {"tipo": "REQ", "archivo": "requisitos.md"}
+    nodos = rel.setdefault("nodos", {})
+    path = wf / "requisitos.md"
+
+    if req_id.strip():
+        rid = req_id.strip()
+        if not re.match(r"^REQ-\d+$", rid):
+            print(f"Id inválido: {rid} (usa REQ-01…)", file=sys.stderr)
+            return 2
+        if rid not in nodos or (nodos[rid] or {}).get("tipo") != "REQ":
+            print(f"{rid} no existe. Créalo sin --id.", file=sys.stderr)
+            return 2
+        nodo = nodos[rid]
+        if sensible:
+            nodo["sensible"] = True
+        atomic_write_json(wf / "relaciones.json", rel)
+        body = path.read_text(encoding="utf-8") if path.is_file() else ""
+        nuevo = _bloque_requisito(rid, titulo, texto, bool(nodo.get("sensible")))
+        pat = re.compile(
+            rf"\n*## {re.escape(rid)}\n.*?(?=\n## |\Z)",
+            re.S,
+        )
+        if pat.search(body):
+            body = pat.sub(nuevo.rstrip() + "\n", body, count=1)
+        else:
+            body = body.rstrip() + nuevo
+        path.write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
+        print(f"Requisito {rid} actualizado: {titulo.strip()}")
+        if nodo.get("sensible"):
+            print("  Marca: sensible (verificar exige prueba negativa en la evidencia)")
+        print("Si ya había tareas verificadas enlazadas, usa impactar.")
+        return 0
+
+    rid = next_id("REQ", set(nodos))
+    nodo = {"tipo": "REQ", "archivo": "requisitos.md"}
     if sensible:
         nodo["sensible"] = True
-    rel.setdefault("nodos", {})[rid] = nodo
+    nodos[rid] = nodo
     atomic_write_json(wf / "relaciones.json", rel)
-    path = wf / "requisitos.md"
-    marca = "\n\n> DATO SENSIBLE: al verificar hace falta prueba negativa.\n" if sensible else "\n"
-    extra = f"\n\n## {rid}\n\n**{titulo.strip()}**\n{marca}\n{texto.strip()}\n"
     with path.open("a", encoding="utf-8") as f:
-        f.write(extra)
+        f.write(_bloque_requisito(rid, titulo, texto, sensible))
     print(f"Requisito {rid}: {titulo.strip()}")
     if sensible:
         print("  Marca: sensible (verificar exige prueba negativa en la evidencia)")
@@ -3672,17 +3715,27 @@ def main(argv: list[str] | None = None) -> int:
         default="",
         help="Texto o comando; si origen=comando y vacío, usa la --comprobacion de la tarea",
     )
-    p_ev.add_argument("--cubre", default="", help="rutas o ids separados por coma")
+    p_ev.add_argument(
+        "--cubre",
+        default="",
+        help="Archivos del programa (y prueba) separados por coma; obligatorio si origen=comando con comprobación",
+    )
     p_ev.add_argument(
         "--ejecutar",
         action="store_true",
         help="Obligatorio si origen=comando: corre la prueba y guarda el exit",
     )
 
-    p_rq = sub.add_parser("requisito", help="Crear un REQ en el workflow")
+    p_rq = sub.add_parser("requisito", help="Crear o actualizar un REQ (--id)")
     p_rq.add_argument("--proyecto", type=Path, required=True)
     p_rq.add_argument("--titulo", required=True)
     p_rq.add_argument("--texto", required=True)
+    p_rq.add_argument(
+        "--id",
+        dest="req_id",
+        default="",
+        help="Si indicas REQ-01…, actualiza ese requisito en vez de crear otro",
+    )
     p_rq.add_argument(
         "--sensible",
         action="store_true",
@@ -3766,17 +3819,17 @@ def main(argv: list[str] | None = None) -> int:
     p_db.add_argument(
         "--evidencia",
         default="",
-        help="Id EVID-… o nota. En integración real no basta un script local.",
+        help="Id EVID-… o nota. Una integración real no se desbloquea.",
     )
     p_db.add_argument(
         "--aprobado-por",
         default="",
-        help="Obligatorio si la marca es integración real / MANUAL_VERIFY",
+        help="No cierra MANUAL_VERIFY ni integracion_real",
     )
     p_db.add_argument(
         "--sistema",
         default="",
-        help="Qué sistema real se probó (no un mock local)",
+        help="No cierra MANUAL_VERIFY ni integracion_real",
     )
 
     p_op = sub.add_parser(
@@ -3849,7 +3902,11 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.cmd == "requisito":
         return cmd_requisito(
-            args.proyecto, args.titulo, args.texto, sensible=args.sensible
+            args.proyecto,
+            args.titulo,
+            args.texto,
+            sensible=args.sensible,
+            req_id=getattr(args, "req_id", "") or "",
         )
     if args.cmd == "tarea":
         return cmd_tarea(

@@ -1,7 +1,0 @@
-{"t":"2026-10-12T18:17:34.909Z","label":"smoke","event":"server_start","pid":162452}
-{"t":"2026-10-12T18:17:34.927Z","label":"smoke","event":"connected"}
-{"t":"2026-10-12T18:17:34.934Z","label":"smoke","event":"jsonrpc_recv","method":"initialize"}
-{"t":"2026-10-12T18:17:34.955Z","label":"smoke","event":"jsonrpc_recv","method":"notifications/initialized"}
-{"t":"2026-10-12T18:17:34.957Z","label":"smoke","event":"jsonrpc_recv","method":"tools/list"}
-{"t":"2026-10-12T18:17:34.962Z","label":"smoke","event":"jsonrpc_recv","method":"resources/read"}
-{"t":"2026-10-12T18:17:34.964Z","label":"smoke","event":"resource_read","uri":"ui://probe/widget.html"}

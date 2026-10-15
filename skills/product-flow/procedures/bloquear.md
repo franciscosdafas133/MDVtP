@@ -13,7 +13,9 @@ Marcas útiles: `simulacion` | `integracion_real` | `MANUAL_VERIFY_REQUIRED`.
 
 Si el motivo habla de tarjeta/pasarela y omites `--marca`, el método pone `MANUAL_VERIFY_REQUIRED` solo.
 
-Desbloquear integración real **solo** con un id `EVID-…` de `evidenciar --origen comando --ejecutar` en verde. Una nota de simulación no vale:
+`MANUAL_VERIFY_REQUIRED` e `integracion_real` no se desbloquean. Una frase, un script de esta máquina o una declaración de que alguien lo probó dejan la tarea bloqueada y pendiente.
+
+Desbloquear el resto exige un id `EVID-…` de `evidenciar --origen comando --ejecutar` en verde. Una nota de simulación no vale:
 
 ```bash
 python3 <skill>/scripts/product_flow.py desbloquear \

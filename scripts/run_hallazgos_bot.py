@@ -61,6 +61,7 @@ def main() -> int:
             "#!/bin/bash\nexit 1\n", encoding="utf-8"
         )
         (p / "test_nota_fail.sh").chmod(0o755)
+        (p / "nota.py").write_text("# producto de prueba\n", encoding="utf-8")
 
         mentira = run(
             [
@@ -92,6 +93,8 @@ def main() -> int:
                 "comando",
                 "--valor",
                 "bash test_nota_fail.sh",
+                "--cubre",
+                "nota.py,test_nota_fail.sh",
                 "--ejecutar",
             ]
         )
@@ -122,6 +125,8 @@ def main() -> int:
                 "comando",
                 "--valor",
                 "bash test_nota.sh",
+                "--cubre",
+                "nota.py,test_nota.sh",
                 "--ejecutar",
             ]
         )
@@ -341,17 +346,16 @@ def main() -> int:
                 "comando",
                 "--valor",
                 "bash mock_portal.sh",
+                "--cubre",
+                "mock_portal.sh",
                 "--ejecutar",
             ]
         )
-        # puede fallar por no coincidir con comprobación en prosa; si crea EVID, desbloquear no debe pasar
-        mock_id = "EVID-01"
-        if "EVID-" in (evmock.stdout or ""):
-            import re as _re
-
-            m = _re.search(r"EVID-\d+", evmock.stdout or "")
-            if m:
-                mock_id = m.group(0)
+        if evmock.returncode == 0:
+            print("FALLA: aceptó evidencia de comando en integración real")
+            fails += 1
+        else:
+            print("OK no evidencia comando en integración real")
         desm = run(
             [
                 "desbloquear",
@@ -360,7 +364,7 @@ def main() -> int:
                 "--tarea",
                 "TASK-02",
                 "--evidencia",
-                mock_id,
+                "EVID-99",
             ]
         )
         if desm.returncode == 0:
@@ -368,6 +372,27 @@ def main() -> int:
             fails += 1
         else:
             print("OK no desbloquea integración con script local")
+
+        desfrase = run(
+            [
+                "desbloquear",
+                "--proyecto",
+                str(p3),
+                "--tarea",
+                "TASK-02",
+                "--evidencia",
+                "El dueño lo probó en el portal",
+                "--aprobado-por",
+                "dueno",
+                "--sistema",
+                "portal de reservas del hotel",
+            ]
+        )
+        if desfrase.returncode == 0:
+            print("FALLA: desbloqueó integración con una declaración")
+            fails += 1
+        else:
+            print("OK no desbloquea integración con una declaración")
 
         # --- impactar DEC invalida TASK verificada ---
         p4 = p / "dec"
@@ -399,6 +424,7 @@ def main() -> int:
         )
         (p4 / "test_ok.sh").write_text("#!/bin/bash\necho ok\n", encoding="utf-8")
         (p4 / "test_ok.sh").chmod(0o755)
+        (p4 / "confirma.py").write_text("# confirma\n", encoding="utf-8")
         run(
             [
                 "decidir",
@@ -427,6 +453,8 @@ def main() -> int:
                 "comando",
                 "--valor",
                 "bash test_ok.sh",
+                "--cubre",
+                "confirma.py,test_ok.sh",
                 "--ejecutar",
             ]
         )

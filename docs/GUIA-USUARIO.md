@@ -3,6 +3,7 @@
 Versión candidata: ver [VERSION](../VERSION).  
 Instalación: [INSTALL.md](../INSTALL.md).  
 Límites: [LIMITES-CANDIDATA.md](LIMITES-CANDIDATA.md).  
+Probar todo: [PROBAR-TODO.md](PROBAR-TODO.md).  
 Mantener / publicar: [MANTENIMIENTO.md](MANTENIMIENTO.md) · [PUBLICAR-GITHUB.md](PUBLICAR-GITHUB.md).
 
 ## Para qué sirve
@@ -12,7 +13,7 @@ Te guía desde una idea vaga hasta un incremento con documentos, decisiones, pru
 ## Empezar (una vez)
 
 ```bash
-# desde el repo del método
+# desde este repositorio
 python3 scripts/install_metodo.py install --alcance global --hosts cursor,claude
 ```
 
@@ -20,34 +21,37 @@ En el chat: pide la skill **product-flow** (o `/product-flow`).
 
 ## Acciones que más usarás
 
-| Quieres… | Di / comando |
+| Quieres… | Comando |
 |---|---|
-| Empezar un producto | «iniciar» / `product_flow.py iniciar --proyecto . --idea "…"` |
-| Retomar | «continuar» |
-| Ver dónde estamos | «estado» |
-| Aceptar o rechazar una propuesta | «decidir» (puerta humana) |
-| Apuntar sin decidir | «anotar» |
-| Guardar partida | «checkpoint» |
-| Volver a un punto (sitio aparte) | «recuperar» |
-| Partir una tarea gorda | «dividir» (con criterio, no por horas) |
-| Cerrar con prueba de verdad | evidenciar → presentar → verificar |
-| Plan de publicación | «operar» |
+| Empezar | `iniciar --proyecto . --idea "…" --modo rapido` |
+| Retomar | `continuar` |
+| Ver dónde estamos | `estado` |
+| Apuntar una respuesta | `anotar --enlaza ASK-01 --texto "…" --resuelto` |
+| Crear o editar un requisito | `requisito …` / `requisito --id REQ-01 …` |
+| Decisión | `decidir --aceptar --aprobado-por …` |
+| Tarea | `tarea --comprobacion "bash test.sh" …` |
+| Partir una tarea | `dividir` (con criterio; opcional `\|REQ-xx` por hija) |
+| Bloquear lo que no está | `bloquear --marca MANUAL_VERIFY_REQUIRED` |
+| Probar de verdad | `evidenciar --origen comando --cubre app.py,test.sh --ejecutar` → `presentar` → `verificar` |
+| Tras un cambio | `impactar --cambiado REQ-01 --motivo "…"` |
+| Guardar partida | `checkpoint --commit` |
+| Plan de entrega | `operar --uso "…" --pendientes "…"` |
 
-## Ciclo de código (siempre)
+## Ciclo de código
 
 **Escanear → planificar → evaluar → reemplazar.**  
 Luego evidenciar y verificar. No digas “ya está” si la prueba no corrió.
 
-## Comprobar que el workflow no está roto
+## Reglas cortas
+
+- `--cubre` nombra el programa (y la prueba). Sin eso no hay evidencia de comando.
+- Una integración real (`MANUAL_VERIFY_REQUIRED`) se queda pendiente: no se evidencia, no se desbloquea, no se verifica.
+- El validador manda: `python3 …/validate_workflow.py workflow`.
+
+## Comprobar el paquete
 
 ```bash
-python3 <ruta-skill>/scripts/validate_workflow.py <proyecto>/workflow
+python3 scripts/run_regresion.py
 ```
 
-## Demos rápidas (en el repo del método)
-
-```bash
-python3 scripts/run_integridad.py
-python3 scripts/product_flow.py recorrido-simple
-python3 scripts/run_integracion_b20.py
-```
+Tiene que terminar en `7/7 → ok`.

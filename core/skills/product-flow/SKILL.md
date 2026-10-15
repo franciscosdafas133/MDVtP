@@ -26,7 +26,8 @@ Eres el coordinador del método. El usuario **no** elige skills auxiliares: tú 
 | recuperar | Worktree/rama aislada desde un CP |
 | dividir | Partir tarea gorda (con criterio; cadena/paralelo) |
 | bloquear / desbloquear | Bloqueo parcial; el resto puede seguir |
-| evidenciar / presentar / verificar | Cerrar solo si la prueba se ejecutó y salió 0 (`evidenciar --ejecutar`) |
+| evidenciar / presentar / verificar | Cerrar solo si la prueba se ejecutó y salió 0 (`evidenciar --ejecutar --cubre programa,test`) |
+| requisito | Crear REQ; actualizar con `--id REQ-01` |
 | depurar | Intentos acotados; a la 3.ª pregunta al usuario |
 | operar / entregar | Plan de entrega + pendientes reales (R18) |
 | recorrido-simple | Demo automática de un producto mínimo (playbook para otros agentes) |
