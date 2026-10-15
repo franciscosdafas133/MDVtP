@@ -9,6 +9,13 @@ Fallo grave: desbloquear/verificar tarjeta con simulación.
 
 Veredicto del probador: útil con huecos. Documental bien; promesa de pruebas honestas rota (evidencia texto libre; `siguiente_preparada`; `recuperar` worktree; `impactar` TASK/DEC).
 
+## Oleada F — e2e-v3-nivel-3 taller (d3cfabf)
+
+Formular 4/5, construir 3/5. **Grave:** cierre del padre `bloqueada→verificada` ilegal.  
+Sobre-impacto; `reabrir`+`decidir` huérfana; `--valor` obligatorio pese al mensaje.
+
+**Hecho:** cierre padre en dos pasos legales + `cerrado_por_hijas`; `decidir --decision`; `--valor` opcional; pistas de taller; `dividir …|REQ-xx`; impactar DEC solo si enlace directo.
+
 ## Oleada E — e2e-v3-nivel-2 academia (192ec37 → e0c33d7)
 
 Formular/construir **4/5**. Pistas de privacidad sí, pero sin id; S1c (mismo script, otros args); stale sin reabrir tareas; sin `--sensible`.

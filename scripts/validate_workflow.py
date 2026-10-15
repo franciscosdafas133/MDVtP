@@ -225,24 +225,42 @@ def validate_workflow(
                         str(estado_path),
                     )
         if est == "verificada":
-            evid_ids = tarea.get("evidencia") or []
-            if not evid_ids and not tarea.get("comprobacion"):
-                err(
-                    "evidencia_faltante",
-                    f"{tid} verificada sin evidencia ni comprobacion",
-                    str(estado_path),
-                )
-            vigentes = [
-                e
-                for e in evid_ids
-                if (items_ev.get(e) or {}).get("estado") == "vigente"
-            ]
-            if evid_ids and not vigentes:
-                err(
-                    "evidencia_invalida",
-                    f"{tid} verificada pero ninguna EVID vigente",
-                    str(estado_path),
-                )
+            # Padre cerrado porque todas las hijas están verificadas: sin EVID propia
+            if tarea.get("cerrado_por_hijas"):
+                hijas = tarea.get("hijas") or [
+                    i
+                    for i, x in tareas.items()
+                    if isinstance(x, dict) and x.get("padre") == tid
+                ]
+                if hijas and all(
+                    (tareas.get(h) or {}).get("estado") == "verificada" for h in hijas
+                ):
+                    pass  # OK sin EVID propia
+                else:
+                    err(
+                        "evidencia_invalida",
+                        f"{tid} cerrado_por_hijas pero hay hijas no verificadas",
+                        str(estado_path),
+                    )
+            else:
+                evid_ids = tarea.get("evidencia") or []
+                if not evid_ids and not tarea.get("comprobacion"):
+                    err(
+                        "evidencia_faltante",
+                        f"{tid} verificada sin evidencia ni comprobacion",
+                        str(estado_path),
+                    )
+                vigentes = [
+                    e
+                    for e in evid_ids
+                    if (items_ev.get(e) or {}).get("estado") == "vigente"
+                ]
+                if evid_ids and not vigentes:
+                    err(
+                        "evidencia_invalida",
+                        f"{tid} verificada pero ninguna EVID vigente",
+                        str(estado_path),
+                    )
 
     siguiente = estado.get("siguiente_preparada")
     if siguiente is not None and siguiente not in tareas:

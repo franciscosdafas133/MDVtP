@@ -64,11 +64,20 @@ AREAS_RAPIDO_IDS = ("ASK-01", "ASK-06", "ASK-02")
 # Pistas según la idea (no sustituyen a AREAS; se añaden al descubrimiento).
 PISTAS_NEGOCIO = [
     (
-        re.compile(r"peluquer|barber|sal[oó]n|cita|reserv|taller|mec[aá]nic", re.I),
+        re.compile(r"peluquer|barber|sal[oó]n|cita|reserv", re.I),
         [
             "¿Cuánto dura cada servicio y en qué horario atienden?",
             "¿Qué pasa si el cliente cancela o no llega?",
             "¿Quién ve la agenda: solo el local o también el cliente?",
+        ],
+    ),
+    (
+        re.compile(r"taller|mec[aá]nic|patente|elevador|\bauto\b|\bcoche\b", re.I),
+        [
+            "¿Cuántos elevadores o mecánicos atienden a la vez?",
+            "¿Qué datos del auto hacen falta (patente, marca…)?",
+            "¿El cliente deja el auto todo el día o solo el rato del servicio?",
+            "¿Cuánto dura cada servicio y en qué horario atienden?",
         ],
     ),
     (
@@ -891,7 +900,8 @@ def cmd_impactar(proyecto: Path, cambiado: str, motivo: str) -> int:
         for path in sorted(dec_dir.glob("DEC-*.json")):
             dec = load_json(path, {})
             enlaces = dec.get("enlaces") or []
-            if cambiado in enlaces or any(x in deps for x in enlaces):
+            # Solo DECs que enlazan directamente el cambiado (no por deps transitivas)
+            if cambiado in enlaces:
                 if dec.get("estado") == "aceptada" and not dec.get("requiere_revision"):
                     dec["requiere_revision"] = True
                     dec["motivo_revision"] = f"Cambio en {cambiado}: {motivo}"
@@ -1374,31 +1384,40 @@ def marcar_evidencias_huella_stale(proyecto: Path, wf: Path) -> list[str]:
     return cambiadas
 
 
+def _hijas_de(tareas: dict, tid: str) -> list[str]:
+    hijas = [i for i, x in tareas.items() if x.get("padre") == tid]
+    if hijas:
+        return hijas
+    bloq = str((tareas.get(tid) or {}).get("bloqueo") or "")
+    if bloq.startswith("dividida") and "→" in bloq:
+        return [x.strip() for x in bloq.split("→", 1)[1].split(",") if x.strip()]
+    return list((tareas.get(tid) or {}).get("hijas") or [])
+
+
 def cerrar_padres_divididos(wf: Path, estado: dict) -> list[str]:
-    """Si todas las hijas de una división están verificadas, cierra el padre."""
+    """Cierra el padre cuando todas las hijas están verificadas.
+
+    Transiciones legales: bloqueada→en_revision→verificada (nunca bloqueada→verificada).
+    """
     tareas = estado.get("tareas") or {}
     cerrados: list[str] = []
     for tid, t in list(tareas.items()):
-        if t.get("estado") != "bloqueada":
-            continue
-        bloq = str(t.get("bloqueo") or "")
-        if not bloq.startswith("dividida"):
-            continue
-        hijas = [i for i, x in tareas.items() if x.get("padre") == tid]
-        if not hijas and "→" in bloq:
-            hijas = [x.strip() for x in bloq.split("→", 1)[1].split(",") if x.strip()]
+        hijas = _hijas_de(tareas, tid)
         if not hijas:
             continue
-        if all((tareas.get(h) or {}).get("estado") == "verificada" for h in hijas):
-            prev = t.get("estado")
-            t["estado"] = "verificada"
-            t["bloqueo"] = None
-            estado["bloqueos"] = [
-                b
-                for b in (estado.get("bloqueos") or [])
-                if b.get("id") != tid and tid not in (b.get("afecta") or [])
-            ]
-            cerrados.append(tid)
+        es_padre = any((tareas.get(h) or {}).get("padre") == tid for h in hijas) or str(
+            t.get("bloqueo") or ""
+        ).startswith("dividida") or bool(t.get("hijas"))
+        if not es_padre:
+            continue
+        if not all((tareas.get(h) or {}).get("estado") == "verificada" for h in hijas):
+            continue
+        est = t.get("estado")
+        if est not in ("bloqueada", "en_revision"):
+            continue
+
+        if est == "bloqueada":
+            t["estado"] = "en_revision"
             append_event(
                 wf,
                 {
@@ -1406,11 +1425,36 @@ def cerrar_padres_divididos(wf: Path, estado: dict) -> list[str]:
                     "tipo": "tarea.transicion",
                     "actor": "validador",
                     "sujeto": tid,
-                    "de": prev,
+                    "de": "bloqueada",
+                    "a": "en_revision",
+                    "detalle": {"accion": "hijas_verificadas", "hijas": hijas},
+                },
+            )
+            est = "en_revision"
+
+        if est == "en_revision":
+            t["estado"] = "verificada"
+            t["bloqueo"] = None
+            t["cerrado_por_hijas"] = True
+            t["hijas"] = hijas
+            estado["bloqueos"] = [
+                b
+                for b in (estado.get("bloqueos") or [])
+                if tid not in (b.get("afecta") or [])
+            ]
+            append_event(
+                wf,
+                {
+                    "ts": now_iso(),
+                    "tipo": "tarea.transicion",
+                    "actor": "validador",
+                    "sujeto": tid,
+                    "de": "en_revision",
                     "a": "verificada",
                     "detalle": {"accion": "hijas_verificadas", "hijas": hijas},
                 },
             )
+            cerrados.append(tid)
     return cerrados
 
 
@@ -1926,8 +1970,9 @@ def cmd_dividir(
 ) -> int:
     """Parte una tarea solo si hay criterio (R09 / X05). Hijas cadena o paralelo.
 
-    --hijas: 'titulo|condicion|cadena;titulo2|condicion2|paralelo;...'
+    --hijas: 'titulo|condicion|cadena;titulo2|condicion2|paralelo|REQ-01;...'
     Modo omitido = cadena. Paralelo = misma oleada (mismas deps; no se esperan entre sí).
+    Cuarto campo opcional: REQ/OBJ de esa hija (coma-separados); si falta, hereda los del padre.
     --porque: uno de los ids de core/contracts/reglas-division.json
     """
     wf = proyecto / "workflow"
@@ -1953,21 +1998,33 @@ def cmd_dividir(
         )
         return 2
 
-    # (titulo, termino, paralelo: bool)
-    hijas_spec: list[tuple[str, str, bool]] = []
+    # (titulo, termino, paralelo, enlaces|None)
+    hijas_spec: list[tuple[str, str, bool, list[str] | None]] = []
     for p in partes:
         bits = [b.strip() for b in p.split("|")]
         if len(bits) < 2:
             print(
-                f"Formato: titulo|condicion_observable[|cadena|paralelo] — recibí: {p}",
+                f"Formato: titulo|condicion[|cadena|paralelo][|REQ-01,…] — recibí: {p}",
                 file=sys.stderr,
             )
             return 2
         tit, term = bits[0], bits[1]
-        modo = (bits[2] if len(bits) > 2 else "cadena").lower()
-        if modo not in ("cadena", "paralelo", "seq", "par", "p"):
-            print(f"Modo inválido '{modo}' (usa cadena o paralelo): {p}", file=sys.stderr)
-            return 2
+        modo = "cadena"
+        enlaces_h: list[str] | None = None
+        if len(bits) > 2:
+            b2 = bits[2].lower()
+            if b2 in ("cadena", "paralelo", "seq", "par", "p"):
+                modo = b2
+                if len(bits) > 3 and bits[3].strip():
+                    enlaces_h = [x.strip() for x in bits[3].split(",") if x.strip()]
+            elif re.match(r"^(REQ|OBJ)-", bits[2], re.I):
+                enlaces_h = [x.strip() for x in bits[2].split(",") if x.strip()]
+            else:
+                print(
+                    f"Modo inválido '{bits[2]}' (usa cadena|paralelo o REQ-…): {p}",
+                    file=sys.stderr,
+                )
+                return 2
         paralelo = modo in ("paralelo", "par", "p")
         if not tit or not term:
             print(f"Título y condición obligatorios: {p}", file=sys.stderr)
@@ -1986,7 +2043,7 @@ def cmd_dividir(
                 file=sys.stderr,
             )
             return 2
-        hijas_spec.append((tit, term, paralelo))
+        hijas_spec.append((tit, term, paralelo, enlaces_h))
 
     estado = load_estado(wf)
     tareas = estado.setdefault("tareas", {})
@@ -2001,7 +2058,7 @@ def cmd_dividir(
     last_wave = list(tareas[padre].get("depende_de") or [])
     current_parallel: list[str] = []
 
-    for tit, term, paralelo in hijas_spec:
+    for tit, term, paralelo, enlaces_h in hijas_spec:
         if paralelo:
             deps = list(last_wave)
         else:
@@ -2012,12 +2069,21 @@ def cmd_dividir(
 
         tid = next_id("TASK", existing)
         existing.add(tid)
+        enlaces_final = (
+            list(enlaces_h)
+            if enlaces_h is not None
+            else list(tareas[padre].get("enlaces") or [])
+        )
+        for link in enlaces_final:
+            if link not in (rel.get("nodos") or {}) and link not in tareas:
+                print(f"Enlace inexistente en hija «{tit}»: {link}", file=sys.stderr)
+                return 2
         tareas[tid] = {
             "id": tid,
             "titulo": tit,
             "estado": "pendiente",
             "depende_de": deps,
-            "enlaces": list(tareas[padre].get("enlaces") or []),
+            "enlaces": enlaces_final,
             "evidencia": [],
             "comprobacion": term,
             "bloqueo": None,
@@ -2562,13 +2628,68 @@ def cmd_decidir(
     aprobado_por: str,
     enlaces: str,
     aceptar: bool,
+    decision: str = "",
 ) -> int:
-    """Registra una decisión. Aceptar exige --aprobado-por (la puerta queda escrita)."""
+    """Registra una decisión. Aceptar exige --aprobado-por (la puerta queda escrita).
+
+    Con --decision DEC-xx acepta una propuesta existente (p. ej. la de reabrir).
+    """
     wf = _wf_ready(proyecto)
     if not wf:
         return 2
     if aceptar and not aprobado_por.strip():
         print("Aceptar exige --aprobado-por (quién tomó la puerta).", file=sys.stderr)
+        return 2
+
+    # Aceptar propuesta ya creada (p. ej. por reabrir)
+    if decision.strip():
+        did = decision.strip()
+        path = wf / "decisiones" / f"{did}.json"
+        if not path.is_file():
+            print(f"No existe {path}", file=sys.stderr)
+            return 2
+        dec = load_json(path, {})
+        if dec.get("estado") != "propuesta":
+            print(
+                f"{did} está {dec.get('estado')}; solo se acepta una propuesta.",
+                file=sys.stderr,
+            )
+            return 2
+        if not aceptar:
+            print("Para una DEC existente usa --aceptar --aprobado-por …", file=sys.stderr)
+            return 2
+        eleg_raw = (elegida or dec.get("elegida") or "A").strip()
+        alt_id = eleg_raw.upper() if re.fullmatch(r"[A-Za-z]", eleg_raw) else "A"
+        dec["estado"] = "aceptada"
+        dec["elegida"] = alt_id
+        if motivo.strip():
+            dec["motivo"] = motivo.strip()
+        if titulo.strip():
+            dec["titulo"] = titulo.strip()
+        dec["aprobado_por"] = aprobado_por.strip()
+        atomic_write_json(path, dec)
+        append_event(
+            wf,
+            {
+                "ts": now_iso(),
+                "tipo": "decision.transicion",
+                "actor": aprobado_por.strip(),
+                "sujeto": did,
+                "de": "propuesta",
+                "a": "aceptada",
+                "detalle": {"motivo": dec.get("motivo")},
+            },
+        )
+        ok, raw = run_validator(wf)
+        print(f"Decisión {did} aceptada: {dec.get('titulo')}")
+        print(f"Validador: {'OK' if ok else 'FALLA'}")
+        if not ok:
+            print(raw)
+            return 1
+        return 0
+
+    if not titulo.strip() or not motivo.strip():
+        print("Al crear una DEC hacen falta --titulo y --motivo.", file=sys.stderr)
         return 2
     rel = load_json(wf / "relaciones.json", {"nodos": {}, "aristas": []})
     links = [x.strip() for x in enlaces.split(",") if x.strip()]
@@ -3484,7 +3605,11 @@ def main(argv: list[str] | None = None) -> int:
     p_ev.add_argument("--proyecto", type=Path, required=True)
     p_ev.add_argument("--tarea", required=True)
     p_ev.add_argument("--origen", required=True, help="commit|hash_archivo|comando|manual")
-    p_ev.add_argument("--valor", required=True)
+    p_ev.add_argument(
+        "--valor",
+        default="",
+        help="Texto o comando; si origen=comando y vacío, usa la --comprobacion de la tarea",
+    )
     p_ev.add_argument("--cubre", default="", help="rutas o ids separados por coma")
     p_ev.add_argument(
         "--ejecutar",
@@ -3511,12 +3636,21 @@ def main(argv: list[str] | None = None) -> int:
 
     p_dc = sub.add_parser("decidir", help="Registrar una decisión (aceptar exige --aprobado-por)")
     p_dc.add_argument("--proyecto", type=Path, required=True)
-    p_dc.add_argument("--titulo", required=True)
+    p_dc.add_argument(
+        "--titulo",
+        default="",
+        help="Título (obligatorio al crear; opcional con --decision)",
+    )
     p_dc.add_argument("--elegida", default="A")
-    p_dc.add_argument("--motivo", required=True)
+    p_dc.add_argument("--motivo", default="", help="Obligatorio al crear; opcional con --decision")
     p_dc.add_argument("--aprobado-por", default="")
     p_dc.add_argument("--enlaces", default="")
     p_dc.add_argument("--aceptar", action="store_true")
+    p_dc.add_argument(
+        "--decision",
+        default="",
+        help="Aceptar una DEC propuesta existente (p. ej. la de reabrir)",
+    )
 
     p_ra = sub.add_parser("reabrir", help="Sustituir una decisión aceptada por una propuesta nueva")
     p_ra.add_argument("--proyecto", type=Path, required=True)
@@ -3654,6 +3788,7 @@ def main(argv: list[str] | None = None) -> int:
             args.aprobado_por,
             args.enlaces,
             args.aceptar,
+            decision=args.decision,
         )
     if args.cmd == "reabrir":
         return cmd_reabrir(
